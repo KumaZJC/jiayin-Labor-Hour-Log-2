@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>佳音专属工时记录</title>
+    <title>Stacey专属工时记录</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -95,26 +95,10 @@
                 </div>
             </div>
 
-            <!-- 实用计时器板块 -->
+            <!-- 高精追踪计时器板块 -->
             <div class="mb-4 p-4 rounded-apple bg-slate-100/50 dark:bg-slate-800/40 border border-slate-200/20">
-                <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider" id="timer-label">计时器</span>
-                    <span class="w-2 h-2 rounded-full bg-success animate-pulse" id="timer-dot" style="display: none;"></span>
-                </div>
-                <div class="text-2xl font-mono font-bold tracking-widest text-center my-1" id="timer-display">00:00:00</div>
-                <div class="flex flex-col gap-2 mt-2">
-                    <div class="flex justify-center gap-2">
-                        <button id="btn-timer-toggle" class="flex-1 py-1 bg-primary text-white text-xs font-medium rounded-full hover:bg-primary/90 transition-all flex items-center justify-center gap-1">
-                            <i class="fa-solid fa-play"></i> <span id="timer-btn-text">开始计时</span>
-                        </button>
-                        <button id="btn-timer-reset" class="px-3 py-1 bg-slate-200 dark:bg-slate-700 text-xs font-medium rounded-full hover:bg-slate-300 dark:hover:bg-slate-600 transition-all">
-                            重置
-                        </button>
-                    </div>
-                    <!-- 新增功能：一键将当前计时直接录入工时 -->
-                    <button id="btn-timer-log" onclick="logTimerToTimesheet()" class="w-full py-1 bg-success text-white text-[11px] font-semibold rounded-full hover:bg-success/90 transition-all flex items-center justify-center gap-1">
-                        <i class="fa-solid fa-file-invoice"></i> 记入今日工时
-                    </button>
+                <div id="timer-label">
+                    <!-- 由下方多线程追踪脚本自动替换和渲染 -->
                 </div>
             </div>
 
@@ -451,8 +435,7 @@
                         <div class="h-64"><canvas id="analyticsDailyChart"></canvas></div>
                     </div>
                     <div class="glass p-6 rounded-apple">
-                        <h4 class="font-bold text-sm tracking-tight mb-4">Module-wise Distribution
-                        </h4>
+                        <h4 class="font-bold text-sm tracking-tight mb-4">Module-wise Distribution</h4>
                         <div class="h-64 flex items-center justify-center"><canvas id="analyticsModuleChart"></canvas></div>
                     </div>
                 </div>
@@ -506,8 +489,6 @@
                     </div>
                     <h3 class="text-xl font-bold" id="profile-name">JiaYin</h3>
                     <p class="text-xs text-slate-400 mb-6" id="profile-sub-title">lucidata | 陆泽科技 in Shanghai</p>
-
-
 
                     <div class="w-full space-y-3">
                         <button onclick="exportJSONBackup()" class="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all">
@@ -569,7 +550,7 @@
             { id: 3, text: "准备今日跟晓文 和 香肠哥 的工作交接会", done: false }
         ];
 
-        // 默认内置两个会议用于演示提醒
+        // 默认内置会议提醒数据
         let reminderList = [
             { id: 1, title: "部门同步会议", time: "15:00", notified: { 10: false, 5: false, 1: false } }
         ];
@@ -591,15 +572,14 @@
 
             // 启动毫秒级时间以及会议提醒轮询器
             setInterval(checkReminders, 1000);
-// 在页面加载时，给头像强制戴上“时间戳面具”，骗过浏览器缓存
-const timestamp = Date.now(); // 获取当前毫秒数，如 1719876543210
 
-const pcAvatar = document.getElementById('user-avatar-pc');
-const profileAvatar = document.getElementById('profile-avatar');
+            // 防止浏览器头像缓存
+            const timestamp = Date.now();
+            const pcAvatar = document.getElementById('user-avatar-pc');
+            const profileAvatar = document.getElementById('profile-avatar');
 
-if (pcAvatar) pcAvatar.src = `2.jpg?t=${timestamp}`;
-if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
-
+            if (pcAvatar) pcAvatar.src = `2.jpg?t=${timestamp}`;
+            if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
         });
 
         function initDatabase() {
@@ -712,12 +692,10 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
             reminderList.forEach(rem => {
                 const [remH, remM] = rem.time.split(':').map(Number);
                 
-                // 将今天两时间节点转换成绝对分钟差
                 const nowTotalMin = nowH * 60 + nowM;
                 const remTotalMin = remH * 60 + remM;
                 const diffMin = remTotalMin - nowTotalMin;
 
-                // 核心提醒时间节点判断
                 if (diffMin > 0) {
                     [10, 5, 1].forEach(triggerMin => {
                         if (diffMin === triggerMin && !rem.notified[triggerMin]) {
@@ -733,12 +711,10 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
         function triggerNotification(title, minsLeft) {
             const msg = `会议「${title}」将在 ${minsLeft} 分钟后开始！请注意时间。`;
             
-            // 1. 尝试系统弹窗通知
             if ("Notification" in window && Notification.permission === "granted") {
                 new Notification("Chronos 会议提醒", { body: msg, icon: "https://cdn-icons-png.flaticon.com/512/3114/3114812.png" });
             }
 
-            // 2. 网页级高亮通知
             const alertBanner = document.createElement('div');
             alertBanner.className = "fixed top-5 right-5 z-50 glass border border-amber-400 bg-amber-500/10 p-4 rounded-apple shadow-xl max-w-sm flex items-start gap-3 animate-bounce";
             alertBanner.innerHTML = `
@@ -756,14 +732,13 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
             }, 6000);
         }
 
-        // ------------------- 实用计时器打通功能 -------------------
+        // ------------------- 传统计时器一键录入工时 -------------------
         function logTimerToTimesheet() {
             if (timerSeconds < 60) {
                 alert("当前计时时间不足 1 分钟，请稍后再试！");
                 return;
             }
 
-            // 暂定计时器结束时间为当前实际系统时间，倒退得出开始时间
             const now = new Date();
             const endHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
             
@@ -771,12 +746,10 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
             const startDateObj = new Date(startSec);
             const startHHMM = `${String(startDateObj.getHours()).padStart(2, '0')}:${String(startDateObj.getMinutes()).padStart(2, '0')}`;
 
-            // 暂停计时器
             if (timerInterval) {
                 document.getElementById('btn-timer-toggle').click();
             }
 
-            // 自动跳转，并将计时器算好的开始、结束时间注入工时表单
             switchTab('timesheet');
             document.getElementById('ts-start').value = startHHMM;
             document.getElementById('ts-end').value = endHHMM;
@@ -785,7 +758,7 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
             document.getElementById('ts-project').focus();
         }
 
-        // ------------------- 工时保存与即时无刷新表格渲染 -------------------
+        // ------------------- 工时保存与即时渲染 -------------------
         function handleTimesheetSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('entry-id').value;
@@ -806,19 +779,12 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
                     timesheetEntries[idx] = { id, date, type, start, end, project, customer, sapModule, priority, notes, duration };
                 }
             } else {
-                timesheetEntries.push({ id: Date.now().toString(), date, type, start, end, project, customer, sapModule, priority, notes, duration });
+                timesheetEntries.unshift({ id: Date.now().toString(), date, type, start, end, project, customer, sapModule, priority, notes, duration });
             }
 
-            // 1. 本地存储更新
             saveToLocalStorage();
-            
-            // 2. 清空重置表单
             resetForm();
-            
-            // 3. 【核心修正】无需刷新，直接触发右侧表格数据实时渲染
             renderTable();
-            
-            // 4. 更新 KPI 数据与统计模块
             updateKPIs();
         }
 
@@ -950,21 +916,21 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
 
             document.getElementById('kpi-today-status').innerText = `目标: ${systemSettings.standardHours}.0h`;
             document.getElementById('kpi-week-status').innerText = `目标: 40.0h`;
-            document.querySelector('#kpi-month + div').innerHTML = `<span id="kpi-target-rate" class="text-success font-semibold">${targetRate}%</span> <span class="text-slate-400 font-normal">总目标 180h</span>`;
+            
+            const monthKpiBox = document.querySelector('#kpi-month + div');
+            if (monthKpiBox) {
+                monthKpiBox.innerHTML = `<span id="kpi-target-rate" class="text-success font-semibold">${targetRate}%</span> <span class="text-slate-400 font-normal">总目标 180h</span>`;
+            }
 
-         const alertEl = document.getElementById('quick-alert');
+            const alertEl = document.getElementById('quick-alert');
             if (todayHours > 0) {
                 alertEl.style.display = 'flex';
-                // 如果今天已经有工时记录了
                 if (todayHours < systemSettings.standardHours) {
-                    // 工时未满 8 小时
-                    document.getElementById('alert-text').innerText = `您今天已经工作 ${todayHours.toFixed(1)}h 啦，辛苦啦 ☕`;
+                    document.getElementById('alert-text').innerText = `您今天已经工作 ${todayHours.toFixed(1)}h 啦，宝贝辛苦啦 ☕`;
                 } else {
-                    // 工时已满 8 小时或超额完成
                     document.getElementById('alert-text').innerText = `今天已累计 ${todayHours.toFixed(1)}h！超额达成目标，快去休息吧 🎉`;
                 }
             } else {
-                // 如果今天还没有任何工时记录，就先隐藏提示栏
                 alertEl.style.display = 'none';
             }
         }
@@ -1064,7 +1030,10 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
             const startIdx = (currentPage - 1) * entriesPerPage;
             const paginated = filtered.slice(startIdx, startIdx + entriesPerPage);
 
-            document.getElementById('pagination-info').innerText = `显示第 ${startIdx + 1} - ${Math.min(startIdx + entriesPerPage, total)} 条，共 ${total} 条记录`;
+            const paginationInfo = document.getElementById('pagination-info');
+            if (paginationInfo) {
+                paginationInfo.innerText = `显示第 ${startIdx + 1} - ${Math.min(startIdx + entriesPerPage, total)} 条，共 ${total} 条记录`;
+            }
 
             paginated.forEach(entry => {
                 const tr = document.createElement('tr');
@@ -1074,7 +1043,7 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
                     <td class="py-4 px-2 font-medium">${entry.date}</td>
                     <td class="py-4 px-2">
                         <div class="font-bold text-slate-700 dark:text-slate-200">${entry.project}</div>
-                        <div class="text-[10px] text-slate-400 max-w-[200px] truncate">${entry.notes}</div>
+                        <div class="text-[10px] text-slate-400 max-w-[200px] truncate" title="${entry.notes}">${entry.notes}</div>
                     </td>
                     <td class="py-4 px-2">
                         <span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 font-mono text-xs">${entry.sapModule || 'None'}</span>
@@ -1205,55 +1174,61 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
                     .reduce((sum, e) => sum + parseFloat(e.duration), 0);
             });
 
-            const ctxTrend = document.getElementById('chartTrend').getContext('2d');
-            if (trendChartRef) trendChartRef.destroy();
-            trendChartRef = new Chart(ctxTrend, {
-                type: 'line',
-                data: {
-                    labels: last7Days.map(d => d.substring(5)),
-                    datasets: [{
-                        label: '投入工时 (h)',
-                        data: dailyWorkload,
-                        borderColor: '#4F46E5',
-                        backgroundColor: 'rgba(79, 70, 229, 0.05)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true },
-                        x: { grid: { display: false } }
+            const canvasTrend = document.getElementById('chartTrend');
+            if (canvasTrend) {
+                const ctxTrend = canvasTrend.getContext('2d');
+                if (trendChartRef) trendChartRef.destroy();
+                trendChartRef = new Chart(ctxTrend, {
+                    type: 'line',
+                    data: {
+                        labels: last7Days.map(d => d.substring(5)),
+                        datasets: [{
+                            label: '投入工时 (h)',
+                            data: dailyWorkload,
+                            borderColor: '#4F46E5',
+                            backgroundColor: 'rgba(79, 70, 229, 0.05)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true },
+                            x: { grid: { display: false } }
+                        }
                     }
-                }
-            });
+                });
+            }
 
             const projectHours = {};
             timesheetEntries.forEach(e => {
                 projectHours[e.project] = (projectHours[e.project] || 0) + parseFloat(e.duration);
             });
 
-            const ctxProj = document.getElementById('chartProject').getContext('2d');
-            if (projectChartRef) projectChartRef.destroy();
-            projectChartRef = new Chart(ctxProj, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(projectHours),
-                    datasets: [{
-                        data: Object.values(projectHours),
-                        backgroundColor: ['#4F46E5', '#06B6D4', '#22C55E', '#F59E0B', '#EF4444', '#EC4899']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
-                }
-            });
+            const canvasProj = document.getElementById('chartProject');
+            if (canvasProj) {
+                const ctxProj = canvasProj.getContext('2d');
+                if (projectChartRef) projectChartRef.destroy();
+                projectChartRef = new Chart(ctxProj, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(projectHours),
+                        datasets: [{
+                            data: Object.values(projectHours),
+                            backgroundColor: ['#4F46E5', '#06B6D4', '#22C55E', '#F59E0B', '#EF4444', '#EC4899']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+                    }
+                });
+            }
         }
 
         function renderAnalyticsCharts() {
@@ -1285,23 +1260,26 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
             const baseHrs = sortedDates.map(d => Math.min(8, dailyData[d]));
             const overHrs = sortedDates.map(d => Math.max(0, dailyData[d] - 8));
 
-            const ctxDaily = document.getElementById('analyticsDailyChart').getContext('2d');
-            if (dailyChartRef) dailyChartRef.destroy();
-            dailyChartRef = new Chart(ctxDaily, {
-                type: 'bar',
-                data: {
-                    labels: sortedDates,
-                    datasets: [
-                        { label: '法定标准工时', data: baseHrs, backgroundColor: '#4F46E5' },
-                        { label: '加班工时', data: overHrs, backgroundColor: '#06B6D4' }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { x: { stacked: true }, y: { stacked: true } }
-                }
-            });
+            const canvasDaily = document.getElementById('analyticsDailyChart');
+            if (canvasDaily) {
+                const ctxDaily = canvasDaily.getContext('2d');
+                if (dailyChartRef) dailyChartRef.destroy();
+                dailyChartRef = new Chart(ctxDaily, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedDates,
+                        datasets: [
+                            { label: '法定标准工时', data: baseHrs, backgroundColor: '#4F46E5' },
+                            { label: '加班工时', data: overHrs, backgroundColor: '#06B6D4' }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { x: { stacked: true }, y: { stacked: true } }
+                    }
+                });
+            }
 
             const sapDistribution = {};
             filtered.forEach(e => {
@@ -1310,19 +1288,22 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
                 }
             });
 
-            const ctxMod = document.getElementById('analyticsModuleChart').getContext('2d');
-            if (moduleChartRef) moduleChartRef.destroy();
-            moduleChartRef = new Chart(ctxMod, {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(sapDistribution),
-                    datasets: [{
-                        data: Object.values(sapDistribution),
-                        backgroundColor: ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899']
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+            const canvasMod = document.getElementById('analyticsModuleChart');
+            if (canvasMod) {
+                const ctxMod = canvasMod.getContext('2d');
+                if (moduleChartRef) moduleChartRef.destroy();
+                moduleChartRef = new Chart(ctxMod, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(sapDistribution),
+                        datasets: [{
+                            data: Object.values(sapDistribution),
+                            backgroundColor: ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899']
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
         }
 
         // ------------------- 快捷录入模板 -------------------
@@ -1347,7 +1328,7 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
 
             yesterdayEntries.forEach(entry => {
                 const cloned = { ...entry, id: Date.now().toString() + Math.random(), date: new Date().toISOString().split('T')[0] };
-                timesheetEntries.push(cloned);
+                timesheetEntries.unshift(cloned);
             });
 
             saveToLocalStorage();
@@ -1445,43 +1426,12 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
             }
         }
 
-        // ------------------- 计时器引擎 -------------------
-        document.getElementById('btn-timer-toggle').addEventListener('click', () => {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-                document.getElementById('timer-btn-text').innerText = "开始计时";
-                document.getElementById('btn-timer-toggle').querySelector('i').className = "fa-solid fa-play";
-                document.getElementById('timer-dot').style.display = 'none';
-            } else {
-                document.getElementById('timer-btn-text').innerText = "暂停";
-                document.getElementById('btn-timer-toggle').querySelector('i').className = "fa-solid fa-pause";
-                document.getElementById('timer-dot').style.display = 'inline-block';
-                timerInterval = setInterval(() => {
-                    timerSeconds++;
-                    const hrs = String(Math.floor(timerSeconds / 3600)).padStart(2, '0');
-                    const mins = String(Math.floor((timerSeconds % 3600) / 60)).padStart(2, '0');
-                    const secs = String(timerSeconds % 60).padStart(2, '0');
-                    document.getElementById('timer-display').innerText = `${hrs}:${mins}:${secs}`;
-                }, 1000);
-            }
-        });
-
-        document.getElementById('btn-timer-reset').addEventListener('click', () => {
-            clearInterval(timerInterval);
-            timerInterval = null;
-            timerSeconds = 0;
-            document.getElementById('timer-display').innerText = "00:00:00";
-            document.getElementById('timer-btn-text').innerText = "开始计时";
-            document.getElementById('btn-timer-toggle').querySelector('i').className = "fa-solid fa-play";
-            document.getElementById('timer-dot').style.display = 'none';
-        });
-
         function initShortcutKeys() {
             window.addEventListener('keydown', (e) => {
                 if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                     e.preventDefault();
-                    document.querySelector('#timesheet-form button[type="submit"]').click();
+                    const submitBtn = document.querySelector('#timesheet-form button[type="submit"]');
+                    if (submitBtn) submitBtn.click();
                 }
             });
         }
@@ -1493,5 +1443,337 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
             ];
         }
     </script>
+
+<script>
+// ------------------- 独立高精多线程异步计时引擎 -------------------
+(function() {
+    let activeTimers = [];
+    try {
+        const saved = localStorage.getItem('timesheet_active_timers');
+        if (saved) activeTimers = JSON.parse(saved);
+    } catch (e) { console.error(e); }
+
+    // 初始化默认任务
+    if (activeTimers.length === 0) {
+        activeTimers.push({
+            id: 'timer-default',
+            name: '默认追踪任务',
+            seconds: 0,
+            isRunning: false,
+            startTime: '',
+            endTime: '',
+            pausedSeconds: 0,       // 累计暂停秒数
+            lastStateTime: 0        // 上次改变状态的时间戳
+        });
+    }
+
+    // 定时器主驱动轮询器 (每秒精准刷新文本和计算)
+    setInterval(() => {
+        let changed = false;
+        
+        activeTimers.forEach(t => {
+            if (t.isRunning) {
+                t.seconds++;
+                changed = true;
+            } else if (t.startTime && !t.endTime) {
+                // 已开始、但当前正处于暂停休眠状态的任务，累计其暂停挂起秒数
+                t.pausedSeconds = (t.pausedSeconds || 0) + 1;
+                changed = true;
+            }
+        });
+        if (changed) {
+            localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
+            updateTimersDisplayOnly();
+        }
+    }, 1000);
+
+    function formatTimeStr(totalSeconds) {
+        const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+        const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+        const secs = String(totalSeconds % 60).padStart(2, '0');
+        return `${hrs}:${mins}:${secs}`;
+    }
+
+    function getNowFullTimeStr() {
+        const now = new Date();
+        return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    }
+
+    // 仅精细刷新DOM元素中的特定文本，防止组件重绘丢焦点
+    function updateTimersDisplayOnly() {
+        activeTimers.forEach(t => {
+            const el = document.getElementById(`display-${t.id}`);
+            if (el) el.innerText = formatTimeStr(t.seconds);
+            
+            const pauseEl = document.getElementById(`pause-display-${t.id}`);
+            if (pauseEl) {
+                pauseEl.innerText = formatTimeStr(t.pausedSeconds || 0);
+            }
+
+            const endtimeEl = document.getElementById(`endtime-display-${t.id}`);
+            if (endtimeEl && !t.endTime) {
+                endtimeEl.innerText = t.isRunning ? '计费进行中...' : (t.startTime ? '暂停挂起中' : '未开始');
+            }
+            
+            const btnEl = document.getElementById(`btn-toggle-${t.id}`);
+            if (btnEl) {
+                if (t.isRunning) {
+                    btnEl.innerHTML = `<i class="fa-solid fa-pause"></i> <span>暂停</span>`;
+                    btnEl.className = "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
+                } else {
+                    btnEl.innerHTML = `<i class="fa-solid fa-play"></i> <span>开始</span>`;
+                    btnEl.className = "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-sm shadow-indigo-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
+                }
+            }
+        });
+        const anyRunning = activeTimers.some(t => t.isRunning);
+        const globalDot = document.getElementById('timer-dot');
+        if (globalDot) globalDot.style.display = anyRunning ? 'block' : 'none';
+    }
+
+    // 动态构建高精度多线程追踪模块的 DOM
+    function renderTimersStructure() {
+        const timerLabelEl = document.getElementById('timer-label');
+        if (!timerLabelEl) return;
+        
+        const panelContainer = timerLabelEl.closest('.mb-4');
+        if (!panelContainer) return;
+
+        panelContainer.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider"><i class="fa-solid fa-stopwatch mr-1"></i>计时器</span>
+                <span class="w-2 h-2 rounded-full bg-success animate-pulse" id="timer-dot" style="display: none;"></span>
+            </div>
+            <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1 mb-2" id="custom-timers-dynamic-list"></div>
+            <button id="btn-add-timer-custom" class="w-full py-1 border border-dashed border-primary/40 text-primary hover:bg-primary/5 text-xs font-medium rounded-lg transition-all">
+                + 自定义添加新任务
+            </button>
+        `;
+
+        document.getElementById('btn-add-timer-custom').addEventListener('click', (e) => {
+            e.preventDefault();
+            const taskName = prompt("请输入您想独立跟踪的任务/项目名称:", `任务 ${activeTimers.length + 1}`);
+            if (!taskName || taskName.trim() === '') return;
+            
+            activeTimers.push({
+                id: 'timer-' + Date.now(),
+                name: taskName.trim(),
+                seconds: 0,
+                isRunning: false,
+                startTime: '',
+                endTime: '',
+                pausedSeconds: 0,
+                lastStateTime: 0
+            });
+            localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
+            refreshListDOM();
+        });
+
+        refreshListDOM();
+    }
+
+    function refreshListDOM() {
+        const listBox = document.getElementById('custom-timers-dynamic-list');
+        if (!listBox) return;
+
+        let html = '';
+        activeTimers.forEach((t) => {
+            html += `
+                <div class="p-3 rounded-xl bg-white/60 dark:bg-slate-900/40 border border-slate-200/40 shadow-sm flex flex-col gap-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-700 dark:text-slate-200 truncate max-w-[140px]" title="${t.name}">
+                            ${t.name}
+                        </span>
+                        ${activeTimers.length > 1 ? `
+                            <button onclick="window.customTimerActions.remove('${t.id}')" class="text-slate-400 hover:text-danger text-[11px] p-1 transition-colors">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                    
+                    <!-- 2x2 精细化时间流分析网格 -->
+                    <div class="grid grid-cols-2 gap-1.5 text-[10px] bg-slate-50/50 dark:bg-slate-800/20 p-2 rounded-lg font-mono">
+                        <div class="flex flex-col">
+                            <span class="text-slate-400 text-[9px] uppercase">▶ 开始时间</span>
+                            <span class="font-semibold text-slate-600 dark:text-slate-300 truncate">${t.startTime ? t.startTime : '未开始'}</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-slate-400 text-[9px] uppercase">■ 结束时间</span>
+                            <span class="font-semibold text-slate-600 dark:text-slate-300 truncate" id="endtime-display-${t.id}">
+                                ${t.endTime ? t.endTime : (t.isRunning ? '计费进行中...' : (t.startTime ? '暂停挂起中' : '未开始'))}
+                            </span>
+                        </div>
+                        <div class="flex flex-col border-t border-slate-100 dark:border-slate-800 pt-1 mt-1">
+                            <span class="text-slate-400 text-[9px] uppercase">⏸ 暂停时长</span>
+                            <span class="font-bold text-amber-500" id="pause-display-${t.id}">${formatTimeStr(t.pausedSeconds || 0)}</span>
+                        </div>
+                        <div class="flex flex-col border-t border-slate-100 dark:border-slate-800 pt-1 mt-1">
+                            <span class="text-slate-400 text-[9px] uppercase">⏱ 有效工时</span>
+                            <span class="font-bold text-primary dark:text-indigo-400" id="display-${t.id}">${formatTimeStr(t.seconds)}</span>
+                        </div>
+                    </div>
+
+                    <!-- 美化升级后的动作控制栏 -->
+                    <div class="flex items-center gap-1.5 mt-2">
+                        <!-- 开始/暂停 动态渐变按钮 -->
+                        <button id="btn-toggle-${t.id}" onclick="window.customTimerActions.toggle('${t.id}')" class="flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white transition-all duration-300 flex items-center justify-center gap-1 shadow-sm ${t.isRunning ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-amber-500/10 active:scale-95' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-indigo-500/10 active:scale-95'}">
+                            <i class="fa-solid ${t.isRunning ? 'fa-pause' : 'fa-play'}"></i>
+                            <span>${t.isRunning ? '暂停' : '开始'}</span>
+                        </button>
+                        
+                        <!-- 极简高雅重置按钮 (图标式设计，防止空间挤压折行) -->
+                        <button onclick="window.customTimerActions.reset('${t.id}')" title="重置记录" class="w-8 h-8 flex-shrink-0 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl transition-all duration-300 active:scale-90 flex items-center justify-center border border-slate-200/30 dark:border-slate-700/30 shadow-sm">
+                            <i class="fa-solid fa-rotate-left text-xs"></i>
+                       
+                        </button>
+                        
+                        <!-- 结算入账 成功导向高亮渐变按钮 -->
+                        <button onclick="window.customTimerActions.logToFormAndSave('${t.id}')" class="flex-1 py-1.5 text-[11px] font-bold rounded-xl text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 hover:shadow-md hover:shadow-emerald-500/15 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1 shadow-sm">
+                            <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
+                            <span>结束</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        listBox.innerHTML = html;
+        updateTimersDisplayOnly();
+    }
+
+    // 智能自动化核心逻辑控制器
+    window.customTimerActions = {
+        toggle: function(id) {
+            const t = activeTimers.find(x => x.id === id);
+            if (!t) return;
+            
+            const nowTimeFull = getNowFullTimeStr();
+            if (!t.isRunning) {
+                // 开始运行或从暂停中恢复
+                if (!t.startTime || t.seconds === 0) {
+                    t.startTime = nowTimeFull; 
+                    t.pausedSeconds = 0;
+                }
+                t.isRunning = true;
+                t.endTime = ''; // 清除上次的结束时间标志
+            } else {
+                // 切换为暂停挂起
+                t.isRunning = false;
+            }
+            t.lastStateTime = Date.now();
+            localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
+            refreshListDOM();
+        },
+
+        reset: function(id) {
+            const t = activeTimers.find(x => x.id === id);
+            if (t) {
+                t.seconds = 0;
+                t.isRunning = false;
+                t.startTime = '';
+                t.endTime = '';
+                t.pausedSeconds = 0;
+                t.lastStateTime = 0;
+                localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
+                refreshListDOM();
+            }
+        },
+
+        remove: function(id) {
+            activeTimers = activeTimers.filter(x => x.id !== id);
+            localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
+            refreshListDOM();
+        },
+
+        logToFormAndSave: function(id) {
+            const t = activeTimers.find(x => x.id === id);
+            if (!t || t.seconds <= 0) {
+                alert("计时器时长为 0，请开始并进行有效计时后再结算！");
+                return;
+            }
+
+            const nowTimeFull = getNowFullTimeStr();
+            if (t.isRunning) {
+                t.isRunning = false;
+                t.endTime = nowTimeFull;
+            } else if (!t.endTime) {
+                t.endTime = nowTimeFull;
+            }
+
+            if (!t.startTime) t.startTime = getNowFullTimeStr();
+            if (!t.pausedSeconds) t.pausedSeconds = 0;
+            
+            // 计算高精度有效工作时间(小数制小时)
+            const preciseHours = parseFloat((t.seconds / 3600).toFixed(2));
+            const durationString = formatTimeStr(t.seconds);
+            const pauseString = formatTimeStr(t.pausedSeconds);
+
+            // 格式化审计明细日志写入工时备注
+            const auditNotes =  `▶ 开始时间: ${t.startTime}\n` +
+                               `⏸ 挂起暂停: ${pauseString}\n` +
+                               `⏱ 有效持续: ${durationString}\n` +
+                               `■ 结束时间: ${t.endTime}\n` ;
+
+            // 构建完美的工时数据库行
+            const newRecord = {
+                id: String(Date.now()),
+                date: new Date().toISOString().split('T')[0],
+                type: "开发", 
+                start: t.startTime.substring(0, 5), // 精简 HH:MM 格式，防止格式溢出
+                end: t.endTime.substring(0, 5),     // 精简 HH:MM 格式，防止格式溢出
+                project: t.name,
+                customer: "异步追踪",
+                sapModule: "TIMER",
+                priority: "medium",
+                notes: auditNotes,  // 记录完整审计日志
+                duration: preciseHours > 0 ? preciseHours : 0.1 // 规避 0 计费工时的异常
+            };
+
+            // 1. 无缝灌入全局主工时数据库头部并持久化
+            if (typeof timesheetEntries !== 'undefined' && Array.isArray(timesheetEntries)) {
+                timesheetEntries.unshift(newRecord);
+                if (typeof saveToLocalStorage === 'function') {
+                    saveToLocalStorage();
+                }
+            }
+
+            // 2. 调度执行原系统的刷新与计算引擎
+            const refreshRoutines = [
+                { name: 'renderTable', action: () => renderTable() },
+                { name: 'updateKPIs', action: () => updateKPIs() },
+                { name: 'initOrUpdateCharts', action: () => initOrUpdateCharts() }
+            ];
+
+            refreshRoutines.forEach(routine => {
+                if (typeof window[routine.name] === 'function') {
+                    try { routine.action(); } catch(err) { console.error(err); }
+                }
+            });
+
+            // 3. 自动切页到工时表，查看录入成果
+            if (typeof switchTab === 'function') {
+                switchTab('timesheet');
+            }
+
+            alert(`🎉 结算成功并已一键同步入账！\n\n【工时明细摘要】:\n开始时间: ${t.startTime}\n暂停挂起: ${pauseString}\n工作持续: ${durationString}\n结束时间: ${t.endTime}`);
+            
+            // 重置与复位该卡片线程的状态机
+            t.seconds = 0;
+            t.startTime = '';
+            t.endTime = '';
+            t.pausedSeconds = 0;
+            t.lastStateTime = 0;
+            localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
+            refreshListDOM();
+        }
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderTimersStructure);
+    } else {
+        setTimeout(renderTimersStructure, 200);
+    }
+})();
+</script>
+
 </body>
 </html>
