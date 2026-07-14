@@ -566,7 +566,7 @@
         let todoItems = [
             { id: 1, text: "架构对接确认", done: false },
             { id: 2, text: "模块账期结算异常问题排查 (Company Code 1000)", done: true },
-            { id: 3, text: "准备今日跟晓文 和 大肠哥 的工作交接会", done: false }
+            { id: 3, text: "准备今日跟晓文 和 香肠哥 的工作交接会", done: false }
         ];
 
         // 默认内置两个会议用于演示提醒
@@ -952,11 +952,19 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
             document.getElementById('kpi-week-status').innerText = `目标: 40.0h`;
             document.querySelector('#kpi-month + div').innerHTML = `<span id="kpi-target-rate" class="text-success font-semibold">${targetRate}%</span> <span class="text-slate-400 font-normal">总目标 180h</span>`;
 
-            const alertEl = document.getElementById('quick-alert');
-            if (todayHours < systemSettings.standardHours) {
+         const alertEl = document.getElementById('quick-alert');
+            if (todayHours > 0) {
                 alertEl.style.display = 'flex';
-                document.getElementById('alert-text').innerText = `今日工时还差 ${(systemSettings.standardHours - todayHours).toFixed(1)}h 达成 8h 标准`;
+                // 如果今天已经有工时记录了
+                if (todayHours < systemSettings.standardHours) {
+                    // 工时未满 8 小时
+                    document.getElementById('alert-text').innerText = `您今天已经工作 ${todayHours.toFixed(1)}h 啦，辛苦啦 ☕`;
+                } else {
+                    // 工时已满 8 小时或超额完成
+                    document.getElementById('alert-text').innerText = `今天已累计 ${todayHours.toFixed(1)}h！超额达成目标，快去休息吧 🎉`;
+                }
             } else {
+                // 如果今天还没有任何工时记录，就先隐藏提示栏
                 alertEl.style.display = 'none';
             }
         }
@@ -1322,7 +1330,7 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
             document.getElementById('ts-start').value = "09:00";
             document.getElementById('ts-end').value = "18:00";
             document.getElementById('ts-project').value = "全球滚动项目";
-            document.getElementById('ts-customer').value = "大肠哥";
+            document.getElementById('ts-customer').value = "香肠哥";
             document.getElementById('ts-sap-module').value = "PS";
             document.getElementById('ts-notes').value = "标准日常系统配置、单元测试及日常故障排查工作。";
             alert("标准工时模板加载成功！");
@@ -1481,7 +1489,7 @@ if (profileAvatar) profileAvatar.src = `2.jpg?t=${timestamp}`;
         function generateMockData() {
             return [
                 { id: "1", date: "2026-07-13", type: "开发", start: "09:00", end: "18:00", project: "某某项目", customer: "京东张三", sapModule: "CO", priority: "high", notes: "完成成本要素主数据的迁移配置与数据校验。", duration: 8 },
-                { id: "2", date: "2026-07-14", type: "会议", start: "10:00", end: "12:00", project: "架构对齐研讨会", customer: "陆泽 大肠", sapModule: "PS", priority: "medium", notes: "与 晓文 和 大肠哥 确认 Project Systems 设计框架。", duration: 2 }
+                { id: "2", date: "2026-07-14", type: "会议", start: "10:00", end: "12:00", project: "架构对齐研讨会", customer: "陆泽 香肠哥", sapModule: "PS", priority: "medium", notes: "与 晓文 和 香肠哥 确认 Project Systems 设计框架。", duration: 2 }
             ];
         }
     </script>
