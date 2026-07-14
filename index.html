@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chronos - SAP & IT Consultant Timesheet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#06B6D4',
+                        success: '#22C55E',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                        bgLight: '#F8FAFC',
+                        bgDark: '#0F172A',
+                    },
+                    borderRadius: {
+                        'apple': '16px',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .glow-card {
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glow-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(79, 70, 229, 0.08);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 9999px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+        .page-panel {
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .hidden-panel {
+            display: none !important;
+        }
+        .priority-high { border-left: 4px solid #EF4444; }
+        .priority-medium { border-left: 4px solid #F59E0B; }
+        .priority-low { border-left: 4px solid #22C55E; }
+    </style>
+</head>
+<body class="bg-bgLight text-slate-800 dark:bg-bgDark dark:text-slate-100 min-h-screen pb-20 md:pb-0">
+
+    <div class="flex min-h-screen">
+        <!-- 侧边栏 -->
+        <aside class="hidden md:flex flex-col w-64 glass border-r border-slate-200/50 dark:border-slate-800/50 p-6 fixed h-full z-30 overflow-y-auto">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                    <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base tracking-tight">JiaYing工数记录</h1>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500">Timesheet PRO</p>
+                </div>
+            </div>
+
+            <!-- 实用计时器板块 -->
+            <div class="mb-4 p-4 rounded-apple bg-slate-100/50 dark:bg-slate-800/40 border border-slate-200/20">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider" id="timer-label">计时器</span>
+                    <span class="w-2 h-2 rounded-full bg-success animate-pulse" id="timer-dot" style="display: none;"></span>
+                </div>
+                <div class="text-2xl font-mono font-bold tracking-widest text-center my-1" id="timer-display">00:00:00</div>
+                <div class="flex flex-col gap-2 mt-2">
+                    <div class="flex justify-center gap-2">
+                        <button id="btn-timer-toggle" class="flex-1 py-1 bg-primary text-white text-xs font-medium rounded-full hover:bg-primary/90 transition-all flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-play"></i> <span id="timer-btn-text">开始计时</span>
+                        </button>
+                        <button id="btn-timer-reset" class="px-3 py-1 bg-slate-200 dark:bg-slate-700 text-xs font-medium rounded-full hover:bg-slate-300 dark:hover:bg-slate-600 transition-all">
+                            重置
+                        </button>
+                    </div>
+                    <!-- 新增功能：一键将当前计时直接录入工时 -->
+                    <button id="btn-timer-log" onclick="logTimerToTimesheet()" class="w-full py-1 bg-success text-white text-[11px] font-semibold rounded-full hover:bg-success/90 transition-all flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-file-invoice"></i> 记入今日工时
+                    </button>
+                </div>
+            </div>
+
+            <!-- 智能日程/会议提醒板块 -->
+            <div class="mb-5 p-4 rounded-apple bg-amber-50/30 dark:bg-amber-950/10 border border-amber-200/30">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400"><i class="fa-solid fa-bell mr-1"></i>日程提醒</span>
+                    <button onclick="addNewReminderPrompt()" class="text-[10px] text-primary hover:underline">+ 新建</button>
+                </div>
+                <div id="reminder-sidebar-list" class="space-y-2 max-h-32 overflow-y-auto pr-1">
+                    <!-- 提醒条目动态渲染 -->
+                </div>
+            </div>
+
+            <nav class="flex-1 space-y-1.5">
+                <button onclick="switchTab('dashboard')" data-tab="dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-apple text-sm font-medium transition-all text-primary bg-primary/10 dark:text-primary dark:bg-primary/10">
+                    <i class="fa-solid fa-chart-pie w-5"></i> <span class="lang-zh">工作台</span>
+                </button>
+                <button onclick="switchTab('timesheet')" data-tab="timesheet" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-apple text-sm font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50">
+                    <i class="fa-solid fa-list-check w-5"></i> <span class="lang-zh">工时记录</span>
+                </button>
+                <button onclick="switchTab('calendar')" data-tab="calendar" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-apple text-sm font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50">
+                    <i class="fa-solid fa-calendar-days w-5"></i> <span class="lang-zh">日历视图</span>
+                </button>
+                <button onclick="switchTab('analytics')" data-tab="analytics" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-apple text-sm font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50">
+                    <i class="fa-solid fa-chart-line w-5"></i> <span class="lang-zh">统计分析</span>
+                </button>
+                <button onclick="switchTab('settings')" data-tab="settings" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-apple text-sm font-medium transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50">
+                    <i class="fa-solid fa-sliders w-5"></i> <span class="lang-zh">偏好设置</span>
+                </button>
+            </nav>
+
+            <div class="mt-auto pt-4 border-t border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between">
+                <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('profile')">
+                    <img id="user-avatar-pc" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&h=80&q=80" class="w-9 h-9 rounded-full object-cover ring-2 ring-primary/20" alt="Avatar">
+                    <div class="text-left">
+                        <p class="text-xs font-semibold" id="profile-name-pc">JiaYing</p>
+                        <p class="text-[10px] text-slate-400">lucidata</p>
+                    </div>
+                </div>
+                <button onclick="toggleTheme()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center hover:scale-105 transition-all text-slate-600 dark:text-slate-300">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:block"></i>
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 md:ml-64 p-4 md:p-8 max-w-7xl mx-auto w-full transition-all duration-300">
+            <!-- 头部 -->
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-bold tracking-tight" id="welcome-message">Hello, JiaYing 👋</h2>
+                    <p class="text-xs md:text-sm text-slate-400" id="current-date-text">Welcome back, let's track your productivity today.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div id="quick-alert" class="flex items-center gap-2 px-4 py-2 rounded-full glass text-xs font-medium text-warning border-warning/20">
+                        <i class="fa-solid fa-circle-exclamation text-amber-500 animate-bounce"></i>
+                        <span id="alert-text">今天尚未填报满 8h 工时！</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 工作台 -->
+            <section id="panel-dashboard" class="page-panel space-y-8">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="glass p-5 rounded-apple glow-card">
+                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Today</p>
+                        <h3 class="text-2xl md:text-3xl font-bold tracking-tight" id="kpi-today">0.0h</h3>
+                        <div class="mt-2 text-xs text-slate-400" id="kpi-today-status">Target: 8.0h</div>
+                    </div>
+                    <div class="glass p-5 rounded-apple glow-card">
+                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">This Week</p>
+                        <h3 class="text-2xl md:text-3xl font-bold tracking-tight" id="kpi-week">0.0h</h3>
+                        <div class="mt-2 text-xs text-slate-400" id="kpi-week-status">Target: 40.0h</div>
+                    </div>
+                    <div class="glass p-5 rounded-apple glow-card">
+                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">This Month</p>
+                        <h3 class="text-2xl md:text-3xl font-bold tracking-tight" id="kpi-month">0.0h</h3>
+                        <div class="mt-2 text-xs text-success flex items-center gap-1 font-semibold">
+                            <span id="kpi-target-rate">0%</span>
+                            <span class="text-slate-400 font-normal">of 180h target</span>
+                        </div>
+                    </div>
+                    <div class="glass p-5 rounded-apple glow-card">
+                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Avg. Daily</p>
+                        <h3 class="text-2xl md:text-3xl font-bold tracking-tight" id="kpi-avg">0.0h</h3>
+                        <div class="mt-2 text-xs text-slate-400">Calculated over working days</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="glass p-6 rounded-apple lg:col-span-2">
+                        <div class="flex items-center justify-between mb-6">
+                            <h4 class="font-bold text-sm tracking-tight"><i class="fa-solid fa-chart-line mr-2 text-primary"></i>Weekly Work Trend (7 Days)</h4>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="chartTrend"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass p-6 rounded-apple">
+                        <div class="flex items-center justify-between mb-6">
+                            <h4 class="font-bold text-sm tracking-tight"><i class="fa-solid fa-chart-pie mr-2 text-secondary"></i>Projects Ratio</h4>
+                        </div>
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="chartProject"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass p-6 rounded-apple">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-bold text-sm tracking-tight"><i class="fa-solid fa-check-double mr-2 text-success"></i>Today's Checklist</h4>
+                            <button onclick="addTodoPrompt()" class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:scale-110 transition-all text-xs">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                        <div id="todo-list-container" class="space-y-3 max-h-60 overflow-y-auto pr-1"></div>
+                    </div>
+
+                    <div class="glass p-6 rounded-apple flex flex-col justify-between">
+                        <div>
+                            <h4 class="font-bold text-sm tracking-tight mb-4"><i class="fa-solid fa-bolt mr-2 text-warning"></i>Smart Templates & AI Action</h4>
+                            <p class="text-xs text-slate-400 mb-4">Quick actions to duplicate entries or generate summaries with a click.</p>
+                            <div class="grid grid-cols-2 gap-3 mb-4">
+                                <button onclick="duplicateYesterday()" class="flex items-center justify-center gap-2 p-3 text-xs font-semibold rounded-apple border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-left">
+                                    <i class="fa-solid fa-copy text-primary"></i> Clone Yesterday
+                                </button>
+                                <button onclick="loadDefaultTemplate()" class="flex items-center justify-center gap-2 p-3 text-xs font-semibold rounded-apple border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-left">
+                                    <i class="fa-solid fa-star text-amber-500"></i> Standard Day Template
+                                </button>
+                            </div>
+                        </div>
+                        <div class="border-t border-slate-200/50 dark:border-slate-800/50 pt-4 mt-auto">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-slate-500">AI Daily Summary Draft</span>
+                                <button onclick="generateDailySummary()" class="text-xs font-bold text-primary hover:underline">
+                                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Generate Report
+                                </button>
+                            </div>
+                            <textarea id="ai-summary-output" readonly class="w-full text-xs p-3 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/30 font-mono text-slate-500 min-h-[80px] focus:outline-none resize-none" placeholder="Draft will appear here based on today's logged hours..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 工时记录页面 -->
+            <section id="panel-timesheet" class="page-panel hidden-panel space-y-8">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="glass p-6 rounded-apple h-fit">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-base" id="form-title">Log Your Time</h3>
+                            <div class="flex items-center gap-2">
+                                <span id="form-edit-indicator" class="hidden text-xs bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded font-semibold">Editing Mode</span>
+                                <button type="button" id="btn-cancel-edit" onclick="resetForm()" class="hidden text-xs text-slate-400 hover:text-danger underline">取消编辑</button>
+                            </div>
+                        </div>
+                        <form id="timesheet-form" onsubmit="handleTimesheetSubmit(event)" class="space-y-4">
+                            <input type="hidden" id="entry-id">
+                            
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">日期</label>
+                                    <input type="date" id="ts-date" required class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">工时类型</label>
+                                    <select id="ts-type" onchange="checkCustomType(this)" class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+                                        <option value="开发">开发</option>
+                                        <option value="会议">会议</option>
+                                        <option value="学习">学习</option>
+                                        <option value="Support">Support</option>
+                                        <option value="__CUSTOM__" class="text-primary font-bold">+ 自定义添加...</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">开始时间</label>
+                                    <input type="time" id="ts-start" required class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">结束时间</label>
+                                    <input type="time" id="ts-end" required class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">项目 (Project)</label>
+                                    <input type="text" id="ts-project" required placeholder="例如：S/4HANA Migration" class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">客户 (Customer)</label>
+                                    <input type="text" id="ts-customer" placeholder="例如：JASM" class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">内部对接</label>
+                                    <input type="text" id="ts-sap-module" placeholder="例如：大肠哥" class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">优先级</label>
+                                    <select id="ts-priority" class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+                                        <option value="low">低 (Low)</option>
+                                        <option value="medium" selected>中 (Medium)</option>
+                                        <option value="high">高 (High)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-500 mb-1">工作描述/备注</label>
+                                <textarea id="ts-notes" rows="3" placeholder="填写今日工作详情..." class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 font-mono"></textarea>
+                            </div>
+
+                            <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-bold text-xs p-2.5 rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center">
+                                <i class="fa-solid fa-floppy-disk mr-2"></i> 保存记录 (Ctrl+S)
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- 右侧列表展示 -->
+                    <div class="glass p-6 rounded-apple lg:col-span-2 flex flex-col justify-between">
+                        <div>
+                            <div class="flex flex-col md:flex-row gap-3 justify-between items-start md:items-center mb-6">
+                                <div class="flex flex-wrap gap-2 items-center">
+                                    <input type="text" id="search-input" oninput="renderTable()" placeholder="Search project, notes..." class="px-3.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none w-48">
+                                    <select id="filter-type" onchange="renderTable()" class="px-3.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                                        <option value="All">All Types</option>
+                                        <option value="开发">开发</option>
+                                        <option value="会议">会议</option>
+                                        <option value="Support">Support</option>
+                                        <option value="学习">学习</option>
+                                        <option value="休假">休假</option>
+                                    </select>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="exportCSV()" class="px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg font-bold flex items-center gap-1 transition-all">
+                                        <i class="fa-solid fa-file-csv"></i> CSV
+                                    </button>
+                                    <button onclick="document.getElementById('import-file-input').click()" class="px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg font-bold flex items-center gap-1 transition-all">
+                                        <i class="fa-solid fa-file-import"></i> Import
+                                    </button>
+                                    <input type="file" id="import-file-input" class="hidden" accept=".json" onchange="importJSON(event)">
+                                    <button onclick="batchDelete()" class="px-3 py-1.5 text-xs bg-danger/10 text-danger hover:bg-danger/20 rounded-lg font-bold flex items-center gap-1 transition-all">
+                                        <i class="fa-solid fa-trash"></i> Delete Selected
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead>
+                                        <tr class="text-slate-400 border-b border-slate-100 dark:border-slate-800/80 pb-2">
+                                            <th class="py-3 px-2"><input type="checkbox" id="select-all" onclick="toggleSelectAll(this)"></th>
+                                            <th class="py-3 px-2">Date</th>
+                                            <th class="py-3 px-2">Details</th>
+                                            <th class="py-3 px-2">Member</th>
+                                            <th class="py-3 px-2">Duration</th>
+                                            <th class="py-3 px-2 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="timesheet-table-body" class="divide-y divide-slate-100/50 dark:divide-slate-800/50"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-800/80 pt-4 mt-6">
+                            <span class="text-xs text-slate-400" id="pagination-info">Showing 0 of 0 entries</span>
+                            <div class="flex gap-1">
+                                <button onclick="changePage(-1)" class="w-8 h-8 rounded-lg border border-slate-200/50 dark:border-slate-700/50 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-xs">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                <button onclick="changePage(1)" class="w-8 h-8 rounded-lg border border-slate-200/50 dark:border-slate-700/50 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-xs">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 日历视图 -->
+            <section id="panel-calendar" class="page-panel hidden-panel space-y-6">
+                <div class="glass p-6 rounded-apple">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <button onclick="adjustCalendarMonth(-1)" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"><i class="fa-solid fa-chevron-left"></i></button>
+                            <h3 id="calendar-month-year" class="font-bold text-lg">July 2026</h3>
+                            <button onclick="adjustCalendarMonth(1)" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                        <span class="text-xs text-slate-400">Colored dots mark tasks types</span>
+                    </div>
+
+                    <div class="grid grid-cols-7 gap-1.5 md:gap-3 text-center text-xs font-semibold text-slate-400 mb-2">
+                        <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+                    </div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-1.5 md:gap-3"></div>
+                </div>
+
+                <div id="selected-day-details" class="glass p-6 rounded-apple hidden">
+                    <h4 class="font-bold text-sm tracking-tight mb-4" id="selected-day-title">Work logged on July 14, 2026</h4>
+                    <div class="space-y-3" id="selected-day-list"></div>
+                </div>
+            </section>
+
+            <!-- 统计分析 -->
+            <section id="panel-analytics" class="page-panel hidden-panel space-y-8">
+                <div class="glass p-5 rounded-apple flex flex-wrap gap-4 items-center justify-between">
+                    <div class="flex flex-wrap gap-3 items-center">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wide">Project Filter</label>
+                            <select id="analytics-filter-project" onchange="renderAnalyticsCharts()" class="px-3.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                                <option value="All">All Projects</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wide">Customer Filter</label>
+                            <select id="analytics-filter-customer" onchange="renderAnalyticsCharts()" class="px-3.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                                <option value="All">All Customers</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="text-xs font-semibold text-slate-400">Multi-dimensional analytics built on Chart.js</div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass p-6 rounded-apple">
+                        <h4 class="font-bold text-sm tracking-tight mb-4">Daily Overtime and Base Workload</h4>
+                        <div class="h-64"><canvas id="analyticsDailyChart"></canvas></div>
+                    </div>
+                    <div class="glass p-6 rounded-apple">
+                        <h4 class="font-bold text-sm tracking-tight mb-4">Module-wise Distribution (SAP Focus)</h4>
+                        <div class="h-64 flex items-center justify-center"><canvas id="analyticsModuleChart"></canvas></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 偏好设置 -->
+            <section id="panel-settings" class="page-panel hidden-panel max-w-2xl mx-auto space-y-6">
+                <div class="glass p-6 rounded-apple">
+                    <h3 class="font-bold text-lg mb-6"><i class="fa-solid fa-sliders mr-2 text-primary"></i>System Preference</h3>
+                    <form id="settings-form" onsubmit="saveSettings(event)" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Standard Daily Hours</label>
+                                <input type="number" step="0.5" id="cfg-standard-hours" class="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800" value="8">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Target Monthly Hours</label>
+                                <input type="number" id="cfg-target-hours" class="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800" value="180">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Default Start Time</label>
+                                <input type="time" id="cfg-start" class="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800" value="09:00">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Default End Time</label>
+                                <input type="time" id="cfg-end" class="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800" value="18:00">
+                            </div>
+                        </div>
+
+                        <div class="pt-4">
+                            <button type="submit" class="px-5 py-2.5 bg-primary text-white text-xs font-bold rounded-xl hover:scale-105 transition-all">
+                                Update Standard Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 个人信息 -->
+            <section id="panel-profile" class="page-panel hidden-panel max-w-2xl mx-auto space-y-6">
+                <div class="glass p-8 rounded-apple flex flex-col items-center text-center">
+                    <div class="relative mb-4 group">
+                        <img id="profile-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&h=160&q=80" class="w-24 h-24 rounded-full object-cover ring-4 ring-primary/20" alt="Avatar">
+                        <label class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center text-white text-xs cursor-pointer opacity-0 group-hover:opacity-100 transition-all">
+                            <i class="fa-solid fa-camera mr-1"></i> Edit
+                            <input type="file" class="hidden" accept="image/*" onchange="updateProfilePicture(event)">
+                        </label>
+                    </div>
+                    <h3 class="text-xl font-bold" id="profile-name">JiaYing</h3>
+                    <p class="text-xs text-slate-400 mb-6" id="profile-sub-title">lucidata | 陆泽科技 in Shanghai</p>
+
+
+
+                    <div class="w-full space-y-3">
+                        <button onclick="exportJSONBackup()" class="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all">
+                            <i class="fa-solid fa-download"></i> Backup Timesheet Database (JSON)
+                        </button>
+                        <button onclick="clearAllData()" class="w-full py-3 bg-danger/10 text-danger hover:bg-danger/20 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all">
+                            <i class="fa-solid fa-trash-can"></i> Factory Reset Database
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 移动端导航 -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 glass border-t border-slate-200/50 dark:border-slate-800/50 flex items-center justify-around py-3 px-2 z-40">
+        <button onclick="switchTab('dashboard')" class="mobile-nav-btn flex flex-col items-center gap-1 text-primary">
+            <i class="fa-solid fa-chart-pie text-lg"></i>
+            <span class="text-[9px] font-semibold">Home</span>
+        </button>
+        <button onclick="switchTab('timesheet')" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400">
+            <i class="fa-solid fa-list-check text-lg"></i>
+            <span class="text-[9px] font-semibold">Track</span>
+        </button>
+        <button onclick="switchTab('calendar')" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400">
+            <i class="fa-solid fa-calendar-days text-lg"></i>
+            <span class="text-[9px] font-semibold">Calendar</span>
+        </button>
+        <button onclick="switchTab('analytics')" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400">
+            <i class="fa-solid fa-chart-line text-lg"></i>
+            <span class="text-[9px] font-semibold">Charts</span>
+        </button>
+        <button onclick="switchTab('profile')" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400">
+            <i class="fa-solid fa-user text-lg"></i>
+            <span class="text-[9px] font-semibold">Profile</span>
+        </button>
+    </div>
+
+    <script>
+        // ------------------- 全局状态与初始化 -------------------
+        let timesheetEntries = [];
+        let systemSettings = {
+            standardHours: 8,
+            targetHours: 180,
+            defaultStart: "09:00",
+            defaultEnd: "18:00"
+        };
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let currentPage = 1;
+        const entriesPerPage = 8;
+
+        let timerSeconds = 0;
+        let timerInterval = null;
+
+        let todoItems = [
+            { id: 1, text: "JASM SAP PS WBS 架构对接确认", done: false },
+            { id: 2, text: "FI 模块账期结算异常问题排查 (Company Code 1000)", done: true },
+            { id: 3, text: "准备今日跟 Yanagawa 和 Kondo 的工作交接会", done: false }
+        ];
+
+        // 默认内置两个会议用于演示提醒
+        let reminderList = [
+            { id: 1, title: "部门同步会议", time: "15:00", notified: { 10: false, 5: false, 1: false } }
+        ];
+
+        let trendChartRef = null;
+        let projectChartRef = null;
+        let dailyChartRef = null;
+        let moduleChartRef = null;
+
+        let customTypes = ['开发', '会议', '学习', 'Support'];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initDatabase();
+            initTypeDropdown();
+            calculateDuration();
+            switchTab('dashboard');
+            initShortcutKeys();
+            requestNotificationPermission();
+
+            // 启动毫秒级时间以及会议提醒轮询器
+            setInterval(checkReminders, 1000);
+        });
+
+        function initDatabase() {
+            const storedEntries = localStorage.getItem('chronos_timesheets');
+            const storedSettings = localStorage.getItem('chronos_settings');
+            const storedTodos = localStorage.getItem('chronos_todos');
+            const storedReminders = localStorage.getItem('chronos_reminders');
+
+            if (storedEntries) {
+                timesheetEntries = JSON.parse(storedEntries);
+            } else {
+                timesheetEntries = generateMockData();
+                saveToLocalStorage();
+            }
+
+            if (storedSettings) {
+                systemSettings = JSON.parse(storedSettings);
+            }
+
+            if (storedTodos) {
+                todoItems = JSON.parse(storedTodos);
+            }
+
+            if (storedReminders) {
+                reminderList = JSON.parse(storedReminders);
+            }
+
+            document.getElementById('cfg-standard-hours').value = systemSettings.standardHours;
+            document.getElementById('cfg-target-hours').value = systemSettings.targetHours;
+            document.getElementById('cfg-start').value = systemSettings.defaultStart;
+            document.getElementById('cfg-end').value = systemSettings.defaultEnd;
+            document.getElementById('ts-date').value = new Date().toISOString().split('T')[0];
+
+            renderReminders();
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('chronos_timesheets', JSON.stringify(timesheetEntries));
+            localStorage.setItem('chronos_todos', JSON.stringify(todoItems));
+            localStorage.setItem('chronos_reminders', JSON.stringify(reminderList));
+        }
+
+        // ------------------- 提醒功能逻辑 -------------------
+        function requestNotificationPermission() {
+            if ("Notification" in window) {
+                if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+                    Notification.requestPermission();
+                }
+            }
+        }
+
+        function renderReminders() {
+            const container = document.getElementById('reminder-sidebar-list');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (reminderList.length === 0) {
+                container.innerHTML = `<p class="text-[10px] text-slate-400 text-center py-2">暂无日程提醒</p>`;
+                return;
+            }
+
+            reminderList.forEach(rem => {
+                const card = document.createElement('div');
+                card.className = "flex items-center justify-between p-2 rounded-lg bg-white/60 dark:bg-slate-800/60 border border-amber-200/20 text-xs";
+                card.innerHTML = `
+                    <div class="flex flex-col">
+                        <span class="font-semibold text-slate-700 dark:text-slate-200">${rem.title}</span>
+                        <span class="text-[10px] text-amber-600 font-mono"><i class="fa-regular fa-clock mr-1"></i>${rem.time}</span>
+                    </div>
+                    <button onclick="deleteReminder(${rem.id})" class="text-slate-400 hover:text-danger text-[11px]"><i class="fa-solid fa-trash-can"></i></button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function addNewReminderPrompt() {
+            const title = prompt("请输入会议/任务名称：");
+            if (!title || !title.trim()) return;
+            const timeStr = prompt("请输入提醒时间 (格式 24小时制，例如 15:00)：");
+            if (!timeStr) return;
+
+            const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
+            if (!timePattern.test(timeStr)) {
+                alert("输入时间格式不正确，请使用 HH:MM 格式！");
+                return;
+            }
+
+            reminderList.push({
+                id: Date.now(),
+                title: title.trim(),
+                time: timeStr.trim(),
+                notified: { 10: false, 5: false, 1: false }
+            });
+
+            saveToLocalStorage();
+            renderReminders();
+        }
+
+        function deleteReminder(id) {
+            reminderList = reminderList.filter(r => r.id !== id);
+            saveToLocalStorage();
+            renderReminders();
+        }
+
+        function checkReminders() {
+            const now = new Date();
+            const currentHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            const [nowH, nowM] = currentHHMM.split(':').map(Number);
+
+            reminderList.forEach(rem => {
+                const [remH, remM] = rem.time.split(':').map(Number);
+                
+                // 将今天两时间节点转换成绝对分钟差
+                const nowTotalMin = nowH * 60 + nowM;
+                const remTotalMin = remH * 60 + remM;
+                const diffMin = remTotalMin - nowTotalMin;
+
+                // 核心提醒时间节点判断
+                if (diffMin > 0) {
+                    [10, 5, 1].forEach(triggerMin => {
+                        if (diffMin === triggerMin && !rem.notified[triggerMin]) {
+                            rem.notified[triggerMin] = true;
+                            triggerNotification(rem.title, triggerMin);
+                            saveToLocalStorage();
+                        }
+                    });
+                }
+            });
+        }
+
+        function triggerNotification(title, minsLeft) {
+            const msg = `会议「${title}」将在 ${minsLeft} 分钟后开始！请注意时间。`;
+            
+            // 1. 尝试系统弹窗通知
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("Chronos 会议提醒", { body: msg, icon: "https://cdn-icons-png.flaticon.com/512/3114/3114812.png" });
+            }
+
+            // 2. 网页级高亮通知
+            const alertBanner = document.createElement('div');
+            alertBanner.className = "fixed top-5 right-5 z-50 glass border border-amber-400 bg-amber-500/10 p-4 rounded-apple shadow-xl max-w-sm flex items-start gap-3 animate-bounce";
+            alertBanner.innerHTML = `
+                <div class="text-amber-500 mt-0.5"><i class="fa-solid fa-triangle-exclamation text-xl animate-pulse"></i></div>
+                <div>
+                    <h5 class="font-bold text-xs text-amber-800 dark:text-amber-400">重要日程提醒</h5>
+                    <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-1">${msg}</p>
+                </div>
+            `;
+            document.body.appendChild(alertBanner);
+            
+            setTimeout(() => {
+                alertBanner.classList.add('opacity-0', 'transition-all', 'duration-500');
+                setTimeout(() => alertBanner.remove(), 500);
+            }, 6000);
+        }
+
+        // ------------------- 实用计时器打通功能 -------------------
+        function logTimerToTimesheet() {
+            if (timerSeconds < 60) {
+                alert("当前计时时间不足 1 分钟，请稍后再试！");
+                return;
+            }
+
+            // 暂定计时器结束时间为当前实际系统时间，倒退得出开始时间
+            const now = new Date();
+            const endHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            
+            const startSec = now.getTime() - (timerSeconds * 1000);
+            const startDateObj = new Date(startSec);
+            const startHHMM = `${String(startDateObj.getHours()).padStart(2, '0')}:${String(startDateObj.getMinutes()).padStart(2, '0')}`;
+
+            // 暂停计时器
+            if (timerInterval) {
+                document.getElementById('btn-timer-toggle').click();
+            }
+
+            // 自动跳转，并将计时器算好的开始、结束时间注入工时表单
+            switchTab('timesheet');
+            document.getElementById('ts-start').value = startHHMM;
+            document.getElementById('ts-end').value = endHHMM;
+            document.getElementById('ts-project').value = "计时器跟踪任务";
+            document.getElementById('ts-notes').value = `该记录通过左侧 Chronos 计时器一键转换生成，累计工作秒数: ${timerSeconds}s。`;
+            document.getElementById('ts-project').focus();
+        }
+
+        // ------------------- 工时保存与即时无刷新表格渲染 -------------------
+        function handleTimesheetSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('entry-id').value;
+            const date = document.getElementById('ts-date').value;
+            const type = document.getElementById('ts-type').value;
+            const start = document.getElementById('ts-start').value;
+            const end = document.getElementById('ts-end').value;
+            const project = document.getElementById('ts-project').value || "未命名项目";
+            const customer = document.getElementById('ts-customer').value || "内部客户";
+            const sapModule = document.getElementById('ts-sap-module').value || "None";
+            const priority = document.getElementById('ts-priority').value;
+            const notes = document.getElementById('ts-notes').value || "-";
+            const duration = calculateDuration();
+
+            if (id) {
+                const idx = timesheetEntries.findIndex(item => item.id == id);
+                if (idx !== -1) {
+                    timesheetEntries[idx] = { id, date, type, start, end, project, customer, sapModule, priority, notes, duration };
+                }
+            } else {
+                timesheetEntries.push({ id: Date.now().toString(), date, type, start, end, project, customer, sapModule, priority, notes, duration });
+            }
+
+            // 1. 本地存储更新
+            saveToLocalStorage();
+            
+            // 2. 清空重置表单
+            resetForm();
+            
+            // 3. 【核心修正】无需刷新，直接触发右侧表格数据实时渲染
+            renderTable();
+            
+            // 4. 更新 KPI 数据与统计模块
+            updateKPIs();
+        }
+
+        function calculateDuration() {
+            const start = document.getElementById('ts-start').value;
+            const end = document.getElementById('ts-end').value;
+            if (!start || !end) return 0;
+
+            const [startH, startM] = start.split(':').map(Number);
+            const [endH, endM] = end.split(':').map(Number);
+            
+            let totalHours = (endH + endM/60) - (startH + startM/60);
+            
+            if (startH <= 12 && endH >= 13) {
+                totalHours -= 1; // 自动扣除1h午休
+            }
+            return Math.max(0, parseFloat(totalHours.toFixed(1)));
+        }
+
+        // ------------------- 自定义工时类型管理 -------------------
+        function initTypeDropdown() {
+            const storedTypes = localStorage.getItem('chronos_custom_types');
+            if (storedTypes) {
+                customTypes = JSON.parse(storedTypes);
+            }
+            renderTypeOptions();
+        }
+
+        function renderTypeOptions() {
+            const selectEl = document.getElementById('ts-type');
+            if (!selectEl) return;
+            const currentVal = selectEl.value;
+            selectEl.innerHTML = '';
+            
+            customTypes.forEach(type => {
+                const opt = document.createElement('option');
+                opt.value = type;
+                opt.innerText = type;
+                selectEl.appendChild(opt);
+            });
+            
+            const customOpt = document.createElement('option');
+            customOpt.value = '__CUSTOM__';
+            customOpt.innerText = '+ 自定义添加...';
+            customOpt.className = 'text-primary font-bold';
+            selectEl.appendChild(customOpt);
+            
+            if (customTypes.includes(currentVal)) {
+                selectEl.value = currentVal;
+            }
+        }
+
+        function checkCustomType(selectObj) {
+            if (selectObj.value === '__CUSTOM__') {
+                const newType = prompt("请输入新的工时类型名称：");
+                if (newType && newType.trim()) {
+                    const trimmed = newType.trim();
+                    if (!customTypes.includes(trimmed)) {
+                        customTypes.push(trimmed);
+                        localStorage.setItem('chronos_custom_types', JSON.stringify(customTypes));
+                    }
+                    renderTypeOptions();
+                    selectObj.value = trimmed;
+                } else {
+                    selectObj.value = customTypes[0];
+                }
+            }
+        }
+
+        // ------------------- UI 页面切换 -------------------
+        function switchTab(targetTab) {
+            document.querySelectorAll('.page-panel').forEach(panel => {
+                panel.classList.add('hidden-panel');
+            });
+
+            const targetPanel = document.getElementById(`panel-${targetTab}`);
+            if (targetPanel) targetPanel.classList.remove('hidden-panel');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.getAttribute('data-tab') === targetTab) {
+                    btn.classList.add('text-primary', 'bg-primary/10');
+                    btn.classList.remove('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-100');
+                } else {
+                    btn.classList.remove('text-primary', 'bg-primary/10');
+                    btn.classList.add('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-100');
+                }
+            });
+
+            if (targetTab === 'dashboard') {
+                updateKPIs();
+                initOrUpdateCharts();
+                renderTodos();
+            } else if (targetTab === 'timesheet') {
+                renderTable();
+            } else if (targetTab === 'calendar') {
+                renderCalendar();
+            } else if (targetTab === 'analytics') {
+                renderAnalyticsCharts();
+            }
+        }
+
+        // ------------------- KPI 更新 -------------------
+        function updateKPIs() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            
+            const todayHours = timesheetEntries
+                .filter(e => e.date === todayStr)
+                .reduce((acc, curr) => acc + parseFloat(curr.duration), 0);
+            
+            const currentWeekEntries = timesheetEntries.filter(e => {
+                const entryDate = new Date(e.date);
+                const diff = (new Date() - entryDate) / (1000 * 60 * 60 * 24);
+                return diff >= 0 && diff < 7;
+            });
+            const weekHours = currentWeekEntries.reduce((acc, curr) => acc + parseFloat(curr.duration), 0);
+
+            const currentMonthStr = todayStr.substring(0, 7);
+            const monthHours = timesheetEntries
+                .filter(e => e.date.startsWith(currentMonthStr))
+                .reduce((acc, curr) => acc + parseFloat(curr.duration), 0);
+
+            const targetRate = Math.round((monthHours / systemSettings.targetHours) * 100);
+
+            document.getElementById('kpi-today').innerText = `${todayHours.toFixed(1)}h`;
+            document.getElementById('kpi-week').innerText = `${weekHours.toFixed(1)}h`;
+            document.getElementById('kpi-month').innerText = `${monthHours.toFixed(1)}h`;
+            document.getElementById('kpi-avg').innerText = `${(weekHours / 5).toFixed(1)}h`;
+            document.getElementById('kpi-target-rate').innerText = `${targetRate}%`;
+
+            document.getElementById('kpi-today-status').innerText = `目标: ${systemSettings.standardHours}.0h`;
+            document.getElementById('kpi-week-status').innerText = `目标: 40.0h`;
+            document.querySelector('#kpi-month + div').innerHTML = `<span id="kpi-target-rate" class="text-success font-semibold">${targetRate}%</span> <span class="text-slate-400 font-normal">总目标 180h</span>`;
+
+            const alertEl = document.getElementById('quick-alert');
+            if (todayHours < systemSettings.standardHours) {
+                alertEl.style.display = 'flex';
+                document.getElementById('alert-text').innerText = `今日工时还差 ${(systemSettings.standardHours - todayHours).toFixed(1)}h 达成 8h 标准`;
+            } else {
+                alertEl.style.display = 'none';
+            }
+        }
+
+        // ------------------- 待办列表 -------------------
+        function renderTodos() {
+            const container = document.getElementById('todo-list-container');
+            container.innerHTML = '';
+            todoItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = `flex items-center justify-between p-3.5 rounded-xl border transition-all ${item.done ? 'bg-slate-100/30 dark:bg-slate-900/10 border-slate-200/40 opacity-60' : 'bg-white dark:bg-slate-800/40 border-slate-200/50 dark:border-slate-800/50'}`;
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleTodo(${item.id})" class="w-4.5 h-4.5 rounded text-primary focus:ring-primary/20">
+                        <span class="text-xs ${item.done ? 'line-through text-slate-400' : 'font-medium'}">${item.text}</span>
+                    </div>
+                    <button onclick="deleteTodo(${item.id})" class="text-slate-400 hover:text-danger"><i class="fa-solid fa-xmark"></i></button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleTodo(id) {
+            const todo = todoItems.find(t => t.id === id);
+            if (todo) { todo.done = !todo.done; saveToLocalStorage(); renderTodos(); }
+        }
+
+        function deleteTodo(id) {
+            todoItems = todoItems.filter(t => t.id !== id);
+            saveToLocalStorage();
+            renderTodos();
+        }
+
+        function addTodoPrompt() {
+            const val = prompt("新增待办事项：");
+            if (val && val.trim()) {
+                todoItems.push({ id: Date.now(), text: val.trim(), done: false });
+                saveToLocalStorage();
+                renderTodos();
+            }
+        }
+
+        // ------------------- 数据表格操作 -------------------
+        function editEntry(id) {
+            const entry = timesheetEntries.find(item => item.id == id);
+            if (!entry) return;
+
+            document.getElementById('entry-id').value = entry.id;
+            document.getElementById('ts-date').value = entry.date;
+            document.getElementById('ts-type').value = entry.type;
+            document.getElementById('ts-start').value = entry.start;
+            document.getElementById('ts-end').value = entry.end;
+            document.getElementById('ts-project').value = entry.project;
+            document.getElementById('ts-customer').value = entry.customer;
+            document.getElementById('ts-sap-module').value = entry.sapModule || "";
+            document.getElementById('ts-priority').value = entry.priority;
+            document.getElementById('ts-notes').value = entry.notes;
+
+            document.getElementById('form-edit-indicator').classList.remove('hidden');
+            document.getElementById('btn-cancel-edit').classList.remove('hidden');
+        }
+
+        function resetForm() {
+            document.getElementById('timesheet-form').reset();
+            document.getElementById('entry-id').value = "";
+            document.getElementById('ts-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('form-edit-indicator').classList.add('hidden');
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+        }
+
+        function deleteEntry(id) {
+            if (confirm("确定删除此条工时记录吗？")) {
+                timesheetEntries = timesheetEntries.filter(item => item.id != id);
+                saveToLocalStorage();
+                renderTable();
+                updateKPIs();
+            }
+        }
+
+        function renderTable() {
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const typeFilter = document.getElementById('filter-type').value;
+            const tbody = document.getElementById('timesheet-table-body');
+            tbody.innerHTML = '';
+
+            let filtered = timesheetEntries.filter(entry => {
+                const matchSearch = entry.project.toLowerCase().includes(search) || 
+                                    entry.notes.toLowerCase().includes(search) ||
+                                    (entry.sapModule && entry.sapModule.toLowerCase().includes(search));
+                const matchType = typeFilter === 'All' || entry.type === typeFilter;
+                return matchSearch && matchType;
+            });
+
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const total = filtered.length;
+            const startIdx = (currentPage - 1) * entriesPerPage;
+            const paginated = filtered.slice(startIdx, startIdx + entriesPerPage);
+
+            document.getElementById('pagination-info').innerText = `显示第 ${startIdx + 1} - ${Math.min(startIdx + entriesPerPage, total)} 条，共 ${total} 条记录`;
+
+            paginated.forEach(entry => {
+                const tr = document.createElement('tr');
+                tr.className = `hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all priority-${entry.priority || 'medium'}`;
+                tr.innerHTML = `
+                    <td class="py-4 px-2"><input type="checkbox" class="entry-select" data-id="${entry.id}"></td>
+                    <td class="py-4 px-2 font-medium">${entry.date}</td>
+                    <td class="py-4 px-2">
+                        <div class="font-bold text-slate-700 dark:text-slate-200">${entry.project}</div>
+                        <div class="text-[10px] text-slate-400 max-w-[200px] truncate">${entry.notes}</div>
+                    </td>
+                    <td class="py-4 px-2">
+                        <span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 font-mono text-xs">${entry.sapModule || 'None'}</span>
+                    </td>
+                    <td class="py-4 px-2 font-mono font-bold text-primary">${entry.duration}h</td>
+                    <td class="py-4 px-2 text-right space-x-1.5">
+                        <button onclick="editEntry('${entry.id}')" class="p-1 hover:text-primary transition-all"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteEntry('${entry.id}')" class="p-1 hover:text-danger transition-all"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function toggleSelectAll(master) {
+            document.querySelectorAll('.entry-select').forEach(checkbox => checkbox.checked = master.checked);
+        }
+
+        function batchDelete() {
+            const selectedIds = Array.from(document.querySelectorAll('.entry-select:checked')).map(cb => cb.getAttribute('data-id'));
+            if (selectedIds.length === 0) return alert("请先勾选需要删除的行");
+
+            if (confirm(`确认批量删除选中的 ${selectedIds.length} 项记录？`)) {
+                timesheetEntries = timesheetEntries.filter(e => !selectedIds.includes(e.id));
+                saveToLocalStorage();
+                renderTable();
+                updateKPIs();
+            }
+        }
+
+        function changePage(direction) {
+            currentPage = Math.max(1, currentPage + direction);
+            renderTable();
+        }
+
+        // ------------------- 日历渲染 -------------------
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            document.getElementById('calendar-month-year').innerText = `${monthNames[currentMonth]} ${currentYear}`;
+
+            const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+            const lastDay = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            for (let i = 0; i < firstDayIndex; i++) {
+                const empty = document.createElement('div');
+                empty.className = "p-4 bg-slate-50/10 rounded-xl";
+                grid.appendChild(empty);
+            }
+
+            for (let day = 1; day <= lastDay; day++) {
+                const dayStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const daysEntries = timesheetEntries.filter(e => e.date === dayStr);
+                const totalHours = daysEntries.reduce((sum, e) => sum + parseFloat(e.duration), 0);
+
+                const card = document.createElement('div');
+                card.className = `p-3 min-h-[70px] rounded-apple border border-slate-200/40 dark:border-slate-800/40 cursor-pointer transition-all hover:ring-2 hover:ring-primary/20 flex flex-col justify-between ${totalHours > 0 ? 'bg-primary/5' : 'bg-white/40 dark:bg-slate-900/10'}`;
+                card.onclick = () => showDayDetails(dayStr, daysEntries);
+
+                let dotsHTML = '';
+                const types = [...new Set(daysEntries.map(e => e.type))];
+                types.forEach(t => {
+                    let colorClass = 'bg-slate-400';
+                    if (t === '开发') colorClass = 'bg-primary';
+                    if (t === '会议') colorClass = 'bg-success';
+                    if (t === '学习') colorClass = 'bg-purple-500';
+                    if (t === 'Support') colorClass = 'bg-warning';
+                    dotsHTML += `<span class="w-1.5 h-1.5 rounded-full ${colorClass}"></span>`;
+                });
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-bold">${day}</span>
+                        <div class="flex gap-0.5">${dotsHTML}</div>
+                    </div>
+                    ${totalHours > 0 ? `<span class="text-[10px] font-mono font-bold text-primary block text-right mt-2">${totalHours.toFixed(1)}h</span>` : ''}
+                `;
+                grid.appendChild(card);
+            }
+        }
+
+        function adjustCalendarMonth(direction) {
+            currentMonth += direction;
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            else if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            renderCalendar();
+        }
+
+        function showDayDetails(dateStr, entries) {
+            const drawer = document.getElementById('selected-day-details');
+            const list = document.getElementById('selected-day-list');
+            document.getElementById('selected-day-title').innerText = `${dateStr} 的工时明细`;
+
+            list.innerHTML = '';
+            if (entries.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-400">当天未记录工时</p>`;
+            } else {
+                entries.forEach(e => {
+                    const item = document.createElement('div');
+                    item.className = "p-3 rounded-xl bg-white dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-800/50 flex justify-between items-center";
+                    item.innerHTML = `
+                        <div>
+                            <div class="text-xs font-bold">${e.project} <span class="text-[10px] text-slate-400">(${e.type})</span></div>
+                            <div class="text-[10px] text-slate-400 mt-1">${e.notes}</div>
+                        </div>
+                        <div class="text-xs font-mono font-bold text-primary">${e.duration}h</div>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+            drawer.classList.remove('hidden');
+        }
+
+        // ------------------- 报表统计 -------------------
+        function initOrUpdateCharts() {
+            const last7Days = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                last7Days.push(d.toISOString().split('T')[0]);
+            }
+
+            const dailyWorkload = last7Days.map(date => {
+                return timesheetEntries
+                    .filter(e => e.date === date)
+                    .reduce((sum, e) => sum + parseFloat(e.duration), 0);
+            });
+
+            const ctxTrend = document.getElementById('chartTrend').getContext('2d');
+            if (trendChartRef) trendChartRef.destroy();
+            trendChartRef = new Chart(ctxTrend, {
+                type: 'line',
+                data: {
+                    labels: last7Days.map(d => d.substring(5)),
+                    datasets: [{
+                        label: '投入工时 (h)',
+                        data: dailyWorkload,
+                        borderColor: '#4F46E5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.05)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            const projectHours = {};
+            timesheetEntries.forEach(e => {
+                projectHours[e.project] = (projectHours[e.project] || 0) + parseFloat(e.duration);
+            });
+
+            const ctxProj = document.getElementById('chartProject').getContext('2d');
+            if (projectChartRef) projectChartRef.destroy();
+            projectChartRef = new Chart(ctxProj, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(projectHours),
+                    datasets: [{
+                        data: Object.values(projectHours),
+                        backgroundColor: ['#4F46E5', '#06B6D4', '#22C55E', '#F59E0B', '#EF4444', '#EC4899']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+                }
+            });
+        }
+
+        function renderAnalyticsCharts() {
+            const projFilter = document.getElementById('analytics-filter-project').value;
+            const custFilter = document.getElementById('analytics-filter-customer').value;
+
+            const projects = [...new Set(timesheetEntries.map(e => e.project))];
+            const customers = [...new Set(timesheetEntries.map(e => e.customer))];
+            
+            const projSelect = document.getElementById('analytics-filter-project');
+            const custSelect = document.getElementById('analytics-filter-customer');
+
+            if (projSelect.options.length <= 1) {
+                projects.forEach(p => projSelect.add(new Option(p, p)));
+                customers.forEach(c => custSelect.add(new Option(c, c)));
+            }
+
+            let filtered = timesheetEntries.filter(e => {
+                return (projFilter === 'All' || e.project === projFilter) &&
+                       (custFilter === 'All' || e.customer === custFilter);
+            });
+
+            const dailyData = {};
+            filtered.forEach(e => {
+                dailyData[e.date] = (dailyData[e.date] || 0) + parseFloat(e.duration);
+            });
+
+            const sortedDates = Object.keys(dailyData).sort().slice(-10);
+            const baseHrs = sortedDates.map(d => Math.min(8, dailyData[d]));
+            const overHrs = sortedDates.map(d => Math.max(0, dailyData[d] - 8));
+
+            const ctxDaily = document.getElementById('analyticsDailyChart').getContext('2d');
+            if (dailyChartRef) dailyChartRef.destroy();
+            dailyChartRef = new Chart(ctxDaily, {
+                type: 'bar',
+                data: {
+                    labels: sortedDates,
+                    datasets: [
+                        { label: '法定标准工时', data: baseHrs, backgroundColor: '#4F46E5' },
+                        { label: '加班工时', data: overHrs, backgroundColor: '#06B6D4' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { x: { stacked: true }, y: { stacked: true } }
+                }
+            });
+
+            const sapDistribution = {};
+            filtered.forEach(e => {
+                if (e.sapModule && e.sapModule !== 'None') {
+                    sapDistribution[e.sapModule] = (sapDistribution[e.sapModule] || 0) + parseFloat(e.duration);
+                }
+            });
+
+            const ctxMod = document.getElementById('analyticsModuleChart').getContext('2d');
+            if (moduleChartRef) moduleChartRef.destroy();
+            moduleChartRef = new Chart(ctxMod, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(sapDistribution),
+                    datasets: [{
+                        data: Object.values(sapDistribution),
+                        backgroundColor: ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        // ------------------- 快捷录入模板 -------------------
+        function loadDefaultTemplate() {
+            document.getElementById('ts-start').value = "09:00";
+            document.getElementById('ts-end').value = "18:00";
+            document.getElementById('ts-project').value = "全球滚动项目";
+            document.getElementById('ts-customer').value = "大肠哥";
+            document.getElementById('ts-sap-module').value = "PS";
+            document.getElementById('ts-notes').value = "标准日常系统配置、单元测试及日常故障排查工作。";
+            alert("标准工时模板加载成功！");
+        }
+
+        function duplicateYesterday() {
+            const yesterdayStr = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+            const yesterdayEntries = timesheetEntries.filter(e => e.date === yesterdayStr);
+
+            if (yesterdayEntries.length === 0) {
+                alert("昨天没有任何填报记录。");
+                return;
+            }
+
+            yesterdayEntries.forEach(entry => {
+                const cloned = { ...entry, id: Date.now().toString() + Math.random(), date: new Date().toISOString().split('T')[0] };
+                timesheetEntries.push(cloned);
+            });
+
+            saveToLocalStorage();
+            alert("已将昨天的所有工时一键复制到今天！");
+            updateKPIs();
+        }
+
+        function generateDailySummary() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayEntries = timesheetEntries.filter(e => e.date === todayStr);
+
+            if (todayEntries.length === 0) {
+                document.getElementById('ai-summary-output').value = "今天尚未录入任何工时，无法生成日报。";
+                return;
+            }
+
+            let summary = `【工作日报摘要】 日期: ${todayStr}\n`;
+            let total = 0;
+            todayEntries.forEach((e, idx) => {
+                summary += `${idx + 1}. [项目: ${e.project}] (对接人员: ${e.sapModule || '无'}) - 时长: ${e.duration}h\n   - 工作明细: ${e.notes}\n`;
+                total += parseFloat(e.duration);
+            });
+            summary += `\n今日累计总工时：${total.toFixed(1)}h。`;
+
+            document.getElementById('ai-summary-output').value = summary;
+        }
+
+        // ------------------- 导入导出与配置 -------------------
+        function saveSettings(e) {
+            e.preventDefault();
+            systemSettings.standardHours = parseFloat(document.getElementById('cfg-standard-hours').value);
+            systemSettings.targetHours = parseFloat(document.getElementById('cfg-target-hours').value);
+            systemSettings.defaultStart = document.getElementById('cfg-start').value;
+            systemSettings.defaultEnd = document.getElementById('cfg-end').value;
+            localStorage.setItem('chronos_settings', JSON.stringify(systemSettings));
+            alert("系统配置更新成功！");
+            updateKPIs();
+        }
+
+        function exportCSV() {
+            if (timesheetEntries.length === 0) {
+                alert("当前没有工时记录可供导出！");
+                return;
+            }
+
+            const headers = ["日期(Date)", "工时类型(Type)", "开始时间(Start)", "结束时间(End)", "项目(Project)", "客户(Customer)", "SAP模块(Module)", "工时(Duration)", "描述/备注(Notes)"];
+            const rows = timesheetEntries.map(e => [
+                e.date,
+                e.type,
+                e.start,
+                e.end,
+                `"${e.project.replace(/"/g, '""')}"`,
+                `"${e.customer.replace(/"/g, '""')}"`,
+                e.sapModule || 'None',
+                e.duration,
+                `"${(e.notes || '').replace(/"/g, '""')}"`
+            ]);
+
+            const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Chronos_Timesheet_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportJSONBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(timesheetEntries));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `Chronos_Timesheet_Backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function clearAllData() {
+            if (confirm("🚨 警告：这将彻底清空您在本机浏览器的工时数据库！确定继续吗？")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        function toggleTheme() {
+            const html = document.querySelector('html');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('chronos_theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('chronos_theme', 'dark');
+            }
+        }
+
+        // ------------------- 计时器引擎 -------------------
+        document.getElementById('btn-timer-toggle').addEventListener('click', () => {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                document.getElementById('timer-btn-text').innerText = "开始计时";
+                document.getElementById('btn-timer-toggle').querySelector('i').className = "fa-solid fa-play";
+                document.getElementById('timer-dot').style.display = 'none';
+            } else {
+                document.getElementById('timer-btn-text').innerText = "暂停";
+                document.getElementById('btn-timer-toggle').querySelector('i').className = "fa-solid fa-pause";
+                document.getElementById('timer-dot').style.display = 'inline-block';
+                timerInterval = setInterval(() => {
+                    timerSeconds++;
+                    const hrs = String(Math.floor(timerSeconds / 3600)).padStart(2, '0');
+                    const mins = String(Math.floor((timerSeconds % 3600) / 60)).padStart(2, '0');
+                    const secs = String(timerSeconds % 60).padStart(2, '0');
+                    document.getElementById('timer-display').innerText = `${hrs}:${mins}:${secs}`;
+                }, 1000);
+            }
+        });
+
+        document.getElementById('btn-timer-reset').addEventListener('click', () => {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerSeconds = 0;
+            document.getElementById('timer-display').innerText = "00:00:00";
+            document.getElementById('timer-btn-text').innerText = "开始计时";
+            document.getElementById('btn-timer-toggle').querySelector('i').className = "fa-solid fa-play";
+            document.getElementById('timer-dot').style.display = 'none';
+        });
+
+        function initShortcutKeys() {
+            window.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    document.querySelector('#timesheet-form button[type="submit"]').click();
+                }
+            });
+        }
+
+        function generateMockData() {
+            return [
+                { id: "1", date: "2026-07-13", type: "开发", start: "09:00", end: "18:00", project: "S/4HANA ERP 全球滚动项目", customer: "JASM 熊本", sapModule: "CO", priority: "high", notes: "完成成本要素主数据的迁移配置与数据校验。", duration: 8 },
+                { id: "2", date: "2026-07-14", type: "会议", start: "10:00", end: "12:00", project: "S/4HANA 架构对齐研讨会", customer: "JASM 熊本", sapModule: "PS", priority: "medium", notes: "与 Yanagawa 和 Kondo 确认 Project Systems 设计框架。", duration: 2 }
+            ];
+        }
+    </script>
+</body>
+</html>
