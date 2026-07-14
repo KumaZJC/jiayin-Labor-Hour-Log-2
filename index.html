@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chronos - SAP & IT Consultant Timesheet</title>
+    <title>佳音专属工时记录</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -563,9 +563,9 @@
         let timerInterval = null;
 
         let todoItems = [
-            { id: 1, text: "JASM SAP PS WBS 架构对接确认", done: false },
-            { id: 2, text: "FI 模块账期结算异常问题排查 (Company Code 1000)", done: true },
-            { id: 3, text: "准备今日跟 Yanagawa 和 Kondo 的工作交接会", done: false }
+            { id: 1, text: "架构对接确认", done: false },
+            { id: 2, text: "模块账期结算异常问题排查 (Company Code 1000)", done: true },
+            { id: 3, text: "准备今日跟晓文 和 大肠哥 的工作交接会", done: false }
         ];
 
         // 默认内置两个会议用于演示提醒
@@ -1470,8 +1470,8 @@
 
         function generateMockData() {
             return [
-                { id: "1", date: "2026-07-13", type: "开发", start: "09:00", end: "18:00", project: "S/4HANA ERP 全球滚动项目", customer: "JASM 熊本", sapModule: "CO", priority: "high", notes: "完成成本要素主数据的迁移配置与数据校验。", duration: 8 },
-                { id: "2", date: "2026-07-14", type: "会议", start: "10:00", end: "12:00", project: "S/4HANA 架构对齐研讨会", customer: "JASM 熊本", sapModule: "PS", priority: "medium", notes: "与 Yanagawa 和 Kondo 确认 Project Systems 设计框架。", duration: 2 }
+                { id: "1", date: "2026-07-13", type: "开发", start: "09:00", end: "18:00", project: "某某项目", customer: "京东张三", sapModule: "CO", priority: "high", notes: "完成成本要素主数据的迁移配置与数据校验。", duration: 8 },
+                { id: "2", date: "2026-07-14", type: "会议", start: "10:00", end: "12:00", project: "架构对齐研讨会", customer: "陆泽 大肠", sapModule: "PS", priority: "medium", notes: "与 晓文 和 大肠哥 确认 Project Systems 设计框架。", duration: 2 }
             ];
         }
     </script>
