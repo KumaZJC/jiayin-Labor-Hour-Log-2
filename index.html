@@ -79,7 +79,6 @@
         .priority-medium { border-left: 4px solid #F59E0B; }
         .priority-low { border-left: 4px solid #22C55E; }
 
-        /* 新增无干扰提示和动画 */
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.95) translateY(-10px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
@@ -1028,19 +1027,19 @@
             document.getElementById('kpi-avg').innerText = `${(weekHours / 5).toFixed(1)}h`;
             document.getElementById('kpi-target-rate').innerText = `${targetRate}%`;
 
-            document.getElementById('kpi-today-status').innerText = `目标: ${systemSettings.standardHours}.0h`;
-            document.getElementById('kpi-week-status').innerText = `目标: 40.0h`;
+            document.getElementById('kpi-today-status').innerText = `Target: ${systemSettings.standardHours}.0h`;
+            document.getElementById('kpi-week-status').innerText = `Target: 40.0h`;
             
             const monthKpiBox = document.querySelector('#kpi-month + div');
             if (monthKpiBox) {
-                monthKpiBox.innerHTML = `<span id="kpi-target-rate" class="text-success font-semibold">${targetRate}%</span> <span class="text-slate-400 font-normal">总目标 180h</span>`;
+                monthKpiBox.innerHTML = `<span id="kpi-target-rate" class="text-success font-semibold">${targetRate}%</span> <span class="text-slate-400 font-normal">of 180h target</span>`;
             }
 
             const alertEl = document.getElementById('quick-alert');
             if (todayHours > 0) {
                 alertEl.style.display = 'flex';
                 if (todayHours < systemSettings.standardHours) {
-                    document.getElementById('alert-text').innerText = `您今天已经工作 ${todayHours.toFixed(1)}h 啦，宝贝辛苦啦 ☕`;
+                    document.getElementById('alert-text').innerText = `今天已经工作 ${todayHours.toFixed(1)}h 啦，宝贝辛苦啦 ☕`;
                 } else {
                     document.getElementById('alert-text').innerText = `今天已累计 ${todayHours.toFixed(1)}h！超额达成目标，快去休息吧 🎉`;
                 }
@@ -1146,7 +1145,7 @@
 
             const paginationInfo = document.getElementById('pagination-info');
             if (paginationInfo) {
-                paginationInfo.innerText = `显示第 ${startIdx + 1} - ${Math.min(startIdx + entriesPerPage, total)} 条，共 ${total} 条记录`;
+                paginationInfo.innerText = `Showing ${startIdx + 1} to ${Math.min(startIdx + entriesPerPage, total)} of ${total} entries`;
             }
 
             paginated.forEach(entry => {
@@ -1567,11 +1566,12 @@
         if (saved) activeTimers = JSON.parse(saved);
     } catch (e) { console.error(e); }
 
-    // 初始化默认任务
+    // 初始化默认任务，赋予默认 memo
     if (activeTimers.length === 0) {
         activeTimers.push({
             id: 'timer-default',
             name: '默认追踪任务',
+            memo: '',
             seconds: 0,
             isRunning: false,
             startTime: '',
@@ -1630,11 +1630,11 @@
             const btnEl = document.getElementById(`btn-toggle-${t.id}`);
             if (btnEl) {
                 if (t.isRunning) {
-                    btnEl.innerHTML = `<i class="fa-solid fa-pause"></i> <span>暂停</span>`;
-                    btnEl.className = "flex-1 py-2 text-xs font-semibold rounded-xl text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
+                    btnEl.innerHTML = `<i class="fa-solid fa-pause text-[10px]"></i> <span>暂停</span>`;
+                    btnEl.className = "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
                 } else {
-                    btnEl.innerHTML = `<i class="fa-solid fa-play"></i> <span>开始</span>`;
-                    btnEl.className = "flex-1 py-2 text-xs font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-sm shadow-indigo-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
+                    btnEl.innerHTML = `<i class="fa-solid fa-play text-[10px]"></i> <span>开始</span>`;
+                    btnEl.className = "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-sm shadow-indigo-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
                 }
             }
         });
@@ -1660,9 +1660,14 @@
             html += `
                 <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex flex-col justify-between gap-3 hover:shadow-md transition-all duration-300">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate max-w-[180px]" title="${t.name}">
-                            ${t.name}
-                        </span>
+                        <div class="flex items-center gap-1.5 max-w-[180px] overflow-hidden">
+                            <span class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate" title="${t.name}">
+                                ${t.name}
+                            </span>
+                            <button onclick="window.customTimerActions.editTitle('${t.id}')" title="修改标题" class="p-1 text-slate-400 hover:text-primary transition-all scale-90">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                        </div>
                         ${timers.length > 1 ? `
                             <button onclick="window.customTimerActions.remove('${t.id}')" class="text-slate-400 hover:text-danger text-[11px] p-1.5 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
                                 <i class="fa-solid fa-trash-can"></i>
@@ -1692,21 +1697,27 @@
                         </div>
                     </div>
 
-                    <!-- 美化升级后的动作控制栏 (全尺寸更易点击) -->
+                    <!-- 📝 任务备注 / Memo 功能区域 -->
+                    <div class="text-xs">
+                        <span class="text-slate-400 text-[9px] uppercase font-bold block mb-1">📝 Memo</span>
+                        <textarea oninput="window.customTimerActions.updateMemo('${t.id}', this.value)" placeholder="你可以在这里写点什么记录..." class="w-full text-xs p-2 rounded-lg bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/30 dark:border-slate-700/30 font-sans focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none h-14 transition-all" rows="2">${t.memo || ''}</textarea>
+                    </div>
+
+                    <!-- 美化后的动作控制栏 (全尺寸更易点击) -->
                     <div class="flex items-center gap-2 mt-1">
                         <!-- 开始/暂停 动态渐变按钮 -->
-                        <button id="btn-toggle-${t.id}" onclick="window.customTimerActions.toggle('${t.id}')" class="flex-1 py-2 text-xs font-bold rounded-xl text-white transition-all duration-300 flex items-center justify-center gap-1 shadow-sm ${t.isRunning ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-amber-500/10 active:scale-95' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-indigo-500/10 active:scale-95'}">
+                        <button id="btn-toggle-${t.id}" onclick="window.customTimerActions.toggle('${t.id}')" class="flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white transition-all duration-300 flex items-center justify-center gap-1 shadow-sm ${t.isRunning ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-amber-500/10 active:scale-95' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-indigo-500/10 active:scale-95'}">
                             <i class="fa-solid ${t.isRunning ? 'fa-pause' : 'fa-play'}"></i>
                             <span>${t.isRunning ? '暂停' : '开始'}</span>
                         </button>
                         
                         <!-- 极简高雅重置按钮 -->
-                        <button onclick="window.customTimerActions.reset('${t.id}')" title="重置记录" class="w-9 h-9 flex-shrink-0 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl transition-all duration-300 active:scale-90 flex items-center justify-center border border-slate-200/30 dark:border-slate-700/30 shadow-sm">
+                        <button onclick="window.customTimerActions.reset('${t.id}')" title="重置记录" class="w-8 h-8 flex-shrink-0 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl transition-all duration-300 active:scale-90 flex items-center justify-center border border-slate-200/30 dark:border-slate-700/30 shadow-sm">
                             <i class="fa-solid fa-rotate-left text-xs"></i>
                         </button>
                         
                         <!-- 结算入账 成功导向高亮渐变按钮 -->
-                        <button onclick="window.customTimerActions.logToFormAndSave('${t.id}')" class="flex-1 py-2 text-xs font-bold rounded-xl text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 hover:shadow-md hover:shadow-emerald-500/15 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1 shadow-sm">
+                        <button onclick="window.customTimerActions.logToFormAndSave('${t.id}')" class="flex-1 py-1.5 text-[10px] font-bold rounded-xl text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 hover:shadow-md hover:shadow-emerald-500/15 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1 shadow-sm">
                             <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
                             <span>结束</span>
                         </button>
@@ -1740,6 +1751,7 @@
                 activeTimers.push({
                     id: 'timer-' + Date.now(),
                     name: taskName.trim(),
+                    memo: '',
                     seconds: 0,
                     isRunning: false,
                     startTime: '',
@@ -1798,6 +1810,27 @@
             refreshListDOM();
         },
 
+        // 修改标题
+        editTitle: function(id) {
+            const t = activeTimers.find(x => x.id === id);
+            if (!t) return;
+            const newName = prompt("请修改任务标题：", t.name);
+            if (newName && newName.trim() !== '') {
+                t.name = newName.trim();
+                localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
+                refreshListDOM();
+            }
+        },
+
+        // 更新备注
+        updateMemo: function(id, val) {
+            const t = activeTimers.find(x => x.id === id);
+            if (t) {
+                t.memo = val;
+                localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
+            }
+        },
+
         logToFormAndSave: function(id) {
             const t = activeTimers.find(x => x.id === id);
             if (!t || t.seconds <= 0) {
@@ -1821,8 +1854,10 @@
             const durationString = formatTimeStr(t.seconds);
             const pauseString = formatTimeStr(t.pausedSeconds);
 
-            // 格式化审计明细日志写入工时备注
-            const auditNotes = `【高精秒级同步入账】\n` + 
+            // 格式化审计明细日志写入工时备注，前置用户键入的自定义备注 Memo
+            const userMemoText = t.memo ? t.memo.trim() : "";
+            const auditNotes = (userMemoText ? `${userMemoText}\n\n` : '') + 
+                               `【高精秒级同步入账】\n` + 
                                `▶ 开始时间: ${t.startTime}\n` +
                                `⏸ 挂起暂停: ${pauseString}\n` +
                                `⏱ 有效持续: ${durationString}\n` +
@@ -1841,7 +1876,7 @@
                 customer: "异步追踪",
                 sapModule: "TIMER",
                 priority: "medium",
-                notes: auditNotes,  // 记录完整审计日志
+                notes: auditNotes,  // 记录带有核心描述和审计的备注
                 duration: preciseHours > 0 ? preciseHours : 0.1 // 规避 0 计费工时的异常
             };
 
@@ -1874,12 +1909,13 @@
             // 使用优雅自定义通知替代原生阻塞弹窗
             showToast(`🎉 结算入账成功！\n有效工作时间: ${durationString}`, "success");
             
-            // 重置与复位该卡片线程的状态机
+            // 重置与复位该卡片线程的状态机并清空当前备注
             t.seconds = 0;
             t.startTime = '';
             t.endTime = '';
             t.pausedSeconds = 0;
             t.lastStateTime = 0;
+            t.memo = '';
             localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
             refreshListDOM();
         }
