@@ -1644,7 +1644,7 @@
         
         if (globalDot) globalDot.style.display = anyRunning ? 'block' : 'none';
         if (statusText) {
-            statusText.innerText = anyRunning ? '高精度计费进行中' : (activeTimers.some(t => t.startTime && !t.endTime) ? '任务暂停挂起中' : '无正在运行的任务');
+            statusText.innerText = anyRunning ? '进行中' : (activeTimers.some(t => t.startTime && !t.endTime) ? '任务暂停挂起中' : '无正在运行的任务');
             if (anyRunning) {
                 statusText.className = "text-xs font-bold text-success animate-pulse";
             } else {
@@ -1857,13 +1857,10 @@
             // 格式化审计明细日志写入工时备注，前置用户键入的自定义备注 Memo
             const userMemoText = t.memo ? t.memo.trim() : "";
             const auditNotes = (userMemoText ? `${userMemoText}\n\n` : '') + 
-                               `【高精秒级同步入账】\n` + 
                                `▶ 开始时间: ${t.startTime}\n` +
                                `⏸ 挂起暂停: ${pauseString}\n` +
                                `⏱ 有效持续: ${durationString}\n` +
-                               `■ 结束时间: ${t.endTime}\n` +
-                               `---------------------\n` +
-                               `独立跟踪任务: ${t.name}`;
+                               `■ 结束时间: ${t.endTime}\n` ;
 
             // 构建完美的工时数据库行
             const newRecord = {
