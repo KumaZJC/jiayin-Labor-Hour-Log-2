@@ -26,7 +26,7 @@
             }
         }
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -78,9 +78,21 @@
         .priority-high { border-left: 4px solid #EF4444; }
         .priority-medium { border-left: 4px solid #F59E0B; }
         .priority-low { border-left: 4px solid #22C55E; }
+
+        /* 新增无干扰提示和动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
     </style>
 </head>
 <body class="bg-bgLight text-slate-800 dark:bg-bgDark dark:text-slate-100 min-h-screen pb-20 md:pb-0">
+
+    <!-- 全局优雅提示容器 -->
+    <div id="global-toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <div class="flex min-h-screen">
         <!-- 侧边栏 (仅在宽屏/电脑端显示) -->
@@ -93,18 +105,6 @@
                     <h1 class="font-bold text-base tracking-tight">JiaYin工数记录</h1>
                     <p class="text-[10px] text-slate-400 dark:text-slate-500">Timesheet PRO</p>
                 </div>
-            </div>
-
-            <!-- PC端高精追踪计时器静态容器 -->
-            <div class="mb-4 p-4 rounded-apple bg-slate-100/50 dark:bg-slate-800/40 border border-slate-200/20">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider"><i class="fa-solid fa-stopwatch mr-1"></i>计时器</span>
-                    <span class="w-2 h-2 rounded-full bg-success animate-pulse" id="timer-dot" style="display: none;"></span>
-                </div>
-                <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1 mb-2" id="custom-timers-dynamic-list"></div>
-                <button id="btn-add-timer-custom" class="w-full py-1 border border-dashed border-primary/40 text-primary hover:bg-primary/5 text-xs font-medium rounded-lg transition-all">
-                    + 自定义添加新任务
-                </button>
             </div>
 
             <!-- PC端智能日程/会议提醒静态容器 -->
@@ -169,21 +169,37 @@
             <!-- 工作台 -->
             <section id="panel-dashboard" class="page-panel space-y-8">
                 
-                <!-- 移动端专属快捷工具面板 (仅在 md 分支以下即手机端显示，电脑端自动隐藏) -->
-                <div class="md:hidden grid grid-cols-1 gap-4 mb-6">
-                    <!-- 移动端高精追踪计时器 -->
-                    <div class="glass p-4 rounded-apple border border-slate-200/20">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider"><i class="fa-solid fa-stopwatch mr-1"></i>计时器</span>
-                            <span class="w-2 h-2 rounded-full bg-success animate-pulse" id="timer-dot-mobile" style="display: none;"></span>
+                <!-- 【新高宽大格局】右侧主页面：高精异步追踪控制台 -->
+                <div class="glass p-6 rounded-apple shadow-sm border border-slate-200/50 dark:border-slate-800/50">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-sm">
+                                <i class="fa-solid fa-stopwatch text-base"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm tracking-tight">多任务控制台</h4>
+                                <p class="text-[11px] text-slate-400 dark:text-slate-500">Task Dashboard</p>
+                            </div>
                         </div>
-                        <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1 mb-2" id="custom-timers-dynamic-list-mobile"></div>
-                        <button id="btn-add-timer-custom-mobile" class="w-full py-1 border border-dashed border-primary/40 text-primary hover:bg-primary/5 text-xs font-medium rounded-lg transition-all">
-                            + 自定义添加新任务
-                        </button>
+                        <div class="flex items-center justify-between sm:justify-end gap-4">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-success animate-pulse" id="timer-dot" style="display: none;"></span>
+                                <span class="text-xs font-semibold text-slate-400 dark:text-slate-500" id="timer-status-text">无正在运行的任务</span>
+                            </div>
+                            <button id="btn-add-timer-main" class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:scale-105 active:scale-95 shadow-md shadow-primary/15 transition-all flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus text-[10px]"></i> 新建任务
+                            </button>
+                        </div>
                     </div>
                     
-                    <!-- 移动端日程提醒 -->
+                    <!-- 任务自适应多列平铺卡片槽（PC端3列，Tablet端2列，手机端1列，视野完全拓宽，免去繁琐下拉滚动） -->
+                    <div id="main-dashboard-timers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[580px] overflow-y-auto pr-1">
+                        <!-- 动态注入任务卡片 -->
+                    </div>
+                </div>
+
+                <!-- 移动端专属快捷日程提醒 (电脑端已在侧边栏显示) -->
+                <div class="md:hidden grid grid-cols-1 gap-4">
                     <div class="glass p-4 rounded-apple bg-amber-50/30 dark:bg-amber-950/10 border border-amber-200/30">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs font-bold text-amber-600 dark:text-amber-400"><i class="fa-solid fa-bell mr-1"></i>日程提醒</span>
@@ -195,6 +211,7 @@
                     </div>
                 </div>
 
+                <!-- KPI度量衡 -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="glass p-5 rounded-apple glow-card">
                         <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Today</p>
@@ -560,6 +577,62 @@
     </div>
 
     <script>
+        // ------------------- 优雅自定义通知与提示模块 (完美规避 browser alert/confirm 阻塞) -------------------
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('global-toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = "pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-xs font-semibold transform translate-y-[-20px] opacity-0 transition-all duration-300 animate-fade-in";
+            
+            if (type === 'success') {
+                toast.className += " bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500/20 text-emerald-600 dark:text-emerald-400";
+                toast.innerHTML = `<i class="fa-solid fa-circle-check text-base"></i><span>${message}</span>`;
+            } else if (type === 'warning') {
+                toast.className += " bg-amber-50 dark:bg-amber-950/30 border-amber-500/20 text-amber-600 dark:text-amber-400";
+                toast.innerHTML = `<i class="fa-solid fa-circle-exclamation text-base"></i><span>${message}</span>`;
+            } else if (type === 'danger') {
+                toast.className += " bg-rose-50 dark:bg-rose-950/30 border-rose-500/20 text-rose-600 dark:text-rose-400";
+                toast.innerHTML = `<i class="fa-solid fa-circle-xmark text-base"></i><span>${message}</span>`;
+            } else {
+                toast.className += " bg-indigo-50 dark:bg-indigo-950/30 border-indigo-500/20 text-indigo-600 dark:text-indigo-400";
+                toast.innerHTML = `<i class="fa-solid fa-circle-info text-base"></i><span>${message}</span>`;
+            }
+            
+            container.appendChild(toast);
+            toast.offsetHeight; // 强制 reflow
+            toast.classList.remove('translate-y-[-20px]', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-20px]', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function showConfirm(message, onConfirm) {
+            const modal = document.createElement('div');
+            modal.className = "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in";
+            modal.innerHTML = `
+                <div class="glass max-w-sm w-full p-6 rounded-apple shadow-2xl border border-slate-200/50 dark:border-slate-800/50 transform scale-95 transition-all duration-300">
+                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100 mb-2">操作确认</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">${message}</p>
+                    <div class="flex gap-3 justify-end">
+                        <button id="btn-confirm-cancel" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all">取消</button>
+                        <button id="btn-confirm-ok" class="px-4 py-2 text-xs font-bold rounded-xl bg-danger hover:bg-danger/90 text-white shadow-lg shadow-danger/20 transition-all">确认</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            const cancelBtn = modal.querySelector('#btn-confirm-cancel');
+            const okBtn = modal.querySelector('#btn-confirm-ok');
+            
+            cancelBtn.addEventListener('click', () => modal.remove());
+            okBtn.addEventListener('click', () => {
+                modal.remove();
+                if (typeof onConfirm === 'function') onConfirm();
+            });
+        }
+
         // ------------------- 全局状态与初始化 -------------------
         let timesheetEntries = [];
         let systemSettings = {
@@ -701,7 +774,7 @@
 
             const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
             if (!timePattern.test(timeStr)) {
-                alert("输入时间格式不正确，请使用 HH:MM 格式！");
+                showToast("输入时间格式不正确，请使用 HH:MM 格式！", "warning");
                 return;
             }
 
@@ -773,7 +846,7 @@
         // ------------------- 传统计时器一键录入工时 -------------------
         function logTimerToTimesheet() {
             if (timerSeconds < 60) {
-                alert("当前计时时间不足 1 分钟，请稍后再试！");
+                showToast("当前计时时间不足 1 分钟，请稍后再试！", "warning");
                 return;
             }
 
@@ -915,6 +988,9 @@
                 updateKPIs();
                 initOrUpdateCharts();
                 renderTodos();
+                if (typeof window.refreshTimerConsole === 'function') {
+                    window.refreshTimerConsole();
+                }
             } else if (targetTab === 'timesheet') {
                 renderTable();
             } else if (targetTab === 'calendar') {
@@ -1040,12 +1116,12 @@
         }
 
         function deleteEntry(id) {
-            if (confirm("确定删除此条工时记录吗？")) {
+            showConfirm("确定删除此条工时记录吗？", () => {
                 timesheetEntries = timesheetEntries.filter(item => item.id != id);
                 saveToLocalStorage();
                 renderTable();
                 updateKPIs();
-            }
+            });
         }
 
         function renderTable() {
@@ -1102,14 +1178,14 @@
 
         function batchDelete() {
             const selectedIds = Array.from(document.querySelectorAll('.entry-select:checked')).map(cb => cb.getAttribute('data-id'));
-            if (selectedIds.length === 0) return alert("请先勾选需要删除的行");
+            if (selectedIds.length === 0) return showToast("请先勾选需要删除的行", "warning");
 
-            if (confirm(`确认批量删除选中的 ${selectedIds.length} 项记录？`)) {
+            showConfirm(`确认批量删除选中的 ${selectedIds.length} 项记录？`, () => {
                 timesheetEntries = timesheetEntries.filter(e => !selectedIds.includes(e.id));
                 saveToLocalStorage();
                 renderTable();
                 updateKPIs();
-            }
+            });
         }
 
         function changePage(direction) {
@@ -1352,7 +1428,7 @@
             document.getElementById('ts-customer').value = "香肠哥";
             document.getElementById('ts-sap-module').value = "PS";
             document.getElementById('ts-notes').value = "标准日常系统配置、单元测试及日常故障排查工作。";
-            alert("标准工时模板加载成功！");
+            showToast("标准工时模板加载成功！", "success");
         }
 
         function duplicateYesterday() {
@@ -1360,7 +1436,7 @@
             const yesterdayEntries = timesheetEntries.filter(e => e.date === yesterdayStr);
 
             if (yesterdayEntries.length === 0) {
-                alert("昨天没有任何填报记录。");
+                showToast("昨天没有任何填报记录。", "warning");
                 return;
             }
 
@@ -1370,7 +1446,7 @@
             });
 
             saveToLocalStorage();
-            alert("已将昨天的所有工时一键复制到今天！");
+            showToast("已将昨天的所有工时一键复制到今天！", "success");
             updateKPIs();
         }
 
@@ -1402,13 +1478,13 @@
             systemSettings.defaultStart = document.getElementById('cfg-start').value;
             systemSettings.defaultEnd = document.getElementById('cfg-end').value;
             localStorage.setItem('chronos_settings', JSON.stringify(systemSettings));
-            alert("系统配置更新成功！");
+            showToast("系统配置更新成功！", "success");
             updateKPIs();
         }
 
         function exportCSV() {
             if (timesheetEntries.length === 0) {
-                alert("当前没有工时记录可供导出！");
+                showToast("当前没有工时记录可供导出！", "warning");
                 return;
             }
 
@@ -1447,10 +1523,10 @@
         }
 
         function clearAllData() {
-            if (confirm("🚨 警告：这将彻底清空您在本机浏览器的工时数据库！确定继续吗？")) {
+            showConfirm("🚨 警告：这将彻底清空您在本机浏览器的工时数据库！确定继续吗？", () => {
                 localStorage.clear();
                 location.reload();
-            }
+            });
         }
 
         function toggleTheme() {
@@ -1483,7 +1559,7 @@
     </script>
 
 <script>
-// ------------------- 独立高精多线程异步计时引擎 -------------------
+// ------------------- 独立高精多线程异步计时引擎 (右侧主板宽屏平铺架构) -------------------
 (function() {
     let activeTimers = [];
     try {
@@ -1500,12 +1576,12 @@
             isRunning: false,
             startTime: '',
             endTime: '',
-            pausedSeconds: 0,       // 累计暂停秒数
-            lastStateTime: 0        // 上次改变状态的时间戳
+            pausedSeconds: 0,       
+            lastStateTime: 0        
         });
     }
 
-    // 定时器主驱动轮询器 (每秒同步高精级刷新 PC 端与移动端状态)
+    // 定时器主驱动轮询器 (每秒精准刷新计算并同步更新 UI)
     setInterval(() => {
         let changed = false;
         
@@ -1537,113 +1613,102 @@
         return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
     }
 
-    // 仅精准局部刷新 DOM 状态，彻底避免 duplicate ID 导致移动端或 PC 端只生效一侧
+    // 仅精细刷新DOM元素中的特定文本，防止组件重绘丢失输入焦点
     function updateTimersDisplayOnly() {
         activeTimers.forEach(t => {
-            // 更新 PC 端
             const el = document.getElementById(`display-${t.id}`);
             if (el) el.innerText = formatTimeStr(t.seconds);
+            
             const pauseEl = document.getElementById(`pause-display-${t.id}`);
             if (pauseEl) pauseEl.innerText = formatTimeStr(t.pausedSeconds || 0);
+
             const endtimeEl = document.getElementById(`endtime-display-${t.id}`);
             if (endtimeEl && !t.endTime) {
                 endtimeEl.innerText = t.isRunning ? '计费进行中...' : (t.startTime ? '暂停挂起中' : '未开始');
             }
-
-            // 更新移动端 (带 -mobile 后缀)
-            const elMob = document.getElementById(`display-${t.id}-mobile`);
-            if (elMob) elMob.innerText = formatTimeStr(t.seconds);
-            const pauseElMob = document.getElementById(`pause-display-${t.id}-mobile`);
-            if (pauseElMob) pauseElMob.innerText = formatTimeStr(t.pausedSeconds || 0);
-            const endtimeElMob = document.getElementById(`endtime-display-${t.id}-mobile`);
-            if (endtimeElMob && !t.endTime) {
-                endtimeElMob.innerText = t.isRunning ? '计费进行中...' : (t.startTime ? '暂停挂起中' : '未开始');
-            }
             
-            // 同步更新 PC 端和移动端按钮状态和样式
             const btnEl = document.getElementById(`btn-toggle-${t.id}`);
-            const btnElMob = document.getElementById(`btn-toggle-${t.id}-mobile`);
-
-            const updateBtn = (btn) => {
-                if (!btn) return;
+            if (btnEl) {
                 if (t.isRunning) {
-                    btn.innerHTML = `<i class="fa-solid fa-pause"></i> <span>暂停</span>`;
-                    btn.className = "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
+                    btnEl.innerHTML = `<i class="fa-solid fa-pause"></i> <span>暂停</span>`;
+                    btnEl.className = "flex-1 py-2 text-xs font-semibold rounded-xl text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
                 } else {
-                    btn.innerHTML = `<i class="fa-solid fa-play"></i> <span>开始</span>`;
-                    btn.className = "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-sm shadow-indigo-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
+                    btnEl.innerHTML = `<i class="fa-solid fa-play"></i> <span>开始</span>`;
+                    btnEl.className = "flex-1 py-2 text-xs font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-sm shadow-indigo-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
                 }
-            };
-
-            updateBtn(btnEl);
-            updateBtn(btnElMob);
+            }
         });
-
-        // 闪烁红点同步
         const anyRunning = activeTimers.some(t => t.isRunning);
         const globalDot = document.getElementById('timer-dot');
-        const globalDotMob = document.getElementById('timer-dot-mobile');
+        const statusText = document.getElementById('timer-status-text');
+        
         if (globalDot) globalDot.style.display = anyRunning ? 'block' : 'none';
-        if (globalDotMob) globalDotMob.style.display = anyRunning ? 'block' : 'none';
+        if (statusText) {
+            statusText.innerText = anyRunning ? '高精度计费进行中' : (activeTimers.some(t => t.startTime && !t.endTime) ? '任务暂停挂起中' : '无正在运行的任务');
+            if (anyRunning) {
+                statusText.className = "text-xs font-bold text-success animate-pulse";
+            } else {
+                statusText.className = "text-xs font-semibold text-slate-400 dark:text-slate-500";
+            }
+        }
     }
 
-    // 生成列表结构的通用函数 (适配 PC 端和移动端)
-    function generateTimerListHTML(timers, isMobile) {
+    // 生成平铺控制台任务列表 HTML
+    function generateTimerListHTML(timers) {
         let html = '';
-        const suffix = isMobile ? '-mobile' : '';
         timers.forEach((t) => {
             html += `
-                <div class="p-3 rounded-xl bg-white/60 dark:bg-slate-900/40 border border-slate-200/40 shadow-sm flex flex-col gap-2">
+                <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex flex-col justify-between gap-3 hover:shadow-md transition-all duration-300">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-slate-700 dark:text-slate-200 truncate max-w-[140px]" title="${t.name}">
+                        <span class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate max-w-[180px]" title="${t.name}">
                             ${t.name}
                         </span>
                         ${timers.length > 1 ? `
-                            <button onclick="window.customTimerActions.remove('${t.id}')" class="text-slate-400 hover:text-danger text-[11px] p-1 transition-colors">
+                            <button onclick="window.customTimerActions.remove('${t.id}')" class="text-slate-400 hover:text-danger text-[11px] p-1.5 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         ` : ''}
                     </div>
                     
                     <!-- 2x2 精细化时间流分析网格 -->
-                    <div class="grid grid-cols-2 gap-1.5 text-[10px] bg-slate-50/50 dark:bg-slate-800/20 p-2 rounded-lg font-mono">
+                    <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50/50 dark:bg-slate-800/10 p-3 rounded-xl font-mono border border-slate-100 dark:border-slate-800/30">
                         <div class="flex flex-col">
-                            <span class="text-slate-400 text-[9px] uppercase">▶ 开始时间</span>
-                            <span class="font-semibold text-slate-600 dark:text-slate-300 truncate">${t.startTime ? t.startTime : '未开始'}</span>
+                            <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">▶ 开始时间</span>
+                            <span class="font-semibold text-slate-600 dark:text-slate-300 truncate mt-0.5">${t.startTime ? t.startTime : '未开始'}</span>
                         </div>
                         <div class="flex flex-col">
-                            <span class="text-slate-400 text-[9px] uppercase">■ 结束时间</span>
-                            <span class="font-semibold text-slate-600 dark:text-slate-300 truncate" id="endtime-display-${t.id}${suffix}">
+                            <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">■ 结束时间</span>
+                            <span class="font-semibold text-slate-600 dark:text-slate-300 truncate mt-0.5" id="endtime-display-${t.id}">
                                 ${t.endTime ? t.endTime : (t.isRunning ? '计费进行中...' : (t.startTime ? '暂停挂起中' : '未开始'))}
                             </span>
                         </div>
-                        <div class="flex flex-col border-t border-slate-100 dark:border-slate-800 pt-1 mt-1">
-                            <span class="text-slate-400 text-[9px] uppercase">⏸ 暂停时长</span>
-                            <span class="font-bold text-amber-500" id="pause-display-${t.id}${suffix}">${formatTimeStr(t.pausedSeconds || 0)}</span>
+                        <div class="flex flex-col border-t border-slate-100 dark:border-slate-800/60 pt-1.5 mt-1.5">
+                            <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">⏸ 暂停时长</span>
+                            <span class="font-bold text-amber-500 mt-0.5" id="pause-display-${t.id}">${formatTimeStr(t.pausedSeconds || 0)}</span>
                         </div>
-                        <div class="flex flex-col border-t border-slate-100 dark:border-slate-800 pt-1 mt-1">
-                            <span class="text-slate-400 text-[9px] uppercase">⏱ 有效工时</span>
-                            <span class="font-bold text-primary dark:text-indigo-400" id="display-${t.id}${suffix}">${formatTimeStr(t.seconds)}</span>
+                        <div class="flex flex-col border-t border-slate-100 dark:border-slate-800/60 pt-1.5 mt-1.5">
+                            <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">⏱ 有效工时</span>
+                            <span class="font-bold text-primary dark:text-indigo-400 mt-0.5" id="display-${t.id}">${formatTimeStr(t.seconds)}</span>
                         </div>
                     </div>
 
-                    <!-- 升级后的动作控制栏 -->
-                    <div class="flex items-center gap-1.5 mt-2">
+                    <!-- 美化升级后的动作控制栏 (全尺寸更易点击) -->
+                    <div class="flex items-center gap-2 mt-1">
                         <!-- 开始/暂停 动态渐变按钮 -->
-                        <button id="btn-toggle-${t.id}${suffix}" onclick="window.customTimerActions.toggle('${t.id}')" class="flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white transition-all duration-300 flex items-center justify-center gap-1 shadow-sm ${t.isRunning ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-amber-500/10 active:scale-95' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-indigo-500/10 active:scale-95'}">
+                        <button id="btn-toggle-${t.id}" onclick="window.customTimerActions.toggle('${t.id}')" class="flex-1 py-2 text-xs font-bold rounded-xl text-white transition-all duration-300 flex items-center justify-center gap-1 shadow-sm ${t.isRunning ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-amber-500/10 active:scale-95' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-indigo-500/10 active:scale-95'}">
                             <i class="fa-solid ${t.isRunning ? 'fa-pause' : 'fa-play'}"></i>
                             <span>${t.isRunning ? '暂停' : '开始'}</span>
                         </button>
                         
                         <!-- 极简高雅重置按钮 -->
-                        <button onclick="window.customTimerActions.reset('${t.id}')" title="重置记录" class="w-8 h-8 flex-shrink-0 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl transition-all duration-300 active:scale-90 flex items-center justify-center border border-slate-200/30 dark:border-slate-700/30 shadow-sm">
+                        <button onclick="window.customTimerActions.reset('${t.id}')" title="重置记录" class="w-9 h-9 flex-shrink-0 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl transition-all duration-300 active:scale-90 flex items-center justify-center border border-slate-200/30 dark:border-slate-700/30 shadow-sm">
                             <i class="fa-solid fa-rotate-left text-xs"></i>
                         </button>
                         
                         <!-- 结算入账 成功导向高亮渐变按钮 -->
-                        <button onclick="window.customTimerActions.logToFormAndSave('${t.id}')" class="flex-1 py-1.5 text-[11px] font-bold rounded-xl text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 hover:shadow-md hover:shadow-emerald-500/15 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1 shadow-sm">
+                        <button onclick="window.customTimerActions.logToFormAndSave('${t.id}')" class="flex-1 py-2 text-xs font-bold rounded-xl text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 hover:shadow-md hover:shadow-emerald-500/15 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1 shadow-sm">
                             <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
-                            <span>结束</span>
+                            <span>结算入账</span>
                         </button>
                     </div>
                 </div>
@@ -1653,45 +1718,39 @@
     }
 
     function refreshListDOM() {
-        const listBox = document.getElementById('custom-timers-dynamic-list');
-        const listBoxMob = document.getElementById('custom-timers-dynamic-list-mobile');
-
+        const listBox = document.getElementById('main-dashboard-timers-grid');
         if (listBox) {
-            listBox.innerHTML = generateTimerListHTML(activeTimers, false);
-        }
-        if (listBoxMob) {
-            listBoxMob.innerHTML = generateTimerListHTML(activeTimers, true);
+            listBox.innerHTML = generateTimerListHTML(activeTimers);
         }
         updateTimersDisplayOnly();
     }
 
+    // 暴露为全局函数，以便切回 Dashboard 时调用刷新
+    window.refreshTimerConsole = refreshListDOM;
+
     // 初始化按钮添加事件
     function initAddButtons() {
-        const addHandler = (e) => {
-            e.preventDefault();
-            const taskName = prompt("请输入您想独立跟踪的任务/项目名称:", `任务 ${activeTimers.length + 1}`);
-            if (!taskName || taskName.trim() === '') return;
-            
-            activeTimers.push({
-                id: 'timer-' + Date.now(),
-                name: taskName.trim(),
-                seconds: 0,
-                isRunning: false,
-                startTime: '',
-                endTime: '',
-                pausedSeconds: 0,
-                lastStateTime: 0
+        const btnAdd = document.getElementById('btn-add-timer-main');
+        if (btnAdd) {
+            btnAdd.addEventListener('click', (e) => {
+                e.preventDefault();
+                const taskName = prompt("请输入您想独立跟踪的任务/项目名称:", `任务 ${activeTimers.length + 1}`);
+                if (!taskName || taskName.trim() === '') return;
+                
+                activeTimers.push({
+                    id: 'timer-' + Date.now(),
+                    name: taskName.trim(),
+                    seconds: 0,
+                    isRunning: false,
+                    startTime: '',
+                    endTime: '',
+                    pausedSeconds: 0,
+                    lastStateTime: 0
+                });
+                localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
+                refreshListDOM();
             });
-            localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
-            refreshListDOM();
-        };
-
-        const btnPC = document.getElementById('btn-add-timer-custom');
-        if (btnPC) btnPC.addEventListener('click', addHandler);
-
-        const btnMob = document.getElementById('btn-add-timer-custom-mobile');
-        if (btnMob) btnMob.addEventListener('click', addHandler);
-
+        }
         refreshListDOM();
     }
 
@@ -1703,13 +1762,15 @@
             
             const nowTimeFull = getNowFullTimeStr();
             if (!t.isRunning) {
+                // 开始运行或从暂停中恢复
                 if (!t.startTime || t.seconds === 0) {
                     t.startTime = nowTimeFull; 
                     t.pausedSeconds = 0;
                 }
                 t.isRunning = true;
-                t.endTime = ''; 
+                t.endTime = ''; // 清除上次的结束时间标志
             } else {
+                // 切换为暂停挂起
                 t.isRunning = false;
             }
             t.lastStateTime = Date.now();
@@ -1740,7 +1801,7 @@
         logToFormAndSave: function(id) {
             const t = activeTimers.find(x => x.id === id);
             if (!t || t.seconds <= 0) {
-                alert("计时器时长为 0，请开始并进行有效计时后再结算！");
+                showToast("计时器时长为 0，请开始并进行有效计时后再结算！", "warning");
                 return;
             }
 
@@ -1755,29 +1816,36 @@
             if (!t.startTime) t.startTime = getNowFullTimeStr();
             if (!t.pausedSeconds) t.pausedSeconds = 0;
             
+            // 计算高精度有效工作时间(小数制小时)
             const preciseHours = parseFloat((t.seconds / 3600).toFixed(2));
             const durationString = formatTimeStr(t.seconds);
             const pauseString = formatTimeStr(t.pausedSeconds);
 
-            const auditNotes = `▶ 开始时间: ${t.startTime}\n` +
+            // 格式化审计明细日志写入工时备注
+            const auditNotes = `【高精秒级同步入账】\n` + 
+                               `▶ 开始时间: ${t.startTime}\n` +
                                `⏸ 挂起暂停: ${pauseString}\n` +
                                `⏱ 有效持续: ${durationString}\n` +
-                               `■ 结束时间: ${t.endTime}\n` ;
+                               `■ 结束时间: ${t.endTime}\n` +
+                               `---------------------\n` +
+                               `独立跟踪任务: ${t.name}`;
 
+            // 构建完美的工时数据库行
             const newRecord = {
                 id: String(Date.now()),
                 date: new Date().toISOString().split('T')[0],
                 type: "开发", 
-                start: t.startTime.substring(0, 5), 
-                end: t.endTime.substring(0, 5),     
+                start: t.startTime.substring(0, 5), // 精简 HH:MM 格式，防止格式溢出
+                end: t.endTime.substring(0, 5),     // 精简 HH:MM 格式，防止格式溢出
                 project: t.name,
                 customer: "异步追踪",
                 sapModule: "TIMER",
                 priority: "medium",
-                notes: auditNotes,  
-                duration: preciseHours > 0 ? preciseHours : 0.1 
+                notes: auditNotes,  // 记录完整审计日志
+                duration: preciseHours > 0 ? preciseHours : 0.1 // 规避 0 计费工时的异常
             };
 
+            // 1. 无缝灌入全局主工时数据库头部并持久化
             if (typeof timesheetEntries !== 'undefined' && Array.isArray(timesheetEntries)) {
                 timesheetEntries.unshift(newRecord);
                 if (typeof saveToLocalStorage === 'function') {
@@ -1785,6 +1853,7 @@
                 }
             }
 
+            // 2. 调度执行原系统的刷新与计算引擎
             const refreshRoutines = [
                 { name: 'renderTable', action: () => renderTable() },
                 { name: 'updateKPIs', action: () => updateKPIs() },
@@ -1797,12 +1866,15 @@
                 }
             });
 
+            // 3. 自动切页到工时表，查看录入成果
             if (typeof switchTab === 'function') {
                 switchTab('timesheet');
             }
 
-            alert(`🎉 结算成功并已一键同步入账！\n\n【工时明细摘要】:\n开始时间: ${t.startTime}\n暂停挂起: ${pauseString}\n工作持续: ${durationString}\n结束时间: ${t.endTime}`);
+            // 使用优雅自定义通知替代原生阻塞弹窗
+            showToast(`🎉 结算入账成功！\n有效工作时间: ${durationString}`, "success");
             
+            // 重置与复位该卡片线程的状态机
             t.seconds = 0;
             t.startTime = '';
             t.endTime = '';
