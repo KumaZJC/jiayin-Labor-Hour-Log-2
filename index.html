@@ -342,18 +342,18 @@
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold text-slate-500 mb-1">客户 (Customer)</label>
-                                    <input type="text" id="ts-customer" placeholder="例如：JASM" class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+                                    <input type="text" id="ts-customer" placeholder="例如：JASM" class="w-full text-xs p-2 rounded-xl border border-slate-200/40 dark:border-slate-800 bg-white dark:bg-slate-900/50">
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-[11px] font-semibold text-slate-500 mb-1">内部对接</label>
-                                    <input type="text" id="ts-sap-module" placeholder="例如：香肠哥" class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+                                    <input type="text" id="ts-sap-module" placeholder="例如：香肠哥" class="w-full text-xs p-2 rounded-xl border border-slate-200/40 dark:border-slate-800 bg-white dark:bg-slate-900/50">
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold text-slate-500 mb-1">优先级</label>
-                                    <select id="ts-priority" class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+                                    <select id="ts-priority" class="w-full text-xs p-2 rounded-xl border border-slate-200/40 dark:border-slate-800 bg-white dark:bg-slate-900/50">
                                         <option value="low">低 (Low)</option>
                                         <option value="medium" selected>中 (Medium)</option>
                                         <option value="high">高 (High)</option>
@@ -1558,13 +1558,23 @@
     </script>
 
 <script>
-// ------------------- 独立高精多线程异步计时引擎 (右侧主板宽屏平铺架构) -------------------
+// ------------------- 独立高精多线程异步计时引擎 (基于绝对物理时间戳对齐，徹底修复休眠/关页Bug) -------------------
 (function() {
     let activeTimers = [];
     try {
         const saved = localStorage.getItem('timesheet_active_timers');
         if (saved) activeTimers = JSON.parse(saved);
     } catch (e) { console.error(e); }
+
+    // 历史数据格式兼容及平滑迁移逻辑
+    activeTimers.forEach(t => {
+        if (t.accumulatedSeconds === undefined) t.accumulatedSeconds = t.seconds || 0;
+        if (t.accumulatedPausedSeconds === undefined) t.accumulatedPausedSeconds = t.pausedSeconds || 0;
+        if (t.lastStateChangeTime === undefined) {
+            t.lastStateChangeTime = t.isRunning ? Date.now() : 0;
+        }
+        if (t.memo === undefined) t.memo = '';
+    });
 
     // 初始化默认任务，赋予默认 memo
     if (activeTimers.length === 0) {
@@ -1577,28 +1587,37 @@
             startTime: '',
             endTime: '',
             pausedSeconds: 0,       
-            lastStateTime: 0        
+            accumulatedSeconds: 0,
+            accumulatedPausedSeconds: 0,
+            lastStateChangeTime: 0
         });
+        localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
     }
 
-    // 定时器主驱动轮询器 (每秒精准刷新计算并同步更新 UI)
-    setInterval(() => {
-        let changed = false;
-        
-        activeTimers.forEach(t => {
+    // 【高精核心】计算指定任务当前的动态绝对时间统计
+    function getTimerCurrentStats(t) {
+        let seconds = t.accumulatedSeconds || 0;
+        let pausedSeconds = t.accumulatedPausedSeconds || 0;
+        const now = Date.now();
+
+        // 只有在已启动且未结算时，才结合当前的物理时钟差值计算，确保关网页、手机休眠时分秒不差
+        if (t.startTime && !t.endTime) {
+            const elapsed = Math.floor((now - (t.lastStateChangeTime || now)) / 1000);
             if (t.isRunning) {
-                t.seconds++;
-                changed = true;
-            } else if (t.startTime && !t.endTime) {
-                // 已开始、但当前正处于暂停休眠状态的任务，累计其暂停挂起秒数
-                t.pausedSeconds = (t.pausedSeconds || 0) + 1;
-                changed = true;
+                seconds += elapsed;
+            } else {
+                pausedSeconds += elapsed;
             }
-        });
-        if (changed) {
-            localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
-            updateTimersDisplayOnly();
         }
+        return {
+            seconds: Math.max(0, seconds),
+            pausedSeconds: Math.max(0, pausedSeconds)
+        };
+    }
+
+    // 定时器主驱动轮询器 (仅高效率、低负载刷新前端 DOM，省电且绝对准确)
+    setInterval(() => {
+        updateTimersDisplayOnly();
     }, 1000);
 
     function formatTimeStr(totalSeconds) {
@@ -1616,15 +1635,17 @@
     // 仅精细刷新DOM元素中的特定文本，防止组件重绘丢失输入焦点
     function updateTimersDisplayOnly() {
         activeTimers.forEach(t => {
+            const stats = getTimerCurrentStats(t);
+            
             const el = document.getElementById(`display-${t.id}`);
-            if (el) el.innerText = formatTimeStr(t.seconds);
+            if (el) el.innerText = formatTimeStr(stats.seconds);
             
             const pauseEl = document.getElementById(`pause-display-${t.id}`);
-            if (pauseEl) pauseEl.innerText = formatTimeStr(t.pausedSeconds || 0);
+            if (pauseEl) pauseEl.innerText = formatTimeStr(stats.pausedSeconds);
 
             const endtimeEl = document.getElementById(`endtime-display-${t.id}`);
             if (endtimeEl && !t.endTime) {
-                endtimeEl.innerText = t.isRunning ? '计费进行中...' : (t.startTime ? '暂停挂起中' : '未开始');
+                endtimeEl.innerText = t.isRunning ? '进行中...' : (t.startTime ? '暂停挂起中' : '未开始');
             }
             
             const btnEl = document.getElementById(`btn-toggle-${t.id}`);
@@ -1657,6 +1678,10 @@
     function generateTimerListHTML(timers) {
         let html = '';
         timers.forEach((t) => {
+            const stats = getTimerCurrentStats(t);
+            const displaySecs = formatTimeStr(stats.seconds);
+            const displayPause = formatTimeStr(stats.pausedSeconds);
+            
             html += `
                 <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex flex-col justify-between gap-3 hover:shadow-md transition-all duration-300">
                     <div class="flex items-center justify-between">
@@ -1689,18 +1714,18 @@
                         </div>
                         <div class="flex flex-col border-t border-slate-100 dark:border-slate-800/60 pt-1.5 mt-1.5">
                             <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">⏸ 暂停时长</span>
-                            <span class="font-bold text-amber-500 mt-0.5" id="pause-display-${t.id}">${formatTimeStr(t.pausedSeconds || 0)}</span>
+                            <span class="font-bold text-amber-500 mt-0.5" id="pause-display-${t.id}">${displayPause}</span>
                         </div>
                         <div class="flex flex-col border-t border-slate-100 dark:border-slate-800/60 pt-1.5 mt-1.5">
                             <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">⏱ 有效工时</span>
-                            <span class="font-bold text-primary dark:text-indigo-400 mt-0.5" id="display-${t.id}">${formatTimeStr(t.seconds)}</span>
+                            <span class="font-bold text-primary dark:text-indigo-400 mt-0.5" id="display-${t.id}">${displaySecs}</span>
                         </div>
                     </div>
 
                     <!-- 📝 任务备注 / Memo 功能区域 -->
                     <div class="text-xs">
-                        <span class="text-slate-400 text-[9px] uppercase font-bold block mb-1">📝 Memo</span>
-                        <textarea oninput="window.customTimerActions.updateMemo('${t.id}', this.value)" placeholder="你可以在这里写点什么记录..." class="w-full text-xs p-2 rounded-lg bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/30 dark:border-slate-700/30 font-sans focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none h-14 transition-all" rows="2">${t.memo || ''}</textarea>
+                        <span class="text-slate-400 text-[9px] uppercase font-bold block mb-1">📝 任务说明 / Memo</span>
+                        <textarea oninput="window.customTimerActions.updateMemo('${t.id}', this.value)" placeholder="写点什么..." class="w-full text-xs p-2 rounded-lg bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/30 dark:border-slate-700/30 font-sans focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none h-14 transition-all" rows="2">${t.memo || ''}</textarea>
                     </div>
 
                     <!-- 美化后的动作控制栏 (全尺寸更易点击) -->
@@ -1719,7 +1744,7 @@
                         <!-- 结算入账 成功导向高亮渐变按钮 -->
                         <button onclick="window.customTimerActions.logToFormAndSave('${t.id}')" class="flex-1 py-1.5 text-[10px] font-bold rounded-xl text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 hover:shadow-md hover:shadow-emerald-500/15 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1 shadow-sm">
                             <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
-                            <span>结束</span>
+                            <span>结算入账</span>
                         </button>
                     </div>
                 </div>
@@ -1757,7 +1782,9 @@
                     startTime: '',
                     endTime: '',
                     pausedSeconds: 0,
-                    lastStateTime: 0
+                    accumulatedSeconds: 0,
+                    accumulatedPausedSeconds: 0,
+                    lastStateChangeTime: 0
                 });
                 localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
                 refreshListDOM();
@@ -1766,26 +1793,40 @@
         refreshListDOM();
     }
 
-    // 智能自动化核心逻辑控制器
+    // 智能自动化绝对时间控制引擎
     window.customTimerActions = {
         toggle: function(id) {
             const t = activeTimers.find(x => x.id === id);
             if (!t) return;
             
+            const now = Date.now();
             const nowTimeFull = getNowFullTimeStr();
+            const stats = getTimerCurrentStats(t);
+            
             if (!t.isRunning) {
-                // 开始运行或从暂停中恢复
-                if (!t.startTime || t.seconds === 0) {
+                // 启动或从暂停中恢复
+                if (!t.startTime || t.accumulatedSeconds === 0) {
                     t.startTime = nowTimeFull; 
-                    t.pausedSeconds = 0;
+                    t.accumulatedSeconds = 0;
+                    t.accumulatedPausedSeconds = 0;
+                } else {
+                    // 将最近的一段挂起时间持久化归档入 accumulatedPausedSeconds
+                    t.accumulatedPausedSeconds = stats.pausedSeconds;
                 }
                 t.isRunning = true;
-                t.endTime = ''; // 清除上次的结束时间标志
+                t.endTime = ''; 
+                t.lastStateChangeTime = now;
             } else {
-                // 切换为暂停挂起
+                // 暂停：将最近运行的一段物理时间持久化归档入 accumulatedSeconds
+                t.accumulatedSeconds = stats.seconds;
                 t.isRunning = false;
+                t.lastStateChangeTime = now;
             }
-            t.lastStateTime = Date.now();
+            
+            // 冗余写入 seconds 与 pausedSeconds
+            t.seconds = stats.seconds;
+            t.pausedSeconds = stats.pausedSeconds;
+
             localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
             refreshListDOM();
         },
@@ -1794,11 +1835,13 @@
             const t = activeTimers.find(x => x.id === id);
             if (t) {
                 t.seconds = 0;
+                t.pausedSeconds = 0;
                 t.isRunning = false;
                 t.startTime = '';
                 t.endTime = '';
-                t.pausedSeconds = 0;
-                t.lastStateTime = 0;
+                t.accumulatedSeconds = 0;
+                t.accumulatedPausedSeconds = 0;
+                t.lastStateChangeTime = 0;
                 localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
                 refreshListDOM();
             }
@@ -1822,7 +1865,7 @@
             }
         },
 
-        // 更新备注
+        // 更新备注并保存
         updateMemo: function(id, val) {
             const t = activeTimers.find(x => x.id === id);
             if (t) {
@@ -1833,48 +1876,59 @@
 
         logToFormAndSave: function(id) {
             const t = activeTimers.find(x => x.id === id);
-            if (!t || t.seconds <= 0) {
+            if (!t) return;
+            
+            const stats = getTimerCurrentStats(t);
+            if (stats.seconds <= 0) {
                 showToast("计时器时长为 0，请开始并进行有效计时后再结算！", "warning");
                 return;
             }
 
             const nowTimeFull = getNowFullTimeStr();
+            const now = Date.now();
+            
+            // 结算时自动归档当前的运行状态
             if (t.isRunning) {
+                t.accumulatedSeconds = stats.seconds;
                 t.isRunning = false;
                 t.endTime = nowTimeFull;
+                t.lastStateChangeTime = now;
             } else if (!t.endTime) {
+                t.accumulatedPausedSeconds = stats.pausedSeconds;
                 t.endTime = nowTimeFull;
+                t.lastStateChangeTime = now;
             }
 
             if (!t.startTime) t.startTime = getNowFullTimeStr();
-            if (!t.pausedSeconds) t.pausedSeconds = 0;
             
-            // 计算高精度有效工作时间(小数制小时)
-            const preciseHours = parseFloat((t.seconds / 3600).toFixed(2));
-            const durationString = formatTimeStr(t.seconds);
-            const pauseString = formatTimeStr(t.pausedSeconds);
+            const preciseHours = parseFloat((stats.seconds / 3600).toFixed(2));
+            const durationString = formatTimeStr(stats.seconds);
+            const pauseString = formatTimeStr(stats.pausedSeconds);
 
             // 格式化审计明细日志写入工时备注，前置用户键入的自定义备注 Memo
             const userMemoText = t.memo ? t.memo.trim() : "";
             const auditNotes = (userMemoText ? `${userMemoText}\n\n` : '') + 
+                               `【高精秒级同步入账】\n` + 
                                `▶ 开始时间: ${t.startTime}\n` +
                                `⏸ 挂起暂停: ${pauseString}\n` +
                                `⏱ 有效持续: ${durationString}\n` +
-                               `■ 结束时间: ${t.endTime}\n` ;
+                               `■ 结束时间: ${t.endTime}\n` +
+                               `---------------------\n` +
+                               `独立跟踪任务: ${t.name}`;
 
             // 构建完美的工时数据库行
             const newRecord = {
                 id: String(Date.now()),
                 date: new Date().toISOString().split('T')[0],
                 type: "开发", 
-                start: t.startTime.substring(0, 5), // 精简 HH:MM 格式，防止格式溢出
-                end: t.endTime.substring(0, 5),     // 精简 HH:MM 格式，防止格式溢出
+                start: t.startTime.substring(0, 5), 
+                end: t.endTime.substring(0, 5),     
                 project: t.name,
                 customer: "异步追踪",
                 sapModule: "TIMER",
                 priority: "medium",
-                notes: auditNotes,  // 记录带有核心描述和审计的备注
-                duration: preciseHours > 0 ? preciseHours : 0.1 // 规避 0 计费工时的异常
+                notes: auditNotes,  
+                duration: preciseHours > 0 ? preciseHours : 0.1 
             };
 
             // 1. 无缝灌入全局主工时数据库头部并持久化
@@ -1911,7 +1965,9 @@
             t.startTime = '';
             t.endTime = '';
             t.pausedSeconds = 0;
-            t.lastStateTime = 0;
+            t.accumulatedSeconds = 0;
+            t.accumulatedPausedSeconds = 0;
+            t.lastStateChangeTime = 0;
             t.memo = '';
             localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
             refreshListDOM();
