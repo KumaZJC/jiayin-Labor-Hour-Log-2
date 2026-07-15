@@ -2541,12 +2541,13 @@
 
             const userMemoText = t.memo ? t.memo.trim() : "";
             const auditNotes = (userMemoText ? `${userMemoText}\n\n` : '') + 
+                               `【高精秒级同步入账】\n` + 
                                `▶ 开始时间: ${t.startTime}\n` +
                                `⏸ 挂起暂停: ${pauseString}\n` +
                                `⏱ 有效持续: ${durationString}\n` +
                                `■ 结束时间: ${t.endTime}\n` +
                                `---------------------\n` +
-                               ` ${t.name}`;
+                               `独立跟踪任务: ${t.name}`;
 
             const newRecord = {
                 id: String(Date.now()),
