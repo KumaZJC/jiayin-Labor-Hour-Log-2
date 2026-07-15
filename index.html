@@ -191,9 +191,45 @@
                         </div>
                     </div>
                     
-                    <!-- 任务自适应多列平铺卡片槽（PC端3列，Tablet端2列，手机端1列，视野完全拓宽，免去繁琐下拉滚动） -->
+                    <!-- 任务自适应多列平铺卡片槽 -->
                     <div id="main-dashboard-timers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[580px] overflow-y-auto pr-1">
                         <!-- 动态注入任务卡片 -->
+                    </div>
+                </div>
+
+                <!-- 【今日日程排班视图】 - 支持日期选择与快速回今天 -->
+                <div class="glass p-6 rounded-apple shadow-sm border border-slate-200/50 dark:border-slate-800/50 animate-fade-in">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 border-b border-slate-100 dark:border-slate-850 pb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                                <i class="fa-solid fa-calendar-week text-base"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm tracking-tight flex items-center gap-2">
+                                    <span>日程排班视图 (Schedule View)</span>
+                                    <button onclick="window.setScheduleDateToToday()" title="快速切回今天" class="text-[10px] bg-primary/10 text-primary hover:bg-primary/20 px-2 py-0.5 rounded-full font-bold transition-all">今天</button>
+                                </h4>
+                                <p class="text-[11px] text-slate-400 dark:text-slate-500">微软排班级时间流，重合时间段左右无缝等宽并排</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 📅 交互区：日期自适应切换 -->
+                        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-slate-400 dark:text-slate-500 hidden sm:inline">选择日期:</span>
+                                <input type="date" id="schedule-date-input" onchange="window.changeScheduleDate(this.value)" class="px-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/25 cursor-pointer font-medium">
+                            </div>
+                            <button onclick="switchTab('timesheet')" class="px-3.5 py-1.5 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-[10.5px] font-bold rounded-lg transition-all flex items-center gap-1">
+                                <i class="fa-solid fa-plus text-[9px]"></i> 手动添加时间记录
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Teams 核心滚动主视区 -->
+                    <div class="overflow-y-auto max-h-[600px] border border-slate-200/40 dark:border-slate-800/60 rounded-xl bg-slate-50/10 dark:bg-slate-900/10">
+                        <div class="min-w-[760px] relative" style="height: 1200px;" id="schedule-grid-container">
+                            <!-- 时钟刻度左轴与格线由 JS 高效渲染 -->
+                        </div>
                     </div>
                 </div>
 
@@ -310,15 +346,16 @@
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-[11px] font-semibold text-slate-500 mb-1">日期</label>
-                                    <input type="date" id="ts-date" required class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+                                    <input type="date" id="ts-date" required class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50">
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold text-slate-500 mb-1">工时类型</label>
-                                    <select id="ts-type" onchange="checkCustomType(this)" class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+                                    <select id="ts-type" onchange="checkCustomType(this)" class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50">
                                         <option value="开发">开发</option>
                                         <option value="会议">会议</option>
                                         <option value="学习">学习</option>
                                         <option value="Support">Support</option>
+                                        <option value="休假">休假</option>
                                         <option value="__CUSTOM__" class="text-primary font-bold">+ 自定义添加...</option>
                                     </select>
                                 </div>
@@ -377,8 +414,8 @@
                         <div>
                             <div class="flex flex-col md:flex-row gap-3 justify-between items-start md:items-center mb-6">
                                 <div class="flex flex-wrap gap-2 items-center">
-                                    <input type="text" id="search-input" oninput="renderTable()" placeholder="Search project, notes..." class="px-3.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none w-48">
-                                    <select id="filter-type" onchange="renderTable()" class="px-3.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                                    <input type="text" id="search-input" oninput="renderTable()" placeholder="Search project, notes..." class="px-3.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-white/40 focus:outline-none w-48">
+                                    <select id="filter-type" onchange="renderTable()" class="px-3.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-white/40">
                                         <option value="All">All Types</option>
                                         <option value="开发">开发</option>
                                         <option value="会议">会议</option>
@@ -394,7 +431,7 @@
                                     <button onclick="document.getElementById('import-file-input').click()" class="px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg font-bold flex items-center gap-1 transition-all">
                                         <i class="fa-solid fa-file-import"></i> Import
                                     </button>
-                                    <input type="file" id="import-file-input" class="hidden" accept=".json" onchange="importJSON(event)">
+                                    <input type="file" id="import-file-input" class="hidden" accept=".json,.csv" onchange="importFile(event)">
                                     <button onclick="batchDelete()" class="px-3 py-1.5 text-xs bg-danger/10 text-danger hover:bg-danger/20 rounded-lg font-bold flex items-center gap-1 transition-all">
                                         <i class="fa-solid fa-trash"></i> Delete Selected
                                     </button>
@@ -463,13 +500,13 @@
                     <div class="flex flex-wrap gap-3 items-center">
                         <div>
                             <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wide">Project Filter</label>
-                            <select id="analytics-filter-project" onchange="renderAnalyticsCharts()" class="px-3.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                            <select id="analytics-filter-project" onchange="renderAnalyticsCharts()" class="px-3.5 py-1.5 text-xs rounded-lg border border-slate-200/50 dark:border-slate-700 bg-white dark:bg-slate-800 animate-fade-in">
                                 <option value="All">All Projects</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wide">Customer Filter</label>
-                            <select id="analytics-filter-customer" onchange="renderAnalyticsCharts()" class="px-3.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                            <select id="analytics-filter-customer" onchange="renderAnalyticsCharts()" class="px-3.5 py-1.5 text-xs rounded-lg border border-slate-200/50 dark:border-slate-700 bg-white dark:bg-slate-800 animate-fade-in">
                                 <option value="All">All Customers</option>
                             </select>
                         </div>
@@ -551,32 +588,117 @@
         </main>
     </div>
 
-    <!-- 移动端导航 -->
-    <div class="md:hidden fixed bottom-0 left-0 right-0 glass border-t border-slate-200/50 dark:border-slate-800/50 flex items-center justify-around py-3 px-2 z-40">
-        <button onclick="switchTab('dashboard')" class="mobile-nav-btn flex flex-col items-center gap-1 text-primary">
-            <i class="fa-solid fa-chart-pie text-lg"></i>
-            <span class="text-[9px] font-semibold">Home</span>
-        </button>
-        <button onclick="switchTab('timesheet')" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400">
-            <i class="fa-solid fa-list-check text-lg"></i>
-            <span class="text-[9px] font-semibold">Track</span>
-        </button>
-        <button onclick="switchTab('calendar')" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400">
-            <i class="fa-solid fa-calendar-days text-lg"></i>
-            <span class="text-[9px] font-semibold">Calendar</span>
-        </button>
-        <button onclick="switchTab('analytics')" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400">
-            <i class="fa-solid fa-chart-line text-lg"></i>
-            <span class="text-[9px] font-semibold">Charts</span>
-        </button>
-        <button onclick="switchTab('profile')" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400">
-            <i class="fa-solid fa-user text-lg"></i>
-            <span class="text-[9px] font-semibold">Profile</span>
-        </button>
+    <!-- 编辑活动高精弹窗 -->
+    <div id="edit-activity-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+        <div class="glass max-w-md w-full p-6 rounded-apple shadow-2xl border border-slate-200/50 dark:border-slate-800/50 transform scale-95 transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
+                <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-primary"></i> 编辑工时活动块
+                </h4>
+                <button onclick="closeEditActivityModal()" class="text-slate-400 hover:text-danger"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form id="edit-activity-form" onsubmit="handleActivityBlockUpdate(event)" class="space-y-4">
+                <input type="hidden" id="edit-act-id">
+                
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 mb-1">项目/任务名称</label>
+                    <input type="text" id="edit-act-project" required class="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">日期</label>
+                        <input type="date" id="edit-act-date" required class="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">工时类型</label>
+                        <select id="edit-act-type" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none">
+                            <option value="开发">开发</option>
+                            <option value="会议">会议</option>
+                            <option value="学习">学习</option>
+                            <option value="Support">Support</option>
+                            <option value="休假">休假</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">开始时间</label>
+                        <input type="time" id="edit-act-start" required class="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">结束时间</label>
+                        <input type="time" id="edit-act-end" required class="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 mb-1">详细描述/备注</label>
+                    <textarea id="edit-act-notes" rows="3" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none font-mono"></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="deleteActivityBlockFromModal()" class="px-4 py-2.5 bg-danger/10 text-danger hover:bg-danger/20 text-xs font-semibold rounded-xl transition-all">
+                        <i class="fa-solid fa-trash mr-1"></i> 删除
+                    </button>
+                    <div class="flex-1 flex gap-2 justify-end">
+                        <button type="button" onclick="closeEditActivityModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-500 dark:text-slate-300 text-xs font-semibold rounded-xl transition-all">取消</button>
+                        <button type="submit" class="px-5 py-2.5 bg-primary hover:bg-primary/95 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-primary/20">保存更改</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 捕获暂停活动高合规弹窗 -->
+    <div id="pause-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+        <div class="glass max-w-md w-full p-6 rounded-apple shadow-2xl border border-slate-200/50 dark:border-slate-800/50 transform scale-95 transition-all duration-300">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                    <i class="fa-solid fa-mug-hot text-lg animate-bounce"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100">记录暂停期间的活动</h4>
+                    <p class="text-[11px] text-slate-400" id="pause-modal-sub-info">累计暂停了 0分0秒</p>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">选择活动类型</label>
+                    <div class="flex flex-wrap gap-2" id="pause-quick-tags">
+                        <button type="button" class="pause-tag px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary transition-all border border-transparent" data-reason="休息与调整 🍵" data-type="休假">🍵 休息与调整</button>
+                        <button type="button" class="pause-tag px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary transition-all border border-transparent" data-reason="临时讨论/会议 💬" data-type="会议">💬 临时讨论/会议</button>
+                        <button type="button" class="pause-tag px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary transition-all border border-transparent" data-reason="处理紧急电话 📞" data-type="Support">📞 紧急电话/支持</button>
+                        <button type="button" class="pause-tag px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary transition-all border border-transparent" data-reason="处理个人事务 🚶" data-type="休假">🚶 个人私事</button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">自定义详细描述</label>
+                    <input type="text" id="pause-custom-reason" placeholder="可在此输入具体细节" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                </div>
+            </div>
+            
+            <div class="flex gap-3 justify-end mt-6">
+                <button id="btn-pause-modal-skip" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">忽略记录</button>
+                <button id="btn-pause-modal-save" class="px-5 py-2 text-xs font-bold rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all">确认保存并记录</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // ------------------- 优雅自定义通知与提示模块 (完美规避 browser alert/confirm 阻塞) -------------------
+        // ------------------- 本地时间跨时区精确对准器 -------------------
+        function getLocalDateString(date = new Date()) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        // ------------------- 优雅提示 -------------------
         function showToast(message, type = 'success') {
             const container = document.getElementById('global-toast-container');
             if (!container) return;
@@ -598,7 +720,7 @@
             }
             
             container.appendChild(toast);
-            toast.offsetHeight; // 强制 reflow
+            toast.offsetHeight; 
             toast.classList.remove('translate-y-[-20px]', 'opacity-0');
             
             setTimeout(() => {
@@ -645,16 +767,12 @@
         let currentPage = 1;
         const entriesPerPage = 8;
 
-        let timerSeconds = 0;
-        let timerInterval = null;
-
         let todoItems = [
             { id: 1, text: "架构对接确认", done: false },
             { id: 2, text: "模块账期结算异常问题排查 (Company Code 1000)", done: true },
             { id: 3, text: "准备今日跟晓文 和 香肠哥 的工作交接会", done: false }
         ];
 
-        // 默认内置会议提醒数据
         let reminderList = [
             { id: 1, title: "部门同步会议", time: "15:00", notified: { 10: false, 5: false, 1: false } }
         ];
@@ -664,7 +782,7 @@
         let dailyChartRef = null;
         let moduleChartRef = null;
 
-        let customTypes = ['开发', '会议', '学习', 'Support'];
+        let customTypes = ['开发', '会议', '学习', 'Support', '休假'];
 
         window.addEventListener('DOMContentLoaded', () => {
             initDatabase();
@@ -677,7 +795,7 @@
             // 启动毫秒级时间以及会议提醒轮询器
             setInterval(checkReminders, 1000);
 
-            // 防止浏览器头像缓存
+            // 在页面加载时，给头像强制戴上“时间戳面具”，骗过浏览器缓存
             const timestamp = Date.now();
             const pcAvatar = document.getElementById('user-avatar-pc');
             const profileAvatar = document.getElementById('profile-avatar');
@@ -715,7 +833,7 @@
             document.getElementById('cfg-target-hours').value = systemSettings.targetHours;
             document.getElementById('cfg-start').value = systemSettings.defaultStart;
             document.getElementById('cfg-end').value = systemSettings.defaultEnd;
-            document.getElementById('ts-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('ts-date').value = getLocalDateString();
 
             renderReminders();
         }
@@ -726,13 +844,157 @@
             localStorage.setItem('chronos_reminders', JSON.stringify(reminderList));
         }
 
-        // ------------------- 提醒功能逻辑 -------------------
-        function requestNotificationPermission() {
-            if ("Notification" in window) {
-                if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-                    Notification.requestPermission();
+        // ------------------- 极健壮的标准 CSV RFC4180 双引号流解析器 -------------------
+        function parseCSV(text) {
+            const lines = [];
+            let row = [""];
+            let inQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                const c = text[i];
+                const next = text[i+1];
+                if (c === '"') {
+                    if (inQuotes && next === '"') {
+                        row[row.length - 1] += '"'; // 支持双引号转义
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (c === ',' && !inQuotes) {
+                    row.push('');
+                } else if ((c === '\r' || c === '\n') && !inQuotes) {
+                    if (c === '\r' && next === '\n') { i++; }
+                    lines.push(row);
+                    row = [''];
+                } else {
+                    row[row.length - 1] += c;
                 }
             }
+            if (row.length > 1 || row[0] !== '') {
+                lines.push(row);
+            }
+            return lines;
+        }
+
+        // ------------------- 备份导入功能 (完美支持 CSV & JSON) -------------------
+        function importFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            const extension = file.name.split('.').pop().toLowerCase();
+
+            reader.onload = function(e) {
+                let content = e.target.result;
+                try {
+                    let importedData = [];
+
+                    if (extension === 'json') {
+                        importedData = JSON.parse(content);
+                        if (!Array.isArray(importedData)) {
+                            showToast("导入失败：JSON 备份文件必须是标准的数据列表格式！", "danger");
+                            return;
+                        }
+                        const isValid = importedData.every(item => item && item.date && item.project && item.duration !== undefined);
+                        if (!isValid) {
+                            showToast("导入失败：JSON 数据不完整或字段受损！", "danger");
+                            return;
+                        }
+                    } else if (extension === 'csv') {
+                        if (content.startsWith('\uFEFF')) {
+                            content = content.slice(1);
+                        }
+
+                        const parsedLines = parseCSV(content);
+                        if (parsedLines.length < 2) {
+                            showToast("导入失败：CSV 报表为空或无明细！", "danger");
+                            return;
+                        }
+
+                        let dataLines = parsedLines;
+                        const firstCell = parsedLines[0][0] || '';
+                        if (firstCell.includes("日期") || firstCell.includes("Date")) {
+                            dataLines = parsedLines.slice(1);
+                        }
+
+                        importedData = dataLines
+                            .filter(line => line.length >= 8 && line[0].trim() !== '')
+                            .map((line, idx) => {
+                                return {
+                                    id: String(Date.now() + idx + Math.random()),
+                                    date: line[0] ? line[0].trim() : getLocalDateString(),
+                                    type: line[1] ? line[1].trim() : "开发",
+                                    start: line[2] ? line[2].trim() : "09:00",
+                                    end: line[3] ? line[3].trim() : "18:00",
+                                    project: line[4] ? line[4].trim() : "未命名项目",
+                                    customer: line[5] ? line[5].trim() : "异步追踪",
+                                    sapModule: line[6] ? line[6].trim() : "None",
+                                    duration: parseFloat(line[7]) || 1.0,
+                                    notes: line[8] ? line[8].trim() : "-",
+                                    priority: "medium"
+                                };
+                            });
+                    } else {
+                        showToast("导入失败：仅支持导入 .json 或 .csv 格式的文件！", "danger");
+                        return;
+                    }
+
+                    if (importedData.length === 0) {
+                        showToast("未在文件中扫描到有效的工时记录！", "warning");
+                        return;
+                    }
+
+                    timesheetEntries = importedData;
+                    saveToLocalStorage();
+                    
+                    renderTable();
+                    updateKPIs();
+                    initOrUpdateCharts();
+                    
+                    showToast(`🎉 成功导入 ${importedData.length} 条工时数据！`, "success");
+
+                } catch (err) {
+                    console.error(err);
+                    showToast("导入解析失败，请检查文件格式或编码！", "danger");
+                } finally {
+                    event.target.value = '';
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ------------------- 待办清单 (Checklist) 完整业务处理逻辑 -------------------
+        function renderTodos() {
+            const container = document.getElementById('todo-list-container');
+            if (!container) return;
+            container.innerHTML = '';
+            todoItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = `flex items-center justify-between p-3.5 rounded-xl border transition-all ${item.done ? 'bg-slate-100/30 dark:bg-slate-900/10 border-slate-200/40 opacity-60' : 'bg-white dark:bg-slate-800/40 border-slate-200/50 dark:border-slate-800/50'}`;
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleTodo(${item.id})" class="w-4.5 h-4.5 rounded text-primary focus:ring-primary/20">
+                        <span class="text-xs ${item.done ? 'line-through text-slate-400' : 'font-medium'}">${item.text}</span>
+                    </div>
+                    <button onclick="deleteTodo(${item.id})" class="text-slate-400 hover:text-danger"><i class="fa-solid fa-xmark"></i></button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleTodo(id) {
+            const todo = todoItems.find(t => t.id === id);
+            if (todo) {
+                todo.done = !todo.done;
+                saveToLocalStorage();
+                renderTodos();
+            }
+        }
+
+        function deleteTodo(id) {
+            todoItems = todoItems.filter(t => t.id !== id);
+            saveToLocalStorage();
+            renderTodos();
         }
 
         function renderReminders() {
@@ -964,7 +1226,6 @@
             }
         }
 
-        // ------------------- UI 页面切换 -------------------
         function switchTab(targetTab) {
             document.querySelectorAll('.page-panel').forEach(panel => {
                 panel.classList.add('hidden-panel');
@@ -990,6 +1251,9 @@
                 if (typeof window.refreshTimerConsole === 'function') {
                     window.refreshTimerConsole();
                 }
+                if (typeof window.renderTeamsSchedule === 'function') {
+                    window.renderTeamsSchedule();
+                }
             } else if (targetTab === 'timesheet') {
                 renderTable();
             } else if (targetTab === 'calendar') {
@@ -1001,7 +1265,7 @@
 
         // ------------------- KPI 更新 -------------------
         function updateKPIs() {
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = getLocalDateString();
             
             const todayHours = timesheetEntries
                 .filter(e => e.date === todayStr)
@@ -1048,44 +1312,6 @@
             }
         }
 
-        // ------------------- 待办列表 -------------------
-        function renderTodos() {
-            const container = document.getElementById('todo-list-container');
-            container.innerHTML = '';
-            todoItems.forEach(item => {
-                const card = document.createElement('div');
-                card.className = `flex items-center justify-between p-3.5 rounded-xl border transition-all ${item.done ? 'bg-slate-100/30 dark:bg-slate-900/10 border-slate-200/40 opacity-60' : 'bg-white dark:bg-slate-800/40 border-slate-200/50 dark:border-slate-800/50'}`;
-                card.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleTodo(${item.id})" class="w-4.5 h-4.5 rounded text-primary focus:ring-primary/20">
-                        <span class="text-xs ${item.done ? 'line-through text-slate-400' : 'font-medium'}">${item.text}</span>
-                    </div>
-                    <button onclick="deleteTodo(${item.id})" class="text-slate-400 hover:text-danger"><i class="fa-solid fa-xmark"></i></button>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function toggleTodo(id) {
-            const todo = todoItems.find(t => t.id === id);
-            if (todo) { todo.done = !todo.done; saveToLocalStorage(); renderTodos(); }
-        }
-
-        function deleteTodo(id) {
-            todoItems = todoItems.filter(t => t.id !== id);
-            saveToLocalStorage();
-            renderTodos();
-        }
-
-        function addTodoPrompt() {
-            const val = prompt("新增待办事项：");
-            if (val && val.trim()) {
-                todoItems.push({ id: Date.now(), text: val.trim(), done: false });
-                saveToLocalStorage();
-                renderTodos();
-            }
-        }
-
         // ------------------- 数据表格操作 -------------------
         function editEntry(id) {
             const entry = timesheetEntries.find(item => item.id == id);
@@ -1109,7 +1335,7 @@
         function resetForm() {
             document.getElementById('timesheet-form').reset();
             document.getElementById('entry-id').value = "";
-            document.getElementById('ts-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('ts-date').value = getLocalDateString();
             document.getElementById('form-edit-indicator').classList.add('hidden');
             document.getElementById('btn-cancel-edit').classList.add('hidden');
         }
@@ -1171,6 +1397,7 @@
             });
         }
 
+        // ------------------- 复选框全选 -------------------
         function toggleSelectAll(master) {
             document.querySelectorAll('.entry-select').forEach(checkbox => checkbox.checked = master.checked);
         }
@@ -1431,7 +1658,7 @@
         }
 
         function duplicateYesterday() {
-            const yesterdayStr = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+            const yesterdayStr = getLocalDateString(new Date(Date.now() - 86400000));
             const yesterdayEntries = timesheetEntries.filter(e => e.date === yesterdayStr);
 
             if (yesterdayEntries.length === 0) {
@@ -1440,7 +1667,7 @@
             }
 
             yesterdayEntries.forEach(entry => {
-                const cloned = { ...entry, id: Date.now().toString() + Math.random(), date: new Date().toISOString().split('T')[0] };
+                const cloned = { ...entry, id: Date.now().toString() + Math.random(), date: getLocalDateString() };
                 timesheetEntries.unshift(cloned);
             });
 
@@ -1450,7 +1677,7 @@
         }
 
         function generateDailySummary() {
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = getLocalDateString();
             const todayEntries = timesheetEntries.filter(e => e.date === todayStr);
 
             if (todayEntries.length === 0) {
@@ -1505,7 +1732,7 @@
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.setAttribute("href", url);
-            link.setAttribute("download", `Chronos_Timesheet_${new Date().toISOString().split('T')[0]}.csv`);
+            link.setAttribute("download", `Chronos_Timesheet_${getLocalDateString()}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1515,7 +1742,7 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(timesheetEntries));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `Chronos_Timesheet_Backup_${new Date().toISOString().split('T')[0]}.json`);
+            downloadAnchor.setAttribute("download", `Chronos_Timesheet_Backup_${getLocalDateString()}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
@@ -1558,7 +1785,7 @@
     </script>
 
 <script>
-// ------------------- 独立高精多线程异步计时引擎 (基于绝对物理时间戳对齐，徹底修复休眠/关页Bug) -------------------
+// ------------------- 独立高精多线程异步计时引擎 (基于绝对物理时间戳对齐，彻底修复休眠、关屏、锁屏与卡片塌陷Bug) -------------------
 (function() {
     let activeTimers = [];
     try {
@@ -1566,7 +1793,7 @@
         if (saved) activeTimers = JSON.parse(saved);
     } catch (e) { console.error(e); }
 
-    // 历史数据格式兼容及平滑迁移逻辑
+    // 历史数据格式兼容及平滑迁移 logic
     activeTimers.forEach(t => {
         if (t.accumulatedSeconds === undefined) t.accumulatedSeconds = t.seconds || 0;
         if (t.accumulatedPausedSeconds === undefined) t.accumulatedPausedSeconds = t.pausedSeconds || 0;
@@ -1576,7 +1803,7 @@
         if (t.memo === undefined) t.memo = '';
     });
 
-    // 初始化默认任务，赋予默认 memo
+    // 初始化默认任务，预置默认 memo
     if (activeTimers.length === 0) {
         activeTimers.push({
             id: 'timer-default',
@@ -1600,7 +1827,7 @@
         let pausedSeconds = t.accumulatedPausedSeconds || 0;
         const now = Date.now();
 
-        // 只有在已启动且未结算时，才结合当前的物理时钟差值计算，确保关网页、手机休眠时分秒不差
+        // 仅在任务处于进行中/挂起中且尚未执行“结算”时，通过物理时间戳偏移补全，完美抵抗切后台/关网页
         if (t.startTime && !t.endTime) {
             const elapsed = Math.floor((now - (t.lastStateChangeTime || now)) / 1000);
             if (t.isRunning) {
@@ -1615,7 +1842,7 @@
         };
     }
 
-    // 定时器主驱动轮询器 (仅高效率、低负载刷新前端 DOM，省电且绝对准确)
+    // 定时器主驱动轮询器 (仅高效率、低负载刷新前端 DOM)
     setInterval(() => {
         updateTimersDisplayOnly();
     }, 1000);
@@ -1632,7 +1859,7 @@
         return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
     }
 
-    // 仅精细刷新DOM元素中的特定文本，防止组件重绘丢失输入焦点
+    // 【绝对防闪烁与防变白修复】：检测当前按钮状态以及内部是否为空，若是空按钮则强制渲染样式！
     function updateTimersDisplayOnly() {
         activeTimers.forEach(t => {
             const stats = getTimerCurrentStats(t);
@@ -1650,12 +1877,19 @@
             
             const btnEl = document.getElementById(`btn-toggle-${t.id}`);
             if (btnEl) {
-                if (t.isRunning) {
-                    btnEl.innerHTML = `<i class="fa-solid fa-pause text-[10px]"></i> <span>暂停</span>`;
-                    btnEl.className = "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
-                } else {
-                    btnEl.innerHTML = `<i class="fa-solid fa-play text-[10px]"></i> <span>开始</span>`;
-                    btnEl.className = "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-sm shadow-indigo-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
+                const isCurrentlyRenderedRunning = btnEl.getAttribute('data-running') === 'true';
+                const isButtonEmpty = btnEl.innerHTML.trim() === "";
+                
+                // 【核心修复】：如果按钮内容为空，强制进行首次外观渲染写入，使其立即着色！
+                if (isCurrentlyRenderedRunning !== t.isRunning || isButtonEmpty) {
+                    btnEl.setAttribute('data-running', t.isRunning ? 'true' : 'false');
+                    if (t.isRunning) {
+                        btnEl.innerHTML = `<i class="fa-solid fa-pause text-[10px]"></i> <span>暂停</span>`;
+                        btnEl.className = "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
+                    } else {
+                        btnEl.innerHTML = `<i class="fa-solid fa-play text-[10px]"></i> <span>开始</span>`;
+                        btnEl.className = "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-sm shadow-indigo-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
+                    }
                 }
             }
         });
@@ -1674,6 +1908,110 @@
         }
     }
 
+    // ------------------- 暂停期高合规记录拦截窗口 -------------------
+    let pendingPauseTimerId = null;
+    let pendingPauseDuration = 0;
+
+    function triggerPauseActivityCapture(timerId, durationSeconds) {
+        pendingPauseTimerId = timerId;
+        pendingPauseDuration = durationSeconds;
+
+        const t = activeTimers.find(x => x.id === timerId);
+        if (!t) return;
+
+        const modal = document.getElementById('pause-modal');
+        if (!modal) return;
+
+        const minStr = Math.floor(durationSeconds / 60);
+        const secStr = durationSeconds % 60;
+        const durationText = minStr > 0 ? `${minStr}分${secStr}秒` : `${secStr}秒`;
+
+        document.getElementById('pause-modal-sub-info').innerHTML = `当前任务: <b>${t.name}</b> | 累计挂起暂停了 <span class="text-amber-500 font-bold font-mono">${durationText}</span>`;
+        document.getElementById('pause-custom-reason').value = '';
+
+        const tags = document.querySelectorAll('#pause-quick-tags .pause-tag');
+        tags.forEach(tag => tag.classList.remove('bg-primary/10', 'text-primary', 'border-primary/20'));
+        if (tags.length > 0) {
+            tags[0].classList.add('bg-primary/10', 'text-primary', 'border-primary/20');
+        }
+
+        modal.classList.remove('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const tags = document.querySelectorAll('#pause-quick-tags .pause-tag');
+        tags.forEach(tag => {
+            tag.addEventListener('click', () => {
+                tags.forEach(t => t.classList.remove('bg-primary/10', 'text-primary', 'border-primary/20'));
+                tag.classList.add('bg-primary/10', 'text-primary', 'border-primary/20');
+            });
+        });
+
+        const btnSave = document.getElementById('btn-pause-modal-save');
+        const btnSkip = document.getElementById('btn-pause-modal-skip');
+
+        if (btnSave) {
+            btnSave.addEventListener('click', () => {
+                const activeTag = document.querySelector('#pause-quick-tags .pause-tag.text-primary');
+                let reason = activeTag ? activeTag.getAttribute('data-reason') : '休息与调整 🍵';
+                let type = activeTag ? activeTag.getAttribute('data-type') : '休假';
+                const customReason = document.getElementById('pause-custom-reason').value.trim();
+                if (customReason) {
+                    reason = customReason;
+                }
+
+                writePauseRecordToDatabase(reason, type);
+                
+                document.getElementById('pause-modal').classList.add('hidden');
+                refreshListDOM();
+                renderTeamsSchedule();
+            });
+        }
+
+        if (btnSkip) {
+            btnSkip.addEventListener('click', () => {
+                document.getElementById('pause-modal').classList.add('hidden');
+                refreshListDOM();
+                renderTeamsSchedule();
+            });
+        }
+    });
+
+    function writePauseRecordToDatabase(reason, type) {
+        const t = activeTimers.find(x => x.id === pendingPauseTimerId);
+        if (!t) return;
+
+        const now = Date.now();
+        const startSec = now - (pendingPauseDuration * 1000);
+        const startDate = new Date(startSec);
+        const endDate = new Date(now);
+
+        const formatTime = (d) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        const preciseHours = parseFloat((pendingPauseDuration / 3600).toFixed(2));
+
+        const pauseEntry = {
+            id: 'pause-' + Date.now() + Math.random(),
+            date: getLocalDateString(endDate),
+            type: type,
+            start: formatTime(startDate),
+            end: formatTime(endDate),
+            project: `⏸ [暂停记录] ${t.name}`,
+            customer: "系统自动记录",
+            sapModule: "PAUSE",
+            priority: "low",
+            notes: `暂停说明: ${reason}\n在追踪任务「${t.name}」期间发生的挂起暂停时段。`,
+            duration: preciseHours > 0 ? preciseHours : 0.01
+        };
+
+        timesheetEntries.unshift(pauseEntry);
+        saveToLocalStorage();
+
+        renderTable();
+        updateKPIs();
+        initOrUpdateCharts();
+        showToast("已将暂停期间做的事情写入工时表！");
+    }
+
     // 生成平铺控制台任务列表 HTML
     function generateTimerListHTML(timers) {
         let html = '';
@@ -1682,8 +2020,16 @@
             const displaySecs = formatTimeStr(stats.seconds);
             const displayPause = formatTimeStr(stats.pausedSeconds);
             
+            // 💡 核心修复：直接在模板生成阶段就赋予完美的渐变背景和图标，保证首次载入绝对不发白、不闪烁！
+            const btnClass = t.isRunning 
+                ? "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1"
+                : "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-sm shadow-indigo-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
+            const btnContent = t.isRunning
+                ? `<i class="fa-solid fa-pause text-[10px]"></i> <span>暂停</span>`
+                : `<i class="fa-solid fa-play text-[10px]"></i> <span>开始</span>`;
+            
             html += `
-                <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex flex-col justify-between gap-3 hover:shadow-md transition-all duration-300">
+                <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex flex-col justify-between gap-3 hover:shadow-md transition-all duration-300 animate-fade-in">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-1.5 max-w-[180px] overflow-hidden">
                             <span class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate" title="${t.name}">
@@ -1709,7 +2055,7 @@
                         <div class="flex flex-col">
                             <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">■ 结束时间</span>
                             <span class="font-semibold text-slate-600 dark:text-slate-300 truncate mt-0.5" id="endtime-display-${t.id}">
-                                ${t.endTime ? t.endTime : (t.isRunning ? '计费进行中...' : (t.startTime ? '暂停挂起中' : '未开始'))}
+                                ${t.endTime ? t.endTime : (t.isRunning ? '进行中...' : (t.startTime ? '暂停挂起中' : '未开始'))}
                             </span>
                         </div>
                         <div class="flex flex-col border-t border-slate-100 dark:border-slate-800/60 pt-1.5 mt-1.5">
@@ -1731,9 +2077,8 @@
                     <!-- 美化后的动作控制栏 (全尺寸更易点击) -->
                     <div class="flex items-center gap-2 mt-1">
                         <!-- 开始/暂停 动态渐变按钮 -->
-                        <button id="btn-toggle-${t.id}" onclick="window.customTimerActions.toggle('${t.id}')" class="flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white transition-all duration-300 flex items-center justify-center gap-1 shadow-sm ${t.isRunning ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-amber-500/10 active:scale-95' : 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-indigo-500/10 active:scale-95'}">
-                            <i class="fa-solid ${t.isRunning ? 'fa-pause' : 'fa-play'}"></i>
-                            <span>${t.isRunning ? '暂停' : '开始'}</span>
+                        <button id="btn-toggle-${t.id}" data-running="${t.isRunning ? 'true' : 'false'}" onclick="window.customTimerActions.toggle('${t.id}')" class="${btnClass}">
+                            ${btnContent}
                         </button>
                         
                         <!-- 极简高雅重置按钮 -->
@@ -1753,6 +2098,291 @@
         return html;
     }
 
+    // ------------------- 【可调日期的高精度日程排班控制核心】 -------------------
+    let selectedScheduleDate = getLocalDateString(); // 💡 引入控制排班表的全局选择状态，默认为今天
+
+    window.changeScheduleDate = function(val) {
+        if (!val) return;
+        selectedScheduleDate = val;
+        renderTeamsSchedule();
+        showToast(`已切换排班视图至 ${val}`, "info");
+    };
+
+    window.setScheduleDateToToday = function() {
+        const todayStr = getLocalDateString();
+        selectedScheduleDate = todayStr;
+        const inputEl = document.getElementById('schedule-date-input');
+        if (inputEl) inputEl.value = todayStr;
+        renderTeamsSchedule();
+        showToast("已一键回到今天！", "success");
+    };
+
+    // ------------------- 【高精并排算法】Teams 排班日程表核心绘制引擎 (完美解决多任务物理交叉，左右等宽并列排开) -------------------
+    function renderTeamsSchedule() {
+        const gridContainer = document.getElementById('schedule-grid-container');
+        if (!gridContainer) return;
+
+        gridContainer.innerHTML = '';
+
+        // 💡 彻底支持动态日期对齐，过滤出用户在日期选择框里挑中的特定一天的工时数据
+        const todayEntries = timesheetEntries.filter(e => e.date === selectedScheduleDate);
+
+        const startHour = 6;
+        const endHour = 24;
+        const totalMinutes = (endHour - startHour) * 60;
+        const gridHeight = 1200; // 锁定基准高度刻度为1200px
+
+        // 1. 绘制 24小时 刻度左轴及背景平行参考虚线
+        const scaleTrack = document.createElement('div');
+        scaleTrack.className = "absolute inset-0 pointer-events-none z-0";
+        gridContainer.appendChild(scaleTrack);
+
+        for (let h = startHour; h < endHour; h++) {
+            const percent = ((h - startHour) / (endHour - startHour)) * 100;
+            
+            const label = document.createElement('div');
+            label.className = "absolute text-[10px] font-mono text-slate-400 dark:text-slate-500 left-3 select-none";
+            label.style.top = `calc(${percent}% + 4px)`;
+            label.innerText = `${String(h).padStart(2, '0')}:00`;
+            scaleTrack.appendChild(label);
+
+            const line = document.createElement('div');
+            line.className = "absolute left-16 right-0 border-t border-slate-200/40 dark:border-slate-800/40";
+            line.style.top = `${percent}%`;
+            scaleTrack.appendChild(line);
+
+            const halfLine = document.createElement('div');
+            halfLine.className = "absolute left-16 right-0 border-t border-dashed border-slate-100/20 dark:border-slate-800/20";
+            halfLine.style.top = `${percent + (50 / (endHour - startHour))}%`;
+            scaleTrack.appendChild(halfLine);
+        }
+
+        // 2. 映射今日时间块实体
+        const events = todayEntries.map(e => {
+            const [sh, sm] = e.start.split(':').map(Number);
+            const [eh, em] = e.end.split(':').map(Number);
+            
+            let startMin = sh * 60 + sm;
+            let endMin = eh * 60 + em;
+            if (endMin <= startMin) {
+                endMin = startMin + 10; // 优化：将极短/0分钟任务在时间轴上的默认投影宽度缩减为 10 分钟
+            }
+            return {
+                id: e.id,
+                title: e.project,
+                notes: e.notes,
+                type: e.type,
+                start: e.start,
+                end: e.end,
+                sapModule: e.sapModule,
+                startMin: startMin,
+                endMin: endMin
+            };
+        });
+
+        const drawableEvents = events.filter(ev => ev.startMin >= startHour * 60 && ev.endMin <= endHour * 60);
+
+        // 按照开始时间升序，同起点下按持续时间长短降序（保证长柱子排在左侧）
+        drawableEvents.sort((a, b) => a.startMin - b.startMin || b.endMin - a.endMin);
+
+        // 3. 【无Bug核心：冲突图连通分支算法】
+        // 彻底解决由于数组插入次序问题导致的时间冲突未合并 Bug
+        let clusters = [];
+        let visited = new Set();
+
+        function dfs(event, currentCluster) {
+            visited.add(event.id);
+            currentCluster.push(event);
+            drawableEvents.forEach(other => {
+                if (!visited.has(other.id)) {
+                    // 只要有任何交叉，判定为冲突并归在同一等高重叠区内
+                    let overlaps = event.startMin < other.endMin && event.endMin > other.startMin;
+                    if (overlaps) {
+                        dfs(other, currentCluster);
+                    }
+                }
+            });
+        }
+
+        drawableEvents.forEach(event => {
+            if (!visited.has(event.id)) {
+                let currentCluster = [];
+                dfs(event, currentCluster);
+                clusters.push(currentCluster);
+            }
+        });
+
+        // 4. 【Outlook / Teams 等宽分栏着色泳道算法】
+        // 对每个成簇的冲突时段进行分栏对齐
+        clusters.forEach(cluster => {
+            cluster.sort((a, b) => a.startMin - b.startMin || b.endMin - a.endMin);
+
+            let lanes = []; // 每一项存储该泳道当前占用的最晚结束时间
+            cluster.forEach(event => {
+                let placed = false;
+                for (let i = 0; i < lanes.length; i++) {
+                    // 如果当前事件的开始时间大于或等于该泳道已有的最晚结束时间，可放入该栏
+                    if (event.startMin >= lanes[i]) {
+                        event.colIdx = i;
+                        lanes[i] = event.endMin; // 更新该泳道最晚时间
+                        placed = true;
+                        break;
+                    }
+                }
+                if (!placed) {
+                    event.colIdx = lanes.length;
+                    lanes.push(event.endMin);
+                }
+            });
+
+            const totalColumns = lanes.length;
+
+            // 水平方向等分定位，确保无论有多少个冲突活动，全部都是左右完美等宽并排！
+            cluster.forEach(event => {
+                event.left = (event.colIdx / totalColumns) * 100;
+                event.width = (1 / totalColumns) * 100;
+            });
+        });
+
+        const cardsTrack = document.createElement('div');
+        cardsTrack.className = "absolute inset-0 left-16 z-10";
+        gridContainer.appendChild(cardsTrack);
+
+        drawableEvents.forEach(ev => {
+            const topPx = ((ev.startMin - startHour * 60) / totalMinutes) * gridHeight;
+            let heightPx = ((ev.endMin - ev.startMin) / totalMinutes) * gridHeight;
+            
+            // 设定最小物理高度：仅为24px！
+            if (heightPx < 24) {
+                heightPx = 24;
+            }
+
+            const card = document.createElement('div');
+            card.className = "absolute rounded-lg p-1.5 shadow-sm border text-white transition-all duration-300 select-none hover:shadow-md hover:scale-[1.01] hover:z-20 cursor-pointer flex flex-col justify-center overflow-hidden";
+            card.style.top = `${topPx}px`;
+            card.style.height = `${heightPx}px`;
+            
+            // 确保坐标系万无一失
+            const lOffset = ev.left !== undefined ? ev.left : 0;
+            const wOffset = ev.width !== undefined ? ev.width : 100;
+            card.style.left = `calc(${lOffset}% + 3px)`;
+            card.style.width = `calc(${wOffset}% - 6px)`;
+
+            let skinClass = "from-slate-500 to-slate-600 border-slate-400/30";
+            let typeBadge = ev.type;
+
+            if (ev.sapModule === 'PAUSE') {
+                skinClass = "from-amber-500/80 to-orange-600/80 border-amber-400/40 text-amber-50";
+                typeBadge = "暂停活动";
+            } else {
+                if (ev.type === '开发') skinClass = "from-indigo-500/90 to-purple-600/90 border-indigo-400/40";
+                if (ev.type === '会议') skinClass = "from-emerald-500/90 to-teal-600/90 border-emerald-400/40";
+                if (ev.type === '学习') skinClass = "from-pink-500/90 to-rose-600/90 border-pink-400/40";
+                if (ev.type === 'Support') skinClass = "from-cyan-500/90 to-blue-600/90 border-cyan-400/40";
+            }
+
+            card.className += ` bg-gradient-to-r ${skinClass}`;
+            card.onclick = () => openEditActivityModal(ev.id);
+
+            // 【自适应高精卡片排版逻辑】
+            if (heightPx < 50) {
+                // 单行横向紧凑模式：将标题与分类徽章完美横向并列，适合短时间或0分钟高频测试任务
+                card.innerHTML = `
+                    <div class="flex items-center justify-between w-full h-full text-[10px] leading-none">
+                        <div class="flex items-center gap-1.5 truncate pr-2">
+                            <span class="px-1 py-0.5 rounded bg-white/20 text-[8px] font-extrabold uppercase tracking-wider">${typeBadge}</span>
+                            <span class="font-bold truncate text-white" title="${ev.title}">${ev.title}</span>
+                        </div>
+                        <span class="font-mono text-[9px] opacity-90 flex-shrink-0">${ev.start}-${ev.end}</span>
+                    </div>
+                `;
+            } else {
+                // 标准高度卡片：多行经典垂直排版
+                card.innerHTML = `
+                    <div class="flex flex-col h-full justify-between leading-tight text-[11px] py-0.5">
+                        <div class="truncate">
+                            <div class="flex items-center justify-between text-[9px] font-bold opacity-90 mb-1">
+                                <span class="px-1 py-0.5 rounded bg-white/20 uppercase tracking-wider">${typeBadge}</span>
+                                <span class="font-mono">${ev.start} - ${ev.end}</span>
+                            </div>
+                            <h5 class="font-bold tracking-tight text-white line-clamp-2 leading-snug text-xs">${ev.title}</h5>
+                        </div>
+                        ${heightPx > 65 ? `<p class="text-[9px] opacity-75 truncate border-t border-white/10 pt-1 mt-1">${ev.notes || '-'}</p>` : ''}
+                    </div>
+                `;
+            }
+            cardsTrack.appendChild(card);
+        });
+    }
+
+    // ------------------- 卡片自定义编辑弹窗模块 -------------------
+    window.openEditActivityModal = function(id) {
+        const entry = timesheetEntries.find(e => e.id == id);
+        if (!entry) return;
+
+        document.getElementById('edit-act-id').value = entry.id;
+        document.getElementById('edit-act-project').value = entry.project;
+        document.getElementById('edit-act-date').value = entry.date;
+        document.getElementById('edit-act-type').value = entry.type;
+        document.getElementById('edit-act-start').value = entry.start;
+        document.getElementById('edit-act-end').value = entry.end;
+        document.getElementById('edit-act-notes').value = entry.notes;
+
+        document.getElementById('edit-activity-modal').classList.remove('hidden');
+    };
+
+    window.closeEditActivityModal = function() {
+        document.getElementById('edit-activity-modal').classList.add('hidden');
+    };
+
+    window.handleActivityBlockUpdate = function(e) {
+        e.preventDefault();
+        const id = document.getElementById('edit-act-id').value;
+        const entry = timesheetEntries.find(item => item.id == id);
+        if (!entry) return;
+
+        entry.project = document.getElementById('edit-act-project').value;
+        entry.date = document.getElementById('edit-act-date').value;
+        entry.type = document.getElementById('edit-act-type').value;
+        entry.start = document.getElementById('edit-act-start').value;
+        entry.end = document.getElementById('edit-act-end').value;
+        entry.notes = document.getElementById('edit-act-notes').value;
+
+        const [startH, startM] = entry.start.split(':').map(Number);
+        const [endH, endM] = entry.end.split(':').map(Number);
+        let totalHours = (endH + endM/60) - (startH + startM/60);
+        if (startH <= 12 && endH >= 13 && entry.sapModule !== 'PAUSE') {
+            totalHours -= 1;
+        }
+        entry.duration = Math.max(0.1, parseFloat(totalHours.toFixed(2)));
+
+        saveToLocalStorage();
+        closeEditActivityModal();
+        
+        renderTable();
+        updateKPIs();
+        initOrUpdateCharts();
+        renderTeamsSchedule();
+        
+        showToast("活动数据已成功更新！", "success");
+    };
+
+    window.deleteActivityBlockFromModal = function() {
+        const id = document.getElementById('edit-act-id').value;
+        showConfirm("您确定要永久删除此段时间流记录吗？", () => {
+            timesheetEntries = timesheetEntries.filter(item => item.id != id);
+            saveToLocalStorage();
+            closeEditActivityModal();
+
+            renderTable();
+            updateKPIs();
+            initOrUpdateCharts();
+            renderTeamsSchedule();
+
+            showToast("记录已永久删除", "warning");
+        });
+    };
+
     function refreshListDOM() {
         const listBox = document.getElementById('main-dashboard-timers-grid');
         if (listBox) {
@@ -1761,10 +2391,9 @@
         updateTimersDisplayOnly();
     }
 
-    // 暴露为全局函数，以便切回 Dashboard 时调用刷新
     window.refreshTimerConsole = refreshListDOM;
+    window.renderTeamsSchedule = renderTeamsSchedule;
 
-    // 初始化按钮添加事件
     function initAddButtons() {
         const btnAdd = document.getElementById('btn-add-timer-main');
         if (btnAdd) {
@@ -1788,12 +2417,13 @@
                 });
                 localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
                 refreshListDOM();
+                renderTeamsSchedule();
             });
         }
         refreshListDOM();
+        renderTeamsSchedule();
     }
 
-    // 智能自动化绝对时间控制引擎
     window.customTimerActions = {
         toggle: function(id) {
             const t = activeTimers.find(x => x.id === id);
@@ -1804,31 +2434,35 @@
             const stats = getTimerCurrentStats(t);
             
             if (!t.isRunning) {
-                // 启动或从暂停中恢复
-                if (!t.startTime || t.accumulatedSeconds === 0) {
+                const isFirstStart = !t.startTime || t.accumulatedSeconds === 0;
+                
+                if (isFirstStart) {
                     t.startTime = nowTimeFull; 
                     t.accumulatedSeconds = 0;
                     t.accumulatedPausedSeconds = 0;
                 } else {
-                    // 将最近的一段挂起时间持久化归档入 accumulatedPausedSeconds
-                    t.accumulatedPausedSeconds = stats.pausedSeconds;
+                    const pauseDuration = Math.floor((now - t.lastStateChangeTime) / 1000);
+                    if (pauseDuration > 1) {
+                        t.accumulatedPausedSeconds = stats.pausedSeconds;
+                        triggerPauseActivityCapture(t.id, pauseDuration);
+                    }
                 }
                 t.isRunning = true;
                 t.endTime = ''; 
                 t.lastStateChangeTime = now;
             } else {
-                // 暂停：将最近运行的一段物理时间持久化归档入 accumulatedSeconds
                 t.accumulatedSeconds = stats.seconds;
                 t.isRunning = false;
                 t.lastStateChangeTime = now;
+                showToast("任务已暂停，计时归档 ⏸", "info");
             }
             
-            // 冗余写入 seconds 与 pausedSeconds
             t.seconds = stats.seconds;
             t.pausedSeconds = stats.pausedSeconds;
 
             localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
             refreshListDOM();
+            renderTeamsSchedule();
         },
 
         reset: function(id) {
@@ -1844,6 +2478,7 @@
                 t.lastStateChangeTime = 0;
                 localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
                 refreshListDOM();
+                renderTeamsSchedule();
             }
         },
 
@@ -1851,9 +2486,9 @@
             activeTimers = activeTimers.filter(x => x.id !== id);
             localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
             refreshListDOM();
+            renderTeamsSchedule();
         },
 
-        // 修改标题
         editTitle: function(id) {
             const t = activeTimers.find(x => x.id === id);
             if (!t) return;
@@ -1862,10 +2497,10 @@
                 t.name = newName.trim();
                 localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
                 refreshListDOM();
+                renderTeamsSchedule();
             }
         },
 
-        // 更新备注并保存
         updateMemo: function(id, val) {
             const t = activeTimers.find(x => x.id === id);
             if (t) {
@@ -1887,7 +2522,6 @@
             const nowTimeFull = getNowFullTimeStr();
             const now = Date.now();
             
-            // 结算时自动归档当前的运行状态
             if (t.isRunning) {
                 t.accumulatedSeconds = stats.seconds;
                 t.isRunning = false;
@@ -1905,21 +2539,18 @@
             const durationString = formatTimeStr(stats.seconds);
             const pauseString = formatTimeStr(stats.pausedSeconds);
 
-            // 格式化审计明细日志写入工时备注，前置用户键入的自定义备注 Memo
             const userMemoText = t.memo ? t.memo.trim() : "";
             const auditNotes = (userMemoText ? `${userMemoText}\n\n` : '') + 
-                               `【高精秒级同步入账】\n` + 
                                `▶ 开始时间: ${t.startTime}\n` +
                                `⏸ 挂起暂停: ${pauseString}\n` +
                                `⏱ 有效持续: ${durationString}\n` +
                                `■ 结束时间: ${t.endTime}\n` +
                                `---------------------\n` +
-                               `独立跟踪任务: ${t.name}`;
+                               ` ${t.name}`;
 
-            // 构建完美的工时数据库行
             const newRecord = {
                 id: String(Date.now()),
-                date: new Date().toISOString().split('T')[0],
+                date: getLocalDateString(),
                 type: "开发", 
                 start: t.startTime.substring(0, 5), 
                 end: t.endTime.substring(0, 5),     
@@ -1931,7 +2562,6 @@
                 duration: preciseHours > 0 ? preciseHours : 0.1 
             };
 
-            // 1. 无缝灌入全局主工时数据库头部并持久化
             if (typeof timesheetEntries !== 'undefined' && Array.isArray(timesheetEntries)) {
                 timesheetEntries.unshift(newRecord);
                 if (typeof saveToLocalStorage === 'function') {
@@ -1939,7 +2569,6 @@
                 }
             }
 
-            // 2. 调度执行原系统的刷新与计算引擎
             const refreshRoutines = [
                 { name: 'renderTable', action: () => renderTable() },
                 { name: 'updateKPIs', action: () => updateKPIs() },
@@ -1952,15 +2581,12 @@
                 }
             });
 
-            // 3. 自动切页到工时表，查看录入成果
             if (typeof switchTab === 'function') {
                 switchTab('timesheet');
             }
 
-            // 使用优雅自定义通知替代原生阻塞弹窗
-            showToast(`🎉 结算入账成功！\n有效工作时间: ${durationString}`, "success");
+            showToast("🎉 结算入账成功！\n有效工作时间: " + durationString, "success");
             
-            // 重置与复位该卡片线程的状态机并清空当前备注
             t.seconds = 0;
             t.startTime = '';
             t.endTime = '';
@@ -1971,13 +2597,23 @@
             t.memo = '';
             localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
             refreshListDOM();
+            renderTeamsSchedule();
         }
     };
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initAddButtons);
+        document.addEventListener('DOMContentLoaded', () => {
+            initAddButtons();
+            // 在页面完全加载后，精准设定一次日期选择器的初始默认值为本地当前日期
+            const inp = document.getElementById('schedule-date-input');
+            if (inp) inp.value = selectedScheduleDate;
+        });
     } else {
-        setTimeout(initAddButtons, 200);
+        setTimeout(() => {
+            initAddButtons();
+            const inp = document.getElementById('schedule-date-input');
+            if (inp) inp.value = selectedScheduleDate;
+        }, 200);
     }
 })();
 </script>
