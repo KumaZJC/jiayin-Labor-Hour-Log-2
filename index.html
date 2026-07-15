@@ -219,7 +219,7 @@
                                 <span class="text-xs font-semibold text-slate-400 dark:text-slate-500 hidden sm:inline">选择日期:</span>
                                 <input type="date" id="schedule-date-input" onchange="window.changeScheduleDate(this.value)" class="px-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/25 cursor-pointer font-medium">
                             </div>
-                            <button onclick="switchTab('timesheet')" class="px-3.5 py-1.5 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-[10.5px] font-bold rounded-lg transition-all flex items-center gap-1">
+                            <button onclick="switchTab('timesheet')" class="px-3.5 py-1.5 border border-slate-200/50 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-[10.5px] font-bold rounded-lg transition-all flex items-center gap-1">
                                 <i class="fa-solid fa-plus text-[9px]"></i> 手动添加时间记录
                             </button>
                         </div>
@@ -308,15 +308,15 @@
                             <h4 class="font-bold text-sm tracking-tight mb-4"><i class="fa-solid fa-bolt mr-2 text-warning"></i>Smart Templates & AI Action</h4>
                             <p class="text-xs text-slate-400 mb-4">Quick actions to duplicate entries or generate summaries with a click.</p>
                             <div class="grid grid-cols-2 gap-3 mb-4">
-                                <button onclick="duplicateYesterday()" class="flex items-center justify-center gap-2 p-3 text-xs font-semibold rounded-apple border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-left">
+                                <button onclick="duplicateYesterday()" class="flex items-center justify-center gap-2 p-3 text-xs font-semibold rounded-apple border border-slate-200/50 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-left">
                                     <i class="fa-solid fa-copy text-primary"></i> Clone Yesterday
                                 </button>
-                                <button onclick="loadDefaultTemplate()" class="flex items-center justify-center gap-2 p-3 text-xs font-semibold rounded-apple border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-left">
+                                <button onclick="loadDefaultTemplate()" class="flex items-center justify-center gap-2 p-3 text-xs font-semibold rounded-apple border border-slate-200/50 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-left">
                                     <i class="fa-solid fa-star text-amber-500"></i> Standard Day Template
                                 </button>
                             </div>
                         </div>
-                        <div class="border-t border-slate-200/50 dark:border-slate-800/50 pt-4 mt-auto">
+                        <div class="border-t border-slate-200/50 dark:border-slate-800 pt-4 mt-auto">
                             <div class="flex items-center justify-between mb-2">
                                 <span class="text-xs font-bold text-slate-500">AI Daily Summary Draft</span>
                                 <button onclick="generateDailySummary()" class="text-xs font-bold text-primary hover:underline">
@@ -350,14 +350,15 @@
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold text-slate-500 mb-1">工时类型</label>
-                                    <select id="ts-type" onchange="checkCustomType(this)" class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50">
-                                        <option value="开发">开发</option>
-                                        <option value="会议">会议</option>
-                                        <option value="学习">学习</option>
-                                        <option value="Support">Support</option>
-                                        <option value="休假">休假</option>
-                                        <option value="__CUSTOM__" class="text-primary font-bold">+ 自定义添加...</option>
-                                    </select>
+                                    <!-- 【核心改进：添加右侧一键删除功能按钮】 -->
+                                    <div class="flex gap-1.5">
+                                        <select id="ts-type" onchange="checkCustomType(this)" class="flex-1 text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:outline-none">
+                                            <!-- JS 动态渲染 -->
+                                        </select>
+                                        <button type="button" onclick="deleteCurrentType()" title="删除当前选中的工时类型" class="px-2.5 bg-danger/10 hover:bg-danger/20 text-danger rounded-xl border border-danger/25 transition-all flex items-center justify-center">
+                                            <i class="fa-solid fa-trash-can text-xs"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -416,12 +417,7 @@
                                 <div class="flex flex-wrap gap-2 items-center">
                                     <input type="text" id="search-input" oninput="renderTable()" placeholder="Search project, notes..." class="px-3.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-white/40 focus:outline-none w-48">
                                     <select id="filter-type" onchange="renderTable()" class="px-3.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-white/40">
-                                        <option value="All">All Types</option>
-                                        <option value="开发">开发</option>
-                                        <option value="会议">会议</option>
-                                        <option value="Support">Support</option>
-                                        <option value="学习">学习</option>
-                                        <option value="休假">休假</option>
+                                        <!-- JS 动态渲染 -->
                                     </select>
                                 </div>
                                 <div class="flex gap-2">
@@ -559,6 +555,26 @@
                             </button>
                         </div>
                     </form>
+
+                    <!-- 新增：全分类类型管理区域 (方案 B) -->
+                    <div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+                        <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-tags text-primary"></i> 工时类型分类管理
+                        </h4>
+                        <p class="text-xs text-slate-400 mb-4">您可以自由管理全站的工时类别。无论是系统默认的还是自定义的类型，均可在此一键移除（请保留至少 1 个分类以保证表单运转）。</p>
+                        
+                        <!-- 新增快捷输入框 -->
+                        <div class="flex gap-2 mb-5">
+                            <input type="text" id="new-type-input" placeholder="输入新的分类名称，例如：技术支持..." class="flex-1 px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                            <button type="button" onclick="addNewTypeFromSettings()" class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:scale-105 active:scale-95 shadow-md shadow-primary/10 transition-all flex items-center gap-1">
+                                <i class="fa-solid fa-plus text-[10px]"></i> 快捷添加
+                            </button>
+                        </div>
+
+                        <div id="custom-type-list" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <!-- JS 动态注入 -->
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -614,11 +630,7 @@
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-400 mb-1">工时类型</label>
                         <select id="edit-act-type" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none">
-                            <option value="开发">开发</option>
-                            <option value="会议">会议</option>
-                            <option value="学习">学习</option>
-                            <option value="Support">Support</option>
-                            <option value="休假">休假</option>
+                            <!-- JS 动态渲染 -->
                         </select>
                     </div>
                 </div>
@@ -696,6 +708,16 @@
             const m = String(date.getMonth() + 1).padStart(2, '0');
             const d = String(date.getDate()).padStart(2, '0');
             return `${y}-${m}-${d}`;
+        }
+
+        // ------------------- HTML 转义安全过滤 -------------------
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;')
+                      .replace(/'/g, '&#039;');
         }
 
         // ------------------- 优雅提示 -------------------
@@ -1176,7 +1198,7 @@
             return Math.max(0, parseFloat(totalHours.toFixed(1)));
         }
 
-        // ------------------- 自定义工时类型管理 -------------------
+        // ------------------- 自定义工时类型管理 (全站完美深度联动核心) -------------------
         function initTypeDropdown() {
             const storedTypes = localStorage.getItem('chronos_custom_types');
             if (storedTypes) {
@@ -1185,30 +1207,71 @@
             renderTypeOptions();
         }
 
+        // 全站所有工时下拉菜单与筛选框的统一数据渲染器
         function renderTypeOptions() {
             const selectEl = document.getElementById('ts-type');
-            if (!selectEl) return;
-            const currentVal = selectEl.value;
-            selectEl.innerHTML = '';
-            
-            customTypes.forEach(type => {
-                const opt = document.createElement('option');
-                opt.value = type;
-                opt.innerText = type;
-                selectEl.appendChild(opt);
-            });
-            
-            const customOpt = document.createElement('option');
-            customOpt.value = '__CUSTOM__';
-            customOpt.innerText = '+ 自定义添加...';
-            customOpt.className = 'text-primary font-bold';
-            selectEl.appendChild(customOpt);
-            
-            if (customTypes.includes(currentVal)) {
-                selectEl.value = currentVal;
+            const editSelectEl = document.getElementById('edit-act-type');
+            const filterSelectEl = document.getElementById('filter-type');
+
+            // 1. 渲染主填报表单的类型
+            if (selectEl) {
+                const currentVal = selectEl.value;
+                selectEl.innerHTML = '';
+                customTypes.forEach(type => {
+                    const opt = document.createElement('option');
+                    opt.value = type;
+                    opt.innerText = type;
+                    selectEl.appendChild(opt);
+                });
+                const customOpt = document.createElement('option');
+                customOpt.value = '__CUSTOM__';
+                customOpt.innerText = '+ 自定义添加...';
+                customOpt.className = 'text-primary font-bold';
+                selectEl.appendChild(customOpt);
+
+                if (customTypes.includes(currentVal)) {
+                    selectEl.value = currentVal;
+                } else {
+                    selectEl.value = customTypes[0] || '开发';
+                }
+            }
+
+            // 2. 渲染编辑弹窗内的类型
+            if (editSelectEl) {
+                const currentVal = editSelectEl.value;
+                editSelectEl.innerHTML = '';
+                customTypes.forEach(type => {
+                    const opt = document.createElement('option');
+                    opt.value = type;
+                    opt.innerText = type;
+                    editSelectEl.appendChild(opt);
+                });
+                if (customTypes.includes(currentVal)) {
+                    editSelectEl.value = currentVal;
+                } else {
+                    editSelectEl.value = customTypes[0] || '开发';
+                }
+            }
+
+            // 3. 渲染主列表上的筛选菜单
+            if (filterSelectEl) {
+                const currentVal = filterSelectEl.value;
+                filterSelectEl.innerHTML = '<option value="All">All Types</option>';
+                customTypes.forEach(type => {
+                    const opt = document.createElement('option');
+                    opt.value = type;
+                    opt.innerText = type;
+                    filterSelectEl.appendChild(opt);
+                });
+                if (currentVal === 'All' || customTypes.includes(currentVal)) {
+                    filterSelectEl.value = currentVal;
+                } else {
+                    filterSelectEl.value = 'All';
+                }
             }
         }
 
+        // 自定义添加工时类别交互
         function checkCustomType(selectObj) {
             if (selectObj.value === '__CUSTOM__') {
                 const newType = prompt("请输入新的工时类型名称：");
@@ -1217,13 +1280,108 @@
                     if (!customTypes.includes(trimmed)) {
                         customTypes.push(trimmed);
                         localStorage.setItem('chronos_custom_types', JSON.stringify(customTypes));
+                        showToast(`已成功添加自定义类型: ${trimmed}`, "success");
                     }
                     renderTypeOptions();
+                    renderCustomTypeManager(); // 同步渲染设置面板
                     selectObj.value = trimmed;
                 } else {
-                    selectObj.value = customTypes[0];
+                    selectObj.value = customTypes[0] || '开发';
                 }
             }
+        }
+
+        // 新增：直接在“工时类型”下拉框旁边删除当前选中分类的快捷交互（无任何默认类型保护限制）
+        function deleteCurrentType() {
+            const selectEl = document.getElementById('ts-type');
+            if (!selectEl) return;
+            
+            const selectedVal = selectEl.value;
+            if (!selectedVal || selectedVal === '__CUSTOM__') {
+                showToast("请选择一个具体的工时类型进行删除！", "warning");
+                return;
+            }
+
+            if (customTypes.length <= 1) {
+                showToast("必须保留至少一个工时类型，否则系统无法正常填报！", "warning");
+                return;
+            }
+
+            showConfirm(`确定要永久删除工时类型 "${selectedVal}" 吗？\n（历史已填报的记录将不受影响，仅从下拉列表中移除）`, () => {
+                customTypes = customTypes.filter(t => t !== selectedVal);
+                localStorage.setItem('chronos_custom_types', JSON.stringify(customTypes));
+                
+                // 统一同步刷新全站相关UI
+                renderTypeOptions();
+                if (typeof renderCustomTypeManager === 'function') {
+                    renderCustomTypeManager();
+                }
+                showToast(`已成功删除工时类型: ${selectedVal}`, 'success');
+            });
+        }
+
+        // 方案 B：渲染偏好设置面板的分类管理列表（全自主控制，完美兼容所有字符，支持删除任意核心或自定义分类）
+        function renderCustomTypeManager() {
+            const listEl = document.getElementById('custom-type-list');
+            if (!listEl) return;
+
+            if (customTypes.length === 0) {
+                listEl.innerHTML = `
+                    <div class="col-span-full py-4 text-center text-xs text-slate-400 dark:text-slate-500">
+                        暂无任何工时分类，请快捷添加一个
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = customTypes.map((type, idx) => `
+                <div class="flex items-center justify-between bg-slate-100 dark:bg-slate-850 p-2.5 px-3.5 rounded-xl text-xs border border-slate-200/40 dark:border-slate-800/60 shadow-sm animate-fade-in">
+                    <span class="font-semibold text-slate-700 dark:text-slate-300 truncate mr-2" title="${escapeHTML(type)}">${escapeHTML(type)}</span>
+                    <button type="button" onclick="removeCustomTypeByIndex(${idx})" class="text-danger hover:text-red-700 hover:scale-110 active:scale-95 transition-all p-1" title="删除 ${escapeHTML(type)}">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // 执行分类移除操作（通过 Index 索引直接删除，无任何默认限制拦截）
+        function removeCustomTypeByIndex(index) {
+            if (customTypes.length <= 1) {
+                showToast("必须保留至少一个工时类型，否则系统无法正常填报！", "warning");
+                return;
+            }
+
+            const typeToRemove = customTypes[index];
+            showConfirm(`确定要永久删除工时类型 "${typeToRemove}" 吗？（历史已录入该类型的工时记录将不受任何影响）`, () => {
+                customTypes.splice(index, 1);
+                localStorage.setItem('chronos_custom_types', JSON.stringify(customTypes));
+
+                // 统一同步全站渲染
+                renderTypeOptions();
+                renderCustomTypeManager();
+                showToast(`已成功删除工时类型: ${typeToRemove}`, 'success');
+            });
+        }
+
+        // 偏好设置中快捷添加分类的方法
+        function addNewTypeFromSettings() {
+            const inputEl = document.getElementById('new-type-input');
+            if (!inputEl) return;
+            const newType = inputEl.value.trim();
+            if (!newType) {
+                showToast("工时类型名称不能为空！", "warning");
+                return;
+            }
+            if (customTypes.includes(newType)) {
+                showToast("该工时类型已存在！", "warning");
+                return;
+            }
+            customTypes.push(newType);
+            localStorage.setItem('chronos_custom_types', JSON.stringify(customTypes));
+            inputEl.value = '';
+            renderTypeOptions();
+            renderCustomTypeManager();
+            showToast(`已成功添加工时分类: ${newType}`, "success");
         }
 
         function switchTab(targetTab) {
@@ -1255,11 +1413,14 @@
                     window.renderTeamsSchedule();
                 }
             } else if (targetTab === 'timesheet') {
+                renderTypeOptions(); // 保证切到填报面板时获取最新下拉列表
                 renderTable();
             } else if (targetTab === 'calendar') {
                 renderCalendar();
             } else if (targetTab === 'analytics') {
                 renderAnalyticsCharts();
+            } else if (targetTab === 'settings') {
+                renderCustomTypeManager(); // 切换到设置面板时刷新列表管理展示
             }
         }
 
@@ -1316,6 +1477,9 @@
         function editEntry(id) {
             const entry = timesheetEntries.find(item => item.id == id);
             if (!entry) return;
+
+            // 在加载数据进表单编辑前，先重绘下拉数据确保其存在于当前的列表中
+            renderTypeOptions();
 
             document.getElementById('entry-id').value = entry.id;
             document.getElementById('ts-date').value = entry.date;
@@ -1766,6 +1930,7 @@
             }
         }
 
+        // 绑定键盘快捷保存
         function initShortcutKeys() {
             window.addEventListener('keydown', (e) => {
                 if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -1781,6 +1946,13 @@
                 { id: "1", date: "2026-07-13", type: "开发", start: "09:00", end: "18:00", project: "某某项目", customer: "京东张三", sapModule: "CO", priority: "high", notes: "完成成本要素主数据的迁移配置与数据校验。", duration: 8 },
                 { id: "2", date: "2026-07-14", type: "会议", start: "10:00", end: "12:00", project: "架构对齐研讨会", customer: "陆泽 香肠哥", sapModule: "PS", priority: "medium", notes: "与 晓文 和 香肠哥 确认 Project Systems 设计框架。", duration: 2 }
             ];
+        }
+
+        // 申请通知权限
+        function requestNotificationPermission() {
+            if ("Notification" in window && Notification.permission === "default") {
+                Notification.requestPermission();
+            }
         }
     </script>
 
@@ -2046,7 +2218,7 @@
                         ` : ''}
                     </div>
                     
-                    <!-- 2x2 精细化时间流分析网格 -->
+                    <!-- 2x2 精细化时间流 analysis 网格 -->
                     <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50/50 dark:bg-slate-800/10 p-3 rounded-xl font-mono border border-slate-100 dark:border-slate-800/30">
                         <div class="flex flex-col">
                             <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">▶ 开始时间</span>
@@ -2320,6 +2492,9 @@
         const entry = timesheetEntries.find(e => e.id == id);
         if (!entry) return;
 
+        // 载入编辑模态框之前刷新一次选项
+        renderTypeOptions();
+
         document.getElementById('edit-act-id').value = entry.id;
         document.getElementById('edit-act-project').value = entry.project;
         document.getElementById('edit-act-date').value = entry.date;
@@ -2541,13 +2716,12 @@
 
             const userMemoText = t.memo ? t.memo.trim() : "";
             const auditNotes = (userMemoText ? `${userMemoText}\n\n` : '') + 
-                               `【高精秒级同步入账】\n` + 
                                `▶ 开始时间: ${t.startTime}\n` +
                                `⏸ 挂起暂停: ${pauseString}\n` +
                                `⏱ 有效持续: ${durationString}\n` +
                                `■ 结束时间: ${t.endTime}\n` +
                                `---------------------\n` +
-                               `独立跟踪任务: ${t.name}`;
+                               ` ${t.name}`;
 
             const newRecord = {
                 id: String(Date.now()),
