@@ -88,7 +88,7 @@
         }
     </style>
 </head>
-<body class="bg-bgLight text-slate-800 dark:bg-bgDark dark:text-slate-100 min-h-screen pb-24 md:pb-0">
+<body class="bg-bgLight text-slate-800 dark:bg-bgDark dark:text-slate-100 min-h-screen pb-20 md:pb-0">
 
     <!-- 全局优雅提示容器 -->
     <div id="global-toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none"></div>
@@ -199,14 +199,14 @@
 
                 <!-- 【今日日程排班视图】 - 支持日期选择与快速回今天 -->
                 <div class="glass p-6 rounded-apple shadow-sm border border-slate-200/50 dark:border-slate-800/50 animate-fade-in">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 2 border-slate-100 dark:border-slate-850 pb-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 border-b border-slate-100 dark:border-slate-850 pb-4">
                         <div class="flex items-center gap-3">
                             <div class="w-9 h-9 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
                                 <i class="fa-solid fa-calendar-week text-base"></i>
                             </div>
                             <div>
                                 <h4 class="font-bold text-sm tracking-tight flex items-center gap-2">
-                                    <span>排班日程视图 (Schedule View)</span>
+                                    <span>日程排班视图 (Schedule View)</span>
                                     <button onclick="window.setScheduleDateToToday()" title="快速切回今天" class="text-[10px] bg-primary/10 text-primary hover:bg-primary/20 px-2 py-0.5 rounded-full font-bold transition-all">今天</button>
                                 </h4>
                                 <p class="text-[11px] text-slate-400 dark:text-slate-500">微软排班级时间流，重合时间段左右无缝等宽并排</p>
@@ -233,7 +233,7 @@
                     </div>
                 </div>
 
-                <!-- 移动端专属快捷日程提醒 -->
+                <!-- 移动端专属快捷日程提醒 (电脑端已在侧边栏显示) -->
                 <div class="md:hidden grid grid-cols-1 gap-4">
                     <div class="glass p-4 rounded-apple bg-amber-50/30 dark:bg-amber-950/10 border border-amber-200/30">
                         <div class="flex items-center justify-between mb-2">
@@ -375,7 +375,7 @@
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-[11px] font-semibold text-slate-500 mb-1">项目 (Project)</label>
-                                    <input type="text" id="ts-project" required placeholder="例如：S/4HANA Migration" class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50">
+                                    <input type="text" id="ts-project" required placeholder="例如：S/4HANA Migration" class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold text-slate-500 mb-1">客户 (Customer)</label>
@@ -588,30 +588,6 @@
         </main>
     </div>
 
-    <!-- 📱 移动端底置快捷导航栏 (重新高能归位，完美适配全面屏) -->
-    <div class="md:hidden fixed bottom-0 left-0 right-0 glass border-t border-slate-200/50 dark:border-slate-800/50 flex items-center justify-around pt-3 pb-safe px-2 z-40 shadow-xl">
-        <button onclick="switchTab('dashboard')" data-mobile-btn="dashboard" class="mobile-nav-btn flex flex-col items-center gap-1 text-primary">
-            <i class="fa-solid fa-chart-pie text-lg"></i>
-            <span class="text-[9px] font-bold tracking-tight">Home</span>
-        </button>
-        <button onclick="switchTab('timesheet')" data-mobile-btn="timesheet" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400">
-            <i class="fa-solid fa-list-check text-lg"></i>
-            <span class="text-[9px] font-bold tracking-tight">Track</span>
-        </button>
-        <button onclick="switchTab('calendar')" data-mobile-btn="calendar" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400">
-            <i class="fa-solid fa-calendar-days text-lg"></i>
-            <span class="text-[9px] font-bold tracking-tight">Calendar</span>
-        </button>
-        <button onclick="switchTab('analytics')" data-mobile-btn="analytics" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400">
-            <i class="fa-solid fa-chart-line text-lg"></i>
-            <span class="text-[9px] font-bold tracking-tight">Charts</span>
-        </button>
-        <button onclick="switchTab('profile')" data-mobile-btn="profile" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-400">
-            <i class="fa-solid fa-sliders text-lg"></i>
-            <span class="text-[9px] font-bold tracking-tight">Set</span>
-        </button>
-    </div>
-
     <!-- 编辑活动高精弹窗 -->
     <div id="edit-activity-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
         <div class="glass max-w-md w-full p-6 rounded-apple shadow-2xl border border-slate-200/50 dark:border-slate-800/50 transform scale-95 transition-all duration-300">
@@ -676,7 +652,7 @@
         </div>
     </div>
 
-    <!-- 捕获暂停 activity 窗口 -->
+    <!-- 捕获暂停活动高合规弹窗 -->
     <div id="pause-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
         <div class="glass max-w-md w-full p-6 rounded-apple shadow-2xl border border-slate-200/50 dark:border-slate-800/50 transform scale-95 transition-all duration-300">
             <div class="flex items-center gap-3 mb-4">
@@ -819,6 +795,7 @@
             // 启动毫秒级时间以及会议提醒轮询器
             setInterval(checkReminders, 1000);
 
+            // 在页面加载时，给头像强制戴上“时间戳面具”，骗过浏览器缓存
             const timestamp = Date.now();
             const pcAvatar = document.getElementById('user-avatar-pc');
             const profileAvatar = document.getElementById('profile-avatar');
@@ -867,6 +844,7 @@
             localStorage.setItem('chronos_reminders', JSON.stringify(reminderList));
         }
 
+        // ------------------- 极健壮的标准 CSV RFC4180 双引号流解析器 -------------------
         function parseCSV(text) {
             const lines = [];
             let row = [""];
@@ -877,7 +855,7 @@
                 const next = text[i+1];
                 if (c === '"') {
                     if (inQuotes && next === '"') {
-                        row[row.length - 1] += '"'; 
+                        row[row.length - 1] += '"'; // 支持双引号转义
                         i++;
                     } else {
                         inQuotes = !inQuotes;
@@ -898,6 +876,7 @@
             return lines;
         }
 
+        // ------------------- 备份导入功能 (完美支持 CSV & JSON) -------------------
         function importFile(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1125,7 +1104,128 @@
             }, 6000);
         }
 
-        // ------------------- 快捷度 -------------------
+        // ------------------- 传统计时器一键录入工时 -------------------
+        function logTimerToTimesheet() {
+            if (timerSeconds < 60) {
+                showToast("当前计时时间不足 1 分钟，请稍后再试！", "warning");
+                return;
+            }
+
+            const now = new Date();
+            const endHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            
+            const startSec = now.getTime() - (timerSeconds * 1000);
+            const startDateObj = new Date(startSec);
+            const startHHMM = `${String(startDateObj.getHours()).padStart(2, '0')}:${String(startDateObj.getMinutes()).padStart(2, '0')}`;
+
+            if (timerInterval) {
+                document.getElementById('btn-timer-toggle').click();
+            }
+
+            switchTab('timesheet');
+            document.getElementById('ts-start').value = startHHMM;
+            document.getElementById('ts-end').value = endHHMM;
+            document.getElementById('ts-project').value = "计时器跟踪任务";
+            document.getElementById('ts-notes').value = `该记录通过左侧 Chronos 计时器一键转换生成，累计工作秒数: ${timerSeconds}s。`;
+            document.getElementById('ts-project').focus();
+        }
+
+        // ------------------- 工时保存与即时渲染 -------------------
+        function handleTimesheetSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('entry-id').value;
+            const date = document.getElementById('ts-date').value;
+            const type = document.getElementById('ts-type').value;
+            const start = document.getElementById('ts-start').value;
+            const end = document.getElementById('ts-end').value;
+            const project = document.getElementById('ts-project').value || "未命名项目";
+            const customer = document.getElementById('ts-customer').value || "内部客户";
+            const sapModule = document.getElementById('ts-sap-module').value || "None";
+            const priority = document.getElementById('ts-priority').value;
+            const notes = document.getElementById('ts-notes').value || "-";
+            const duration = calculateDuration();
+
+            if (id) {
+                const idx = timesheetEntries.findIndex(item => item.id == id);
+                if (idx !== -1) {
+                    timesheetEntries[idx] = { id, date, type, start, end, project, customer, sapModule, priority, notes, duration };
+                }
+            } else {
+                timesheetEntries.unshift({ id: Date.now().toString(), date, type, start, end, project, customer, sapModule, priority, notes, duration });
+            }
+
+            saveToLocalStorage();
+            resetForm();
+            renderTable();
+            updateKPIs();
+        }
+
+        function calculateDuration() {
+            const start = document.getElementById('ts-start').value;
+            const end = document.getElementById('ts-end').value;
+            if (!start || !end) return 0;
+
+            const [startH, startM] = start.split(':').map(Number);
+            const [endH, endM] = end.split(':').map(Number);
+            
+            let totalHours = (endH + endM/60) - (startH + startM/60);
+            
+            if (startH <= 12 && endH >= 13) {
+                totalHours -= 1; // 自动扣除1h午休
+            }
+            return Math.max(0, parseFloat(totalHours.toFixed(1)));
+        }
+
+        // ------------------- 自定义工时类型管理 -------------------
+        function initTypeDropdown() {
+            const storedTypes = localStorage.getItem('chronos_custom_types');
+            if (storedTypes) {
+                customTypes = JSON.parse(storedTypes);
+            }
+            renderTypeOptions();
+        }
+
+        function renderTypeOptions() {
+            const selectEl = document.getElementById('ts-type');
+            if (!selectEl) return;
+            const currentVal = selectEl.value;
+            selectEl.innerHTML = '';
+            
+            customTypes.forEach(type => {
+                const opt = document.createElement('option');
+                opt.value = type;
+                opt.innerText = type;
+                selectEl.appendChild(opt);
+            });
+            
+            const customOpt = document.createElement('option');
+            customOpt.value = '__CUSTOM__';
+            customOpt.innerText = '+ 自定义添加...';
+            customOpt.className = 'text-primary font-bold';
+            selectEl.appendChild(customOpt);
+            
+            if (customTypes.includes(currentVal)) {
+                selectEl.value = currentVal;
+            }
+        }
+
+        function checkCustomType(selectObj) {
+            if (selectObj.value === '__CUSTOM__') {
+                const newType = prompt("请输入新的工时类型名称：");
+                if (newType && newType.trim()) {
+                    const trimmed = newType.trim();
+                    if (!customTypes.includes(trimmed)) {
+                        customTypes.push(trimmed);
+                        localStorage.setItem('chronos_custom_types', JSON.stringify(customTypes));
+                    }
+                    renderTypeOptions();
+                    selectObj.value = trimmed;
+                } else {
+                    selectObj.value = customTypes[0];
+                }
+            }
+        }
+
         function switchTab(targetTab) {
             document.querySelectorAll('.page-panel').forEach(panel => {
                 panel.classList.add('hidden-panel');
@@ -1134,7 +1234,6 @@
             const targetPanel = document.getElementById(`panel-${targetTab}`);
             if (targetPanel) targetPanel.classList.remove('hidden-panel');
 
-            // PC 侧边栏高亮处理
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 if (btn.getAttribute('data-tab') === targetTab) {
                     btn.classList.add('text-primary', 'bg-primary/10');
@@ -1142,17 +1241,6 @@
                 } else {
                     btn.classList.remove('text-primary', 'bg-primary/10');
                     btn.classList.add('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-100');
-                }
-            });
-
-            // 📱 手机端底部导航栏高亮处理 (高能打通修复)
-            document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
-                if (btn.getAttribute('data-mobile-btn') === targetTab) {
-                    btn.classList.add('text-primary');
-                    btn.classList.remove('text-slate-400');
-                } else {
-                    btn.classList.remove('text-primary');
-                    btn.classList.add('text-slate-400');
                 }
             });
 
@@ -1309,6 +1397,7 @@
             });
         }
 
+        // ------------------- 复选框全选 -------------------
         function toggleSelectAll(master) {
             document.querySelectorAll('.entry-select').forEach(checkbox => checkbox.checked = master.checked);
         }
@@ -1696,7 +1785,7 @@
     </script>
 
 <script>
-// ------------------- 独立高精多线程异步计时引擎 (基于绝对物理时间戳对齐) -------------------
+// ------------------- 独立高精多线程异步计时引擎 (基于绝对物理时间戳对齐，彻底修复休眠、关屏、锁屏与卡片塌陷Bug) -------------------
 (function() {
     let activeTimers = [];
     try {
@@ -1704,6 +1793,7 @@
         if (saved) activeTimers = JSON.parse(saved);
     } catch (e) { console.error(e); }
 
+    // 历史数据格式兼容及平滑迁移 logic
     activeTimers.forEach(t => {
         if (t.accumulatedSeconds === undefined) t.accumulatedSeconds = t.seconds || 0;
         if (t.accumulatedPausedSeconds === undefined) t.accumulatedPausedSeconds = t.pausedSeconds || 0;
@@ -1713,6 +1803,7 @@
         if (t.memo === undefined) t.memo = '';
     });
 
+    // 初始化默认任务，预置默认 memo
     if (activeTimers.length === 0) {
         activeTimers.push({
             id: 'timer-default',
@@ -1730,11 +1821,13 @@
         localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
     }
 
+    // 【高精核心】计算指定任务当前的动态绝对时间统计
     function getTimerCurrentStats(t) {
         let seconds = t.accumulatedSeconds || 0;
         let pausedSeconds = t.accumulatedPausedSeconds || 0;
         const now = Date.now();
 
+        // 仅在任务处于进行中/挂起中且尚未执行“结算”时，通过物理时间戳偏移补全，完美抵抗切后台/关网页
         if (t.startTime && !t.endTime) {
             const elapsed = Math.floor((now - (t.lastStateChangeTime || now)) / 1000);
             if (t.isRunning) {
@@ -1749,6 +1842,7 @@
         };
     }
 
+    // 定时器主驱动轮询器 (仅高效率、低负载刷新前端 DOM)
     setInterval(() => {
         updateTimersDisplayOnly();
     }, 1000);
@@ -1765,6 +1859,7 @@
         return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
     }
 
+    // 【绝对防闪烁与防变白修复】：检测当前按钮状态以及内部是否为空，若是空按钮则强制渲染样式！
     function updateTimersDisplayOnly() {
         activeTimers.forEach(t => {
             const stats = getTimerCurrentStats(t);
@@ -1785,6 +1880,7 @@
                 const isCurrentlyRenderedRunning = btnEl.getAttribute('data-running') === 'true';
                 const isButtonEmpty = btnEl.innerHTML.trim() === "";
                 
+                // 【核心修复】：如果按钮内容为空，强制进行首次外观渲染写入，使其立即着色！
                 if (isCurrentlyRenderedRunning !== t.isRunning || isButtonEmpty) {
                     btnEl.setAttribute('data-running', t.isRunning ? 'true' : 'false');
                     if (t.isRunning) {
@@ -1812,7 +1908,7 @@
         }
     }
 
-    // ------------------- 暂停期捕捉活动 -------------------
+    // ------------------- 暂停期高合规记录拦截窗口 -------------------
     let pendingPauseTimerId = null;
     let pendingPauseDuration = 0;
 
@@ -1865,6 +1961,7 @@
                 }
 
                 writePauseRecordToDatabase(reason, type);
+                
                 document.getElementById('pause-modal').classList.add('hidden');
                 refreshListDOM();
                 renderTeamsSchedule();
@@ -1923,6 +2020,7 @@
             const displaySecs = formatTimeStr(stats.seconds);
             const displayPause = formatTimeStr(stats.pausedSeconds);
             
+            // 💡 核心修复：直接在模板生成阶段就赋予完美的渐变背景和图标，保证首次载入绝对不发白、不闪烁！
             const btnClass = t.isRunning 
                 ? "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1"
                 : "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-sm shadow-indigo-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
@@ -1948,6 +2046,7 @@
                         ` : ''}
                     </div>
                     
+                    <!-- 2x2 精细化时间流分析网格 -->
                     <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50/50 dark:bg-slate-800/10 p-3 rounded-xl font-mono border border-slate-100 dark:border-slate-800/30">
                         <div class="flex flex-col">
                             <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">▶ 开始时间</span>
@@ -1969,20 +2068,25 @@
                         </div>
                     </div>
 
+                    <!-- 📝 任务备注 / Memo 功能区域 -->
                     <div class="text-xs">
                         <span class="text-slate-400 text-[9px] uppercase font-bold block mb-1">📝 任务说明 / Memo</span>
                         <textarea oninput="window.customTimerActions.updateMemo('${t.id}', this.value)" placeholder="写点什么..." class="w-full text-xs p-2 rounded-lg bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/30 dark:border-slate-700/30 font-sans focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none h-14 transition-all" rows="2">${t.memo || ''}</textarea>
                     </div>
 
+                    <!-- 美化后的动作控制栏 (全尺寸更易点击) -->
                     <div class="flex items-center gap-2 mt-1">
+                        <!-- 开始/暂停 动态渐变按钮 -->
                         <button id="btn-toggle-${t.id}" data-running="${t.isRunning ? 'true' : 'false'}" onclick="window.customTimerActions.toggle('${t.id}')" class="${btnClass}">
                             ${btnContent}
                         </button>
                         
+                        <!-- 极简高雅重置按钮 -->
                         <button onclick="window.customTimerActions.reset('${t.id}')" title="重置记录" class="w-8 h-8 flex-shrink-0 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl transition-all duration-300 active:scale-90 flex items-center justify-center border border-slate-200/30 dark:border-slate-700/30 shadow-sm">
                             <i class="fa-solid fa-rotate-left text-xs"></i>
                         </button>
                         
+                        <!-- 结算入账 成功导向高亮渐变按钮 -->
                         <button onclick="window.customTimerActions.logToFormAndSave('${t.id}')" class="flex-1 py-1.5 text-[10px] font-bold rounded-xl text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 hover:shadow-md hover:shadow-emerald-500/15 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1 shadow-sm">
                             <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
                             <span>结束</span>
@@ -1995,7 +2099,7 @@
     }
 
     // ------------------- 【可调日期的高精度日程排班控制核心】 -------------------
-    let selectedScheduleDate = getLocalDateString(); 
+    let selectedScheduleDate = getLocalDateString(); // 💡 引入控制排班表的全局选择状态，默认为今天
 
     window.changeScheduleDate = function(val) {
         if (!val) return;
@@ -2013,19 +2117,22 @@
         showToast("已一键回到今天！", "success");
     };
 
-    // ------------------- 【高精并排算法】Teams 排班表 -------------------
+    // ------------------- 【高精并排算法】Teams 排班日程表核心绘制引擎 (完美解决多任务物理交叉，左右等宽并列排开) -------------------
     function renderTeamsSchedule() {
         const gridContainer = document.getElementById('schedule-grid-container');
         if (!gridContainer) return;
 
         gridContainer.innerHTML = '';
+
+        // 💡 彻底支持动态日期对齐，过滤出用户在日期选择框里挑中的特定一天的工时数据
         const todayEntries = timesheetEntries.filter(e => e.date === selectedScheduleDate);
 
         const startHour = 6;
         const endHour = 24;
         const totalMinutes = (endHour - startHour) * 60;
-        const gridHeight = 1200; 
+        const gridHeight = 1200; // 锁定基准高度刻度为1200px
 
+        // 1. 绘制 24小时 刻度左轴及背景平行参考虚线
         const scaleTrack = document.createElement('div');
         scaleTrack.className = "absolute inset-0 pointer-events-none z-0";
         gridContainer.appendChild(scaleTrack);
@@ -2050,6 +2157,7 @@
             scaleTrack.appendChild(halfLine);
         }
 
+        // 2. 映射今日时间块实体
         const events = todayEntries.map(e => {
             const [sh, sm] = e.start.split(':').map(Number);
             const [eh, em] = e.end.split(':').map(Number);
@@ -2057,7 +2165,7 @@
             let startMin = sh * 60 + sm;
             let endMin = eh * 60 + em;
             if (endMin <= startMin) {
-                endMin = startMin + 10; 
+                endMin = startMin + 10; // 优化：将极短/0分钟任务在时间轴上的默认投影宽度缩减为 10 分钟
             }
             return {
                 id: e.id,
@@ -2073,8 +2181,12 @@
         });
 
         const drawableEvents = events.filter(ev => ev.startMin >= startHour * 60 && ev.endMin <= endHour * 60);
+
+        // 按照开始时间升序，同起点下按持续时间长短降序（保证长柱子排在左侧）
         drawableEvents.sort((a, b) => a.startMin - b.startMin || b.endMin - a.endMin);
 
+        // 3. 【无Bug核心：冲突图连通分支算法】
+        // 彻底解决由于数组插入次序问题导致的时间冲突未合并 Bug
         let clusters = [];
         let visited = new Set();
 
@@ -2083,6 +2195,7 @@
             currentCluster.push(event);
             drawableEvents.forEach(other => {
                 if (!visited.has(other.id)) {
+                    // 只要有任何交叉，判定为冲突并归在同一等高重叠区内
                     let overlaps = event.startMin < other.endMin && event.endMin > other.startMin;
                     if (overlaps) {
                         dfs(other, currentCluster);
@@ -2099,15 +2212,19 @@
             }
         });
 
+        // 4. 【Outlook / Teams 等宽分栏着色泳道算法】
+        // 对每个成簇的冲突时段进行分栏对齐
         clusters.forEach(cluster => {
             cluster.sort((a, b) => a.startMin - b.startMin || b.endMin - a.endMin);
-            let lanes = []; 
+
+            let lanes = []; // 每一项存储该泳道当前占用的最晚结束时间
             cluster.forEach(event => {
                 let placed = false;
                 for (let i = 0; i < lanes.length; i++) {
+                    // 如果当前事件的开始时间大于或等于该泳道已有的最晚结束时间，可放入该栏
                     if (event.startMin >= lanes[i]) {
                         event.colIdx = i;
-                        lanes[i] = event.endMin; 
+                        lanes[i] = event.endMin; // 更新该泳道最晚时间
                         placed = true;
                         break;
                     }
@@ -2119,6 +2236,8 @@
             });
 
             const totalColumns = lanes.length;
+
+            // 水平方向等分定位，确保无论有多少个冲突活动，全部都是左右完美等宽并排！
             cluster.forEach(event => {
                 event.left = (event.colIdx / totalColumns) * 100;
                 event.width = (1 / totalColumns) * 100;
@@ -2133,6 +2252,7 @@
             const topPx = ((ev.startMin - startHour * 60) / totalMinutes) * gridHeight;
             let heightPx = ((ev.endMin - ev.startMin) / totalMinutes) * gridHeight;
             
+            // 设定最小物理高度：仅为24px！
             if (heightPx < 24) {
                 heightPx = 24;
             }
@@ -2142,6 +2262,7 @@
             card.style.top = `${topPx}px`;
             card.style.height = `${heightPx}px`;
             
+            // 确保坐标系万无一失
             const lOffset = ev.left !== undefined ? ev.left : 0;
             const wOffset = ev.width !== undefined ? ev.width : 100;
             card.style.left = `calc(${lOffset}% + 3px)`;
@@ -2163,7 +2284,9 @@
             card.className += ` bg-gradient-to-r ${skinClass}`;
             card.onclick = () => openEditActivityModal(ev.id);
 
+            // 【自适应高精卡片排版逻辑】
             if (heightPx < 50) {
+                // 单行横向紧凑模式：将标题与分类徽章完美横向并列，适合短时间或0分钟高频测试任务
                 card.innerHTML = `
                     <div class="flex items-center justify-between w-full h-full text-[10px] leading-none">
                         <div class="flex items-center gap-1.5 truncate pr-2">
@@ -2174,6 +2297,7 @@
                     </div>
                 `;
             } else {
+                // 标准高度卡片：多行经典垂直排版
                 card.innerHTML = `
                     <div class="flex flex-col h-full justify-between leading-tight text-[11px] py-0.5">
                         <div class="truncate">
@@ -2191,7 +2315,7 @@
         });
     }
 
-    // ------------------- 弹窗控制 -------------------
+    // ------------------- 卡片自定义编辑弹窗模块 -------------------
     window.openEditActivityModal = function(id) {
         const entry = timesheetEntries.find(e => e.id == id);
         if (!entry) return;
@@ -2481,6 +2605,7 @@
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
             initAddButtons();
+            // 在页面完全加载后，精准设定一次日期选择器的初始默认值为本地当前日期
             const inp = document.getElementById('schedule-date-input');
             if (inp) inp.value = selectedScheduleDate;
         });
