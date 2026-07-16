@@ -101,7 +101,7 @@
                     <i class="fa-solid fa-clock-rotate-left text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-base tracking-tight">JiaYin工数记录</h1>
+                    <h1 class="font-bold text-base tracking-tight">Stacey工数记录</h1>
                     <p class="text-[10px] text-slate-400 dark:text-slate-500">Timesheet PRO</p>
                 </div>
             </div>
@@ -139,7 +139,7 @@
                 <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('profile')">
                     <img id="user-avatar-pc" src="" class="w-9 h-9 rounded-full object-cover ring-2 ring-primary/20" alt="Avatar" onerror="this.src='https://placehold.co/100x100/4F46E5/FFF?text=JY'">
                     <div class="text-left">
-                        <p class="text-xs font-semibold" id="profile-name-pc">JiaYin</p>
+                        <p class="text-xs font-semibold" id="profile-name-pc">Stacey</p>
                         <p class="text-[10px] text-slate-400">lucidata</p>
                     </div>
                 </div>
@@ -167,7 +167,6 @@
 
             <!-- 工作台 -->
             <section id="panel-dashboard" class="page-panel space-y-8">
-                
                 <!-- 高精异步追踪控制台 -->
                 <div class="glass p-6 rounded-apple shadow-sm border border-slate-200/50 dark:border-slate-800/50">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
@@ -351,16 +350,16 @@
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold text-slate-500 mb-1">工时类型</label>
-                                    <!-- 【核心改进：添加快捷重命名与删除功能按钮】 -->
+                                    <!-- 工时类型快捷重命名与删除按钮组 -->
                                     <div class="flex gap-1.5">
                                         <select id="ts-type" onchange="checkCustomType(this)" class="flex-1 text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:outline-none">
                                             <!-- JS 动态渲染 -->
                                         </select>
-                                        <!-- 一键修改名称按钮 -->
-                                        <button type="button" onclick="renameCurrentType()" title="重命名当前选中的工时类型名称 (同时修改所有历史工时)" class="px-2.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl border border-primary/25 transition-all flex items-center justify-center">
+                                        <!-- 一键修改分类属性（带有覆盖策略选项） -->
+                                        <button type="button" onclick="renameCurrentType()" title="重命名当前选中的工时类型名称 (自主选择是否/如何覆盖历史数据)" class="px-2.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl border border-primary/25 transition-all flex items-center justify-center">
                                             <i class="fa-solid fa-pen-to-square text-xs"></i>
                                         </button>
-                                        <!-- 一键删除按钮 -->
+                                        <!-- 一键物理删除 -->
                                         <button type="button" onclick="deleteCurrentType()" title="删除当前选中的工时类型" class="px-2.5 bg-danger/10 hover:bg-danger/20 text-danger rounded-xl border border-danger/25 transition-all flex items-center justify-center">
                                             <i class="fa-solid fa-trash-can text-xs"></i>
                                         </button>
@@ -379,6 +378,7 @@
                                 </div>
                             </div>
 
+                            <!-- 下面核心字段全部变为 (选填)，去除 required 强约束 -->
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-[11px] font-semibold text-slate-500 mb-1">项目 (Project) <span class="text-slate-400 font-normal">(选填)</span></label>
@@ -446,6 +446,7 @@
                                         <tr class="text-slate-400 border-b border-slate-100 dark:border-slate-800/80 pb-2">
                                             <th class="py-3 px-2"><input type="checkbox" id="select-all" onclick="toggleSelectAll(this)"></th>
                                             <th class="py-3 px-2">Date</th>
+                                            <!-- 在 Date 之后完美插入 Type (工时类型列) -->
                                             <th class="py-3 px-2">Type</th>
                                             <th class="py-3 px-2">Details</th>
                                             <th class="py-3 px-2">Member</th>
@@ -498,7 +499,7 @@
             </section>
 
             <!-- 统计分析 -->
-        <section id="panel-analytics" class="page-panel hidden-panel space-y-8">
+            <section id="panel-analytics" class="page-panel hidden-panel space-y-8">
                 <div class="glass p-5 rounded-apple flex flex-wrap gap-4 items-center justify-between">
                     <div class="flex flex-wrap gap-3 items-center">
                         <div>
@@ -708,20 +709,62 @@
         </div>
     </div>
 
-    <!-- 重命名工时分类精美弹窗 -->
+    <!-- 重命名工时分类精美弹窗 (支持覆盖、非覆盖、及选择特定范围覆盖这三种多模态业务选择) -->
     <div id="rename-type-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-        <div class="glass max-w-sm w-full p-6 rounded-apple shadow-2xl border border-slate-200/50 dark:border-slate-800/50 transform scale-95 transition-all duration-300">
+        <div class="glass max-w-md w-full p-6 rounded-apple shadow-2xl border border-slate-200/50 dark:border-slate-800/50 transform scale-95 transition-all duration-300">
             <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
-                <i class="fa-solid fa-pen text-primary"></i> 重命名工时分类
+                <i class="fa-solid fa-pen text-primary"></i> 重命名并迁移工时分类
             </h4>
-            <p class="text-xs text-slate-400 mb-4">重命名分类后，历史记录中属于该分类的所有工时也将自动进行底层修改与同步升级。</p>
+            <p class="text-xs text-slate-400 mb-4">修改分类名称后，您可以精确指定历史已填报数据的覆盖和归档范围。</p>
             <input type="hidden" id="rename-type-index">
-            <div class="space-y-3">
+            
+            <div class="space-y-4">
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">新分类名称</label>
-                    <input type="text" id="rename-type-input" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    <input type="text" id="rename-type-input" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 focus:outline-none focus:ring-2 focus:ring-primary/20 font-medium text-slate-800 dark:text-white">
+                </div>
+
+                <!-- 覆盖范围高可用交互选择 -->
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">历史记录覆盖策略</label>
+                    <div class="space-y-2.5">
+                        <label class="flex items-start gap-2.5 cursor-pointer text-xs">
+                            <input type="radio" name="rename-history-policy" value="all" checked onchange="toggleRenameDateRange(this.value)" class="mt-0.5 text-primary focus:ring-primary/20">
+                            <div>
+                                <span class="font-semibold text-slate-700 dark:text-slate-200">1. 覆盖历史全部的工时类型</span>
+                                <p class="text-[10px] text-slate-400 mt-0.5">将所有历史记录中的旧分类无缝替换为新分类（全站图表同步重算）</p>
+                            </div>
+                        </label>
+                        <label class="flex items-start gap-2.5 cursor-pointer text-xs">
+                            <input type="radio" name="rename-history-policy" value="none" onchange="toggleRenameDateRange(this.value)" class="mt-0.5 text-primary focus:ring-primary/20">
+                            <div>
+                                <span class="font-semibold text-slate-700 dark:text-slate-200">2. 不覆盖历史</span>
+                                <p class="text-[10px] text-slate-400 mt-0.5">仅改变未来的下拉选项，历史记录中的旧分类维持原貌不改变</p>
+                            </div>
+                        </label>
+                        <label class="flex items-start gap-2.5 cursor-pointer text-xs">
+                            <input type="radio" name="rename-history-policy" value="range" onchange="toggleRenameDateRange(this.value)" class="mt-0.5 text-primary focus:ring-primary/20">
+                            <div>
+                                <span class="font-semibold text-slate-700 dark:text-slate-200">3. 覆盖一个时间范围</span>
+                                <p class="text-[10px] text-slate-400 mt-0.5">仅覆盖处于您指定的起止时间段内对应的旧工时历史数据</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 日期范围选择面板 (动态显隐) -->
+                <div id="rename-date-range-container" class="hidden grid grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-xl border border-slate-200/50 dark:border-slate-800/50 animate-fade-in">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 mb-1">开始日期</label>
+                        <input type="date" id="rename-start-date" class="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 mb-1">结束日期</label>
+                        <input type="date" id="rename-end-date" class="w-full text-xs p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                    </div>
                 </div>
             </div>
+
             <div class="flex gap-3 justify-end mt-6">
                 <button onclick="closeRenameTypeModal()" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">取消</button>
                 <button onclick="submitRenameType()" class="px-5 py-2 text-xs font-bold rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all">确认重命名</button>
@@ -1189,6 +1232,8 @@
             const type = document.getElementById('ts-type').value;
             const start = document.getElementById('ts-start').value;
             const end = document.getElementById('ts-end').value;
+            
+            // 确保没有填写项目名时自动生成“未命名项目”，提高效率
             const project = document.getElementById('ts-project').value || "未命名项目";
             const customer = document.getElementById('ts-customer').value || "内部客户";
             const sapModule = document.getElementById('ts-sap-module').value || "None";
@@ -1227,7 +1272,6 @@
             return Math.max(0, parseFloat(totalHours.toFixed(1)));
         }
 
-        // ------------------- STREAMING_CHUNK: Defining Category Customization & Renaming System... -------------------
         // ------------------- 自定义工时类型管理 (全站完美深度联动核心) -------------------
         function initTypeDropdown() {
             const storedTypes = localStorage.getItem('chronos_custom_types');
@@ -1436,13 +1480,33 @@
             showToast(`已成功添加工时分类: ${newType}`, "success");
         }
 
-        // 打开重命名模态框
+        // 打开工时分类修改模态框 (完美控制历史记录覆盖、不覆盖以及选择范围覆盖三种分支)
         window.openRenameTypeModal = function(index) {
             const typeToRename = customTypes[index];
             if (!typeToRename) return;
             document.getElementById('rename-type-index').value = index;
             document.getElementById('rename-type-input').value = typeToRename;
+            
+            // 每次打开默认重置为全量覆盖
+            const defaultRadio = document.querySelector('input[name="rename-history-policy"][value="all"]');
+            if (defaultRadio) defaultRadio.checked = true;
+            
+            // 重置日期范围并默认隐藏它
+            document.getElementById('rename-date-range-container').classList.add('hidden');
+            document.getElementById('rename-start-date').value = getLocalDateString();
+            document.getElementById('rename-end-date').value = getLocalDateString();
+            
             document.getElementById('rename-type-modal').classList.remove('hidden');
+        };
+
+        // 切换日期起止选择器的可视性
+        window.toggleRenameDateRange = function(policyValue) {
+            const container = document.getElementById('rename-date-range-container');
+            if (policyValue === 'range') {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
         };
 
         // 关闭重命名模态框
@@ -1450,7 +1514,7 @@
             document.getElementById('rename-type-modal').classList.add('hidden');
         };
 
-        // 核心重命名处理函数 (批量扫描并一键迁移历史关联数据)
+        // 核心重命名处理函数 (完美支持 覆盖全部、不覆盖、以及覆盖指定起止日期范围的历史数据联动操作)
         window.submitRenameType = function() {
             const index = parseInt(document.getElementById('rename-type-index').value);
             const newType = document.getElementById('rename-type-input').value.trim();
@@ -1467,24 +1531,49 @@
             }
 
             const oldType = customTypes[index];
-            
-            // 1. 更新下拉选项中的分类名
+            const policy = document.querySelector('input[name="rename-history-policy"]:checked').value;
+
+            // 1. 更新下拉选项库中的分类名
             customTypes[index] = newType;
             localStorage.setItem('chronos_custom_types', JSON.stringify(customTypes));
 
-            // 2. 遍历底层的历史数据库（LocalStorage），批量改写匹配旧名称的记录
+            // 2. 根据用户选择的覆盖策略，更新底层的历史数据库
             let matchedCount = 0;
-            timesheetEntries.forEach(entry => {
-                if (entry.type === oldType) {
-                    entry.type = newType;
-                    matchedCount++;
-                }
-            });
+            
+            if (policy === 'all') {
+                // 策略一：覆盖历史全部工时记录
+                timesheetEntries.forEach(entry => {
+                    if (entry.type === oldType) {
+                        entry.type = newType;
+                        matchedCount++;
+                    }
+                });
+            } else if (policy === 'range') {
+                // 策略三：覆盖特定日期范围 (以 ISO string 完美执行无时差纯日期比对)
+                const startDateStr = document.getElementById('rename-start-date').value;
+                const endDateStr = document.getElementById('rename-end-date').value;
 
-            // 保存更改到 LocalStorage
+                if (!startDateStr || !endDateStr) {
+                    showToast("请指定合法的起止覆盖范围时间！", "warning");
+                    return;
+                }
+
+                timesheetEntries.forEach(entry => {
+                    if (entry.type === oldType) {
+                        // Lexicographical string comparison is accurate for YYYY-MM-DD
+                        if (entry.date >= startDateStr && entry.date <= endDateStr) {
+                            entry.type = newType;
+                            matchedCount++;
+                        }
+                    }
+                });
+            }
+            // 策略二：none (不覆盖历史)，matchedCount 保持为 0，历史旧记录维持原样。
+
+            // 数据持久化保存
             saveToLocalStorage();
 
-            // 3. 关闭窗口并刷新全站的所有依赖视图
+            // 3. 关闭窗口并刷新全站的所有依赖视图与分析图表
             closeRenameTypeModal();
             renderTypeOptions();
             renderCustomTypeManager();
@@ -1493,10 +1582,22 @@
             initOrUpdateCharts();
             renderTeamsSchedule();
 
-            showToast(`重命名成功！分类名从 "${oldType}" 改为 "${newType}"。已自动同步批量修改了历史数据库中的 ${matchedCount} 条工时数据！`, "success");
+            // 构建高合规个性化提示
+            let toastMessage = `重命名成功！分类名称修改为 "${newType}"。`;
+            if (policy === 'all') {
+                toastMessage += `同时批量无缝重命名了历史中所有的 ${matchedCount} 条记录！`;
+            } else if (policy === 'range') {
+                const startStr = document.getElementById('rename-start-date').value;
+                const endStr = document.getElementById('rename-end-date').value;
+                toastMessage += `同时覆盖更新了 [${startStr}] 至 [${endStr}] 时间范围内的 ${matchedCount} 条历史记录！`;
+            } else {
+                toastMessage += `（您选择了保留历史数据，原有工时依然维持旧名称记录）`;
+            }
+
+            showToast(toastMessage, "success");
         };
 
-        // ------------------- STREAMING_CHUNK: Defining Tab Switching & Page Rendering Logic... -------------------
+        // ------------------- STREAMING_CHUNK: Defining Navigation Tab Switching... -------------------
         function switchTab(targetTab) {
             document.querySelectorAll('.page-panel').forEach(panel => {
                 panel.classList.add('hidden-panel');
@@ -1657,7 +1758,7 @@
                 const tr = document.createElement('tr');
                 tr.className = `hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all priority-${entry.priority || 'medium'}`;
                 
-                // 动态匹配高雅色板
+                // 动态匹配高雅工时徽章色彩
                 let typeBadgeColor = 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
                 if (entry.type === '开发') typeBadgeColor = 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400 border border-indigo-500/10';
                 else if (entry.type === '会议') typeBadgeColor = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-500/10';
@@ -1668,6 +1769,7 @@
                 tr.innerHTML = `
                     <td class="py-4 px-2"><input type="checkbox" class="entry-select" data-id="${entry.id}"></td>
                     <td class="py-4 px-2 font-medium">${entry.date}</td>
+                    <!-- 加密插入分类明细徽章 (Type Column) -->
                     <td class="py-4 px-2">
                         <span class="px-2 py-1 rounded-full font-semibold text-[10px] ${typeBadgeColor}">${escapeHTML(entry.type)}</span>
                     </td>
@@ -1710,7 +1812,6 @@
             renderTable();
         }
 
-        // ------------------- STREAMING_CHUNK: Implementing Calendar Rendering Logic... -------------------
         // ------------------- 日历渲染 -------------------
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         
@@ -1791,7 +1892,6 @@
             drawer.classList.remove('hidden');
         }
 
-        // ------------------- STREAMING_CHUNK: Rendering Analytical Charts (Chart.js)... -------------------
         // ------------------- 报表统计 -------------------
         function initOrUpdateCharts() {
             const last7Days = [];
@@ -1998,7 +2098,6 @@
             document.getElementById('ai-summary-output').value = summary;
         }
 
-        // ------------------- STREAMING_CHUNK: Integrating Data Import/Export & Config Functions... -------------------
         // ------------------- 导入导出与配置 -------------------
         function saveSettings(e) {
             e.preventDefault();
@@ -2084,7 +2183,7 @@
         function generateMockData() {
             return [
                 { id: "1", date: getLocalDateString(), type: "京东A", start: "09:00", end: "18:00", project: "京东A模块升级", customer: "京东集团", sapModule: "CO", priority: "high", notes: "进行京东A模块的主数据和流程迁移配置校验。", duration: 8 },
-                { id: "2", date: getLocalDateString(), type: "会议", start: "14:00", end: "16:00", project: "架构对齐研讨会", customer: "陆泽 香肠哥", sapModule: "PS", priority: "medium", notes: "与 晓文 和 香肠哥 确认 Project Systems 设计框架。", duration: 2 }
+                { id: "2", date: getLocalDateString(), type: "会议", start: "14:00", end: "16:00", project: "架构对齐研统会", customer: "陆泽 香肠哥", sapModule: "PS", priority: "medium", notes: "与 晓文 和 香肠哥 确认 Project Systems 设计框架。", duration: 2 }
             ];
         }
 
