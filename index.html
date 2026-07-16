@@ -101,7 +101,7 @@
                     <i class="fa-solid fa-clock-rotate-left text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-base tracking-tight">JiaYin工数记录</h1>
+                    <h1 class="font-bold text-base tracking-tight">Stacey工数记录</h1>
                     <p class="text-[10px] text-slate-400 dark:text-slate-500">Timesheet PRO</p>
                 </div>
             </div>
@@ -137,9 +137,9 @@
 
             <div class="mt-auto pt-4 border-t border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between">
                 <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('profile')">
-                  <img id="user-avatar-pc" src="" data-src="2.jpg" class="w-9 h-9 rounded-full object-cover ring-2 ring-primary/20" alt="Avatar">
+                    <img id="user-avatar-pc" src="" class="w-9 h-9 rounded-full object-cover ring-2 ring-primary/20" alt="Avatar" onerror="this.src='https://placehold.co/100x100/4F46E5/FFF?text=JY'">
                     <div class="text-left">
-                        <p class="text-xs font-semibold" id="profile-name-pc">JiaYin</p>
+                        <p class="text-xs font-semibold" id="profile-name-pc">Stacey</p>
                         <p class="text-[10px] text-slate-400">lucidata</p>
                     </div>
                 </div>
@@ -154,7 +154,7 @@
             <!-- 头部 -->
             <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h2 class="text-xl md:text-2xl font-bold tracking-tight" id="welcome-message">Hello, JiaYin 👋</h2>
+                    <h2 class="text-xl md:text-2xl font-bold tracking-tight" id="welcome-message">Hello, Stacey 👋</h2>
                     <p class="text-xs md:text-sm text-slate-400" id="current-date-text">Welcome back, let's track your productivity today.</p>
                 </div>
                 <div class="flex items-center gap-3">
@@ -168,7 +168,7 @@
             <!-- 工作台 -->
             <section id="panel-dashboard" class="page-panel space-y-8">
                 
-                <!-- 【新高宽大格局】右侧主页面：高精异步追踪控制台 -->
+                <!-- 高精异步追踪控制台 -->
                 <div class="glass p-6 rounded-apple shadow-sm border border-slate-200/50 dark:border-slate-800/50">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                         <div class="flex items-center gap-3">
@@ -197,7 +197,7 @@
                     </div>
                 </div>
 
-                <!-- 【今日日程排班视图】 - 支持日期选择与快速回今天 -->
+                <!-- 今日日程排班视图 -->
                 <div class="glass p-6 rounded-apple shadow-sm border border-slate-200/50 dark:border-slate-800/50 animate-fade-in">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 border-b border-slate-100 dark:border-slate-850 pb-4">
                         <div class="flex items-center gap-3">
@@ -213,7 +213,7 @@
                             </div>
                         </div>
                         
-                        <!-- 📅 交互区：日期自适应切换 -->
+                        <!-- 日期自适应切换 -->
                         <div class="flex flex-wrap items-center gap-2 sm:gap-3">
                             <div class="flex items-center gap-2">
                                 <span class="text-xs font-semibold text-slate-400 dark:text-slate-500 hidden sm:inline">选择日期:</span>
@@ -233,7 +233,7 @@
                     </div>
                 </div>
 
-                <!-- 移动端专属快捷日程提醒 (电脑端已在侧边栏显示) -->
+                <!-- 移动端专属快捷日程提醒 -->
                 <div class="md:hidden grid grid-cols-1 gap-4">
                     <div class="glass p-4 rounded-apple bg-amber-50/30 dark:bg-amber-950/10 border border-amber-200/30">
                         <div class="flex items-center justify-between mb-2">
@@ -273,6 +273,7 @@
                     </div>
                 </div>
 
+                <!-- 趋势分析图表区 -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="glass p-6 rounded-apple lg:col-span-2">
                         <div class="flex items-center justify-between mb-6">
@@ -350,11 +351,16 @@
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-semibold text-slate-500 mb-1">工时类型</label>
-                                    <!-- 【核心改进：添加右侧一键删除功能按钮】 -->
+                                    <!-- 【核心改进：添加快捷重命名与删除功能按钮】 -->
                                     <div class="flex gap-1.5">
                                         <select id="ts-type" onchange="checkCustomType(this)" class="flex-1 text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:outline-none">
                                             <!-- JS 动态渲染 -->
                                         </select>
+                                        <!-- 一键修改名称按钮 -->
+                                        <button type="button" onclick="renameCurrentType()" title="重命名当前选中的工时类型名称 (同时修改所有历史工时)" class="px-2.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl border border-primary/25 transition-all flex items-center justify-center">
+                                            <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                        </button>
+                                        <!-- 一键删除按钮 -->
                                         <button type="button" onclick="deleteCurrentType()" title="删除当前选中的工时类型" class="px-2.5 bg-danger/10 hover:bg-danger/20 text-danger rounded-xl border border-danger/25 transition-all flex items-center justify-center">
                                             <i class="fa-solid fa-trash-can text-xs"></i>
                                         </button>
@@ -375,18 +381,18 @@
 
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">项目 (Project)</label>
-                                    <input type="text" id="ts-project" required placeholder="例如：S/4HANA Migration" class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+                                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">项目 (Project) <span class="text-slate-400 font-normal">(选填)</span></label>
+                                    <input type="text" id="ts-project" placeholder="例如：S/4HANA Migration" class="w-full text-xs p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
                                 </div>
                                 <div>
-                                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">客户 (Customer)</label>
+                                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">客户 (Customer) <span class="text-slate-400 font-normal">(选填)</span></label>
                                     <input type="text" id="ts-customer" placeholder="例如：JASM" class="w-full text-xs p-2 rounded-xl border border-slate-200/40 dark:border-slate-800 bg-white dark:bg-slate-900/50">
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">内部对接</label>
+                                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">内部对接 <span class="text-slate-400 font-normal">(选填)</span></label>
                                     <input type="text" id="ts-sap-module" placeholder="例如：香肠哥" class="w-full text-xs p-2 rounded-xl border border-slate-200/40 dark:border-slate-800 bg-white dark:bg-slate-900/50">
                                 </div>
                                 <div>
@@ -440,6 +446,7 @@
                                         <tr class="text-slate-400 border-b border-slate-100 dark:border-slate-800/80 pb-2">
                                             <th class="py-3 px-2"><input type="checkbox" id="select-all" onclick="toggleSelectAll(this)"></th>
                                             <th class="py-3 px-2">Date</th>
+                                            <th class="py-3 px-2">Type</th>
                                             <th class="py-3 px-2">Details</th>
                                             <th class="py-3 px-2">Member</th>
                                             <th class="py-3 px-2">Duration</th>
@@ -491,7 +498,7 @@
             </section>
 
             <!-- 统计分析 -->
-            <section id="panel-analytics" class="page-panel hidden-panel space-y-8">
+        <section id="panel-analytics" class="page-panel hidden-panel space-y-8">
                 <div class="glass p-5 rounded-apple flex flex-wrap gap-4 items-center justify-between">
                     <div class="flex flex-wrap gap-3 items-center">
                         <div>
@@ -556,14 +563,14 @@
                         </div>
                     </form>
 
-                    <!-- 新增：全分类类型管理区域 (方案 B) -->
+                    <!-- 全分类类型管理区域 -->
                     <div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
                         <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
                             <i class="fa-solid fa-tags text-primary"></i> 工时类型分类管理
                         </h4>
-                        <p class="text-xs text-slate-400 mb-4">您可以自由管理全站的工时类别。无论是系统默认的还是自定义的类型，均可在此一键移除（请保留至少 1 个分类以保证表单运转）。</p>
+                        <p class="text-xs text-slate-400 mb-4">您可以自由管理全站的工时类别。您可以重命名（画笔图标）任意工时分类，重命名后<b>历史记录中的所有对应条目也将自动同步升级！</b></p>
                         
-                        <!-- 新增快捷输入框 -->
+                        <!-- 快捷输入框 -->
                         <div class="flex gap-2 mb-5">
                             <input type="text" id="new-type-input" placeholder="输入新的分类名称，例如：技术支持..." class="flex-1 px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:outline-none focus:ring-2 focus:ring-primary/20">
                             <button type="button" onclick="addNewTypeFromSettings()" class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:scale-105 active:scale-95 shadow-md shadow-primary/10 transition-all flex items-center gap-1">
@@ -582,13 +589,13 @@
             <section id="panel-profile" class="page-panel hidden-panel max-w-2xl mx-auto space-y-6">
                 <div class="glass p-8 rounded-apple flex flex-col items-center text-center">
                     <div class="relative mb-4 group">
-                      <img id="profile-avatar" src="" data-src="2.jpg" class="w-24 h-24 rounded-full object-cover ring-4 ring-primary/20" alt="Avatar">
+                        <img id="profile-avatar" src="" class="w-24 h-24 rounded-full object-cover ring-4 ring-primary/20" alt="Avatar" onerror="this.src='https://placehold.co/100x100/4F46E5/FFF?text=JY'">
                         <label class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center text-white text-xs cursor-pointer opacity-0 group-hover:opacity-100 transition-all">
                             <i class="fa-solid fa-camera mr-1"></i> Edit
                             <input type="file" class="hidden" accept="image/*" onchange="updateProfilePicture(event)">
                         </label>
                     </div>
-                    <h3 class="text-xl font-bold" id="profile-name">JiaYin</h3>
+                    <h3 class="text-xl font-bold" id="profile-name">Stacey</h3>
                     <p class="text-xs text-slate-400 mb-6" id="profile-sub-title">lucidata | 陆泽科技 in Shanghai</p>
 
                     <div class="w-full space-y-3">
@@ -701,6 +708,27 @@
         </div>
     </div>
 
+    <!-- 重命名工时分类精美弹窗 -->
+    <div id="rename-type-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+        <div class="glass max-w-sm w-full p-6 rounded-apple shadow-2xl border border-slate-200/50 dark:border-slate-800/50 transform scale-95 transition-all duration-300">
+            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-pen text-primary"></i> 重命名工时分类
+            </h4>
+            <p class="text-xs text-slate-400 mb-4">重命名分类后，历史记录中属于该分类的所有工时也将自动进行底层修改与同步升级。</p>
+            <input type="hidden" id="rename-type-index">
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">新分类名称</label>
+                    <input type="text" id="rename-type-input" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                </div>
+            </div>
+            <div class="flex gap-3 justify-end mt-6">
+                <button onclick="closeRenameTypeModal()" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">取消</button>
+                <button onclick="submitRenameType()" class="px-5 py-2 text-xs font-bold rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all">确认重命名</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ------------------- 本地时间跨时区精确对准器 -------------------
         function getLocalDateString(date = new Date()) {
@@ -804,7 +832,8 @@
         let dailyChartRef = null;
         let moduleChartRef = null;
 
-        let customTypes = ['开发', '会议', '学习', 'Support', '休假'];
+        // 初始化中默认包含 '京东A' 工时分类，供用户快速体验
+        let customTypes = ['开发', '会议', '学习', 'Support', '休假', '京东A'];
 
         window.addEventListener('DOMContentLoaded', () => {
             initDatabase();
@@ -814,10 +843,10 @@
             initShortcutKeys();
             requestNotificationPermission();
 
-            // 启动毫秒级时间以及会议提醒轮询器
+            // 启动时钟及日程提醒检查器
             setInterval(checkReminders, 1000);
 
-            // 在页面加载时，给头像强制戴上“时间戳面具”，骗过浏览器缓存
+            // 在页面加载时，给头像戴上“时间戳面具”，防浏览器缓存
             const timestamp = Date.now();
             const pcAvatar = document.getElementById('user-avatar-pc');
             const profileAvatar = document.getElementById('profile-avatar');
@@ -866,7 +895,7 @@
             localStorage.setItem('chronos_reminders', JSON.stringify(reminderList));
         }
 
-        // ------------------- 极健壮的标准 CSV RFC4180 双引号流解析器 -------------------
+        // ------------------- 极健壮的标准 CSV RFC4180 解析器 -------------------
         function parseCSV(text) {
             const lines = [];
             let row = [""];
@@ -877,7 +906,7 @@
                 const next = text[i+1];
                 if (c === '"') {
                     if (inQuotes && next === '"') {
-                        row[row.length - 1] += '"'; // 支持双引号转义
+                        row[row.length - 1] += '"';
                         i++;
                     } else {
                         inQuotes = !inQuotes;
@@ -898,7 +927,7 @@
             return lines;
         }
 
-        // ------------------- 备份导入功能 (完美支持 CSV & JSON) -------------------
+        // ------------------- 备份导入功能 (支持 CSV & JSON) -------------------
         function importFile(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -914,12 +943,12 @@
                     if (extension === 'json') {
                         importedData = JSON.parse(content);
                         if (!Array.isArray(importedData)) {
-                            showToast("导入失败：JSON 备份文件必须是标准的数据列表格式！", "danger");
+                            showToast("导入失败：JSON 文件必须是列表格式！", "danger");
                             return;
                         }
                         const isValid = importedData.every(item => item && item.date && item.project && item.duration !== undefined);
                         if (!isValid) {
-                            showToast("导入失败：JSON 数据不完整或字段受损！", "danger");
+                            showToast("导入失败：JSON 数据部分字段缺失！", "danger");
                             return;
                         }
                     } else if (extension === 'csv') {
@@ -929,7 +958,7 @@
 
                         const parsedLines = parseCSV(content);
                         if (parsedLines.length < 2) {
-                            showToast("导入失败：CSV 报表为空或无明细！", "danger");
+                            showToast("导入失败：CSV 文件为空！", "danger");
                             return;
                         }
 
@@ -957,12 +986,12 @@
                                 };
                             });
                     } else {
-                        showToast("导入失败：仅支持导入 .json 或 .csv 格式的文件！", "danger");
+                        showToast("导入失败：仅支持 .json 或 .csv 格式的文件！", "danger");
                         return;
                     }
 
                     if (importedData.length === 0) {
-                        showToast("未在文件中扫描到有效的工时记录！", "warning");
+                        showToast("未扫描到有效的工时记录！", "warning");
                         return;
                     }
 
@@ -977,7 +1006,7 @@
 
                 } catch (err) {
                     console.error(err);
-                    showToast("导入解析失败，请检查文件格式或编码！", "danger");
+                    showToast("导入解析失败，请检查文件格式！", "danger");
                 } finally {
                     event.target.value = '';
                 }
@@ -985,7 +1014,7 @@
             reader.readAsText(file);
         }
 
-        // ------------------- 待办清单 (Checklist) 完整业务处理逻辑 -------------------
+        // ------------------- 待办清单 (Checklist) -------------------
         function renderTodos() {
             const container = document.getElementById('todo-list-container');
             if (!container) return;
@@ -1057,7 +1086,7 @@
 
             const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
             if (!timePattern.test(timeStr)) {
-                showToast("输入时间格式不正确，请使用 HH:MM 格式！", "warning");
+                showToast("时间格式不正确，请使用 HH:MM 格式！", "warning");
                 return;
             }
 
@@ -1106,7 +1135,7 @@
             const msg = `会议「${title}」将在 ${minsLeft} 分钟后开始！请注意时间。`;
             
             if ("Notification" in window && Notification.permission === "granted") {
-                new Notification("Chronos 会议提醒", { body: msg, icon: "https://cdn-icons-png.flaticon.com/512/3114/3114812.png" });
+                new Notification("Chronos 会议提醒", { body: msg });
             }
 
             const alertBanner = document.createElement('div');
@@ -1198,11 +1227,14 @@
             return Math.max(0, parseFloat(totalHours.toFixed(1)));
         }
 
+        // ------------------- STREAMING_CHUNK: Defining Category Customization & Renaming System... -------------------
         // ------------------- 自定义工时类型管理 (全站完美深度联动核心) -------------------
         function initTypeDropdown() {
             const storedTypes = localStorage.getItem('chronos_custom_types');
             if (storedTypes) {
                 customTypes = JSON.parse(storedTypes);
+            } else {
+                localStorage.setItem('chronos_custom_types', JSON.stringify(customTypes));
             }
             renderTypeOptions();
         }
@@ -1291,7 +1323,24 @@
             }
         }
 
-        // 新增：直接在“工时类型”下拉框旁边删除当前选中分类的快捷交互（无任何默认类型保护限制）
+        // 工时录入面板旁的一键重命名按钮触发控制器
+        function renameCurrentType() {
+            const selectEl = document.getElementById('ts-type');
+            if (!selectEl) return;
+            const currentSelected = selectEl.value;
+            if (!currentSelected || currentSelected === '__CUSTOM__') {
+                showToast("请先在下拉框中选择一个需要重命名的工时类型！", "warning");
+                return;
+            }
+            const idx = customTypes.indexOf(currentSelected);
+            if (idx !== -1) {
+                openRenameTypeModal(idx);
+            } else {
+                showToast("未在系统库中定位到当前分类！", "danger");
+            }
+        }
+
+        // 直接在“工时类型”下拉框旁边删除当前选中分类的快捷交互
         function deleteCurrentType() {
             const selectEl = document.getElementById('ts-type');
             if (!selectEl) return;
@@ -1313,14 +1362,12 @@
                 
                 // 统一同步刷新全站相关UI
                 renderTypeOptions();
-                if (typeof renderCustomTypeManager === 'function') {
-                    renderCustomTypeManager();
-                }
+                renderCustomTypeManager();
                 showToast(`已成功删除工时类型: ${selectedVal}`, 'success');
             });
         }
 
-        // 方案 B：渲染偏好设置面板的分类管理列表（全自主控制，完美兼容所有字符，支持删除任意核心或自定义分类）
+        // 渲染偏好设置面板的分类管理列表 (包含删除和重命名按钮，支持修改历史)
         function renderCustomTypeManager() {
             const listEl = document.getElementById('custom-type-list');
             if (!listEl) return;
@@ -1337,14 +1384,19 @@
             listEl.innerHTML = customTypes.map((type, idx) => `
                 <div class="flex items-center justify-between bg-slate-100 dark:bg-slate-850 p-2.5 px-3.5 rounded-xl text-xs border border-slate-200/40 dark:border-slate-800/60 shadow-sm animate-fade-in">
                     <span class="font-semibold text-slate-700 dark:text-slate-300 truncate mr-2" title="${escapeHTML(type)}">${escapeHTML(type)}</span>
-                    <button type="button" onclick="removeCustomTypeByIndex(${idx})" class="text-danger hover:text-red-700 hover:scale-110 active:scale-95 transition-all p-1" title="删除 ${escapeHTML(type)}">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
+                    <div class="flex gap-1.5">
+                        <button type="button" onclick="openRenameTypeModal(${idx})" class="text-primary hover:text-indigo-600 hover:scale-110 active:scale-95 transition-all p-1" title="重命名分类">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button type="button" onclick="removeCustomTypeByIndex(${idx})" class="text-danger hover:text-red-700 hover:scale-110 active:scale-95 transition-all p-1" title="删除 ${escapeHTML(type)}">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
                 </div>
             `).join('');
         }
 
-        // 执行分类移除操作（通过 Index 索引直接删除，无任何默认限制拦截）
+        // 执行分类移除操作
         function removeCustomTypeByIndex(index) {
             if (customTypes.length <= 1) {
                 showToast("必须保留至少一个工时类型，否则系统无法正常填报！", "warning");
@@ -1384,6 +1436,67 @@
             showToast(`已成功添加工时分类: ${newType}`, "success");
         }
 
+        // 打开重命名模态框
+        window.openRenameTypeModal = function(index) {
+            const typeToRename = customTypes[index];
+            if (!typeToRename) return;
+            document.getElementById('rename-type-index').value = index;
+            document.getElementById('rename-type-input').value = typeToRename;
+            document.getElementById('rename-type-modal').classList.remove('hidden');
+        };
+
+        // 关闭重命名模态框
+        window.closeRenameTypeModal = function() {
+            document.getElementById('rename-type-modal').classList.add('hidden');
+        };
+
+        // 核心重命名处理函数 (批量扫描并一键迁移历史关联数据)
+        window.submitRenameType = function() {
+            const index = parseInt(document.getElementById('rename-type-index').value);
+            const newType = document.getElementById('rename-type-input').value.trim();
+            if (isNaN(index) || !customTypes[index]) return;
+            
+            if (!newType) {
+                showToast("新分类名称不能为空！", "warning");
+                return;
+            }
+
+            if (customTypes.includes(newType) && customTypes[index] !== newType) {
+                showToast("该工时类别已存在！", "warning");
+                return;
+            }
+
+            const oldType = customTypes[index];
+            
+            // 1. 更新下拉选项中的分类名
+            customTypes[index] = newType;
+            localStorage.setItem('chronos_custom_types', JSON.stringify(customTypes));
+
+            // 2. 遍历底层的历史数据库（LocalStorage），批量改写匹配旧名称的记录
+            let matchedCount = 0;
+            timesheetEntries.forEach(entry => {
+                if (entry.type === oldType) {
+                    entry.type = newType;
+                    matchedCount++;
+                }
+            });
+
+            // 保存更改到 LocalStorage
+            saveToLocalStorage();
+
+            // 3. 关闭窗口并刷新全站的所有依赖视图
+            closeRenameTypeModal();
+            renderTypeOptions();
+            renderCustomTypeManager();
+            renderTable();
+            updateKPIs();
+            initOrUpdateCharts();
+            renderTeamsSchedule();
+
+            showToast(`重命名成功！分类名从 "${oldType}" 改为 "${newType}"。已自动同步批量修改了历史数据库中的 ${matchedCount} 条工时数据！`, "success");
+        };
+
+        // ------------------- STREAMING_CHUNK: Defining Tab Switching & Page Rendering Logic... -------------------
         function switchTab(targetTab) {
             document.querySelectorAll('.page-panel').forEach(panel => {
                 panel.classList.add('hidden-panel');
@@ -1413,14 +1526,14 @@
                     window.renderTeamsSchedule();
                 }
             } else if (targetTab === 'timesheet') {
-                renderTypeOptions(); // 保证切到填报面板时获取最新下拉列表
+                renderTypeOptions(); 
                 renderTable();
             } else if (targetTab === 'calendar') {
                 renderCalendar();
             } else if (targetTab === 'analytics') {
                 renderAnalyticsCharts();
             } else if (targetTab === 'settings') {
-                renderCustomTypeManager(); // 切换到设置面板时刷新列表管理展示
+                renderCustomTypeManager(); 
             }
         }
 
@@ -1478,7 +1591,6 @@
             const entry = timesheetEntries.find(item => item.id == id);
             if (!entry) return;
 
-            // 在加载数据进表单编辑前，先重绘下拉数据确保其存在于当前的列表中
             renderTypeOptions();
 
             document.getElementById('entry-id').value = entry.id;
@@ -1486,8 +1598,8 @@
             document.getElementById('ts-type').value = entry.type;
             document.getElementById('ts-start').value = entry.start;
             document.getElementById('ts-end').value = entry.end;
-            document.getElementById('ts-project').value = entry.project;
-            document.getElementById('ts-customer').value = entry.customer;
+            document.getElementById('ts-project').value = entry.project || "";
+            document.getElementById('ts-customer').value = entry.customer || "";
             document.getElementById('ts-sap-module').value = entry.sapModule || "";
             document.getElementById('ts-priority').value = entry.priority;
             document.getElementById('ts-notes').value = entry.notes;
@@ -1520,9 +1632,12 @@
             tbody.innerHTML = '';
 
             let filtered = timesheetEntries.filter(entry => {
-                const matchSearch = entry.project.toLowerCase().includes(search) || 
-                                    entry.notes.toLowerCase().includes(search) ||
-                                    (entry.sapModule && entry.sapModule.toLowerCase().includes(search));
+                const projName = entry.project || "";
+                const noteContent = entry.notes || "";
+                const modName = entry.sapModule || "";
+                const matchSearch = projName.toLowerCase().includes(search) || 
+                                    noteContent.toLowerCase().includes(search) ||
+                                    modName.toLowerCase().includes(search);
                 const matchType = typeFilter === 'All' || entry.type === typeFilter;
                 return matchSearch && matchType;
             });
@@ -1541,15 +1656,27 @@
             paginated.forEach(entry => {
                 const tr = document.createElement('tr');
                 tr.className = `hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all priority-${entry.priority || 'medium'}`;
+                
+                // 动态匹配高雅色板
+                let typeBadgeColor = 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+                if (entry.type === '开发') typeBadgeColor = 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400 border border-indigo-500/10';
+                else if (entry.type === '会议') typeBadgeColor = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-500/10';
+                else if (entry.type === '学习') typeBadgeColor = 'bg-purple-50 text-purple-600 dark:bg-purple-950/30 dark:text-purple-400 border border-purple-500/10';
+                else if (entry.type === 'Support') typeBadgeColor = 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-500/10';
+                else if (entry.type.includes('京东')) typeBadgeColor = 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400 border border-rose-500/10';
+
                 tr.innerHTML = `
                     <td class="py-4 px-2"><input type="checkbox" class="entry-select" data-id="${entry.id}"></td>
                     <td class="py-4 px-2 font-medium">${entry.date}</td>
                     <td class="py-4 px-2">
-                        <div class="font-bold text-slate-700 dark:text-slate-200">${entry.project}</div>
-                        <div class="text-[10px] text-slate-400 max-w-[200px] truncate" title="${entry.notes}">${entry.notes}</div>
+                        <span class="px-2 py-1 rounded-full font-semibold text-[10px] ${typeBadgeColor}">${escapeHTML(entry.type)}</span>
                     </td>
                     <td class="py-4 px-2">
-                        <span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 font-mono text-xs">${entry.sapModule || 'None'}</span>
+                        <div class="font-bold text-slate-700 dark:text-slate-200">${escapeHTML(entry.project || '未命名项目')}</div>
+                        <div class="text-[10px] text-slate-400 max-w-[200px] truncate" title="${escapeHTML(entry.notes)}">${escapeHTML(entry.notes)}</div>
+                    </td>
+                    <td class="py-4 px-2">
+                        <span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 font-mono text-xs">${escapeHTML(entry.sapModule || 'None')}</span>
                     </td>
                     <td class="py-4 px-2 font-mono font-bold text-primary">${entry.duration}h</td>
                     <td class="py-4 px-2 text-right space-x-1.5">
@@ -1561,7 +1688,7 @@
             });
         }
 
-        // ------------------- 复选框全选 -------------------
+        // 复选框全选
         function toggleSelectAll(master) {
             document.querySelectorAll('.entry-select').forEach(checkbox => checkbox.checked = master.checked);
         }
@@ -1583,6 +1710,7 @@
             renderTable();
         }
 
+        // ------------------- STREAMING_CHUNK: Implementing Calendar Rendering Logic... -------------------
         // ------------------- 日历渲染 -------------------
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         
@@ -1663,6 +1791,7 @@
             drawer.classList.remove('hidden');
         }
 
+        // ------------------- STREAMING_CHUNK: Rendering Analytical Charts (Chart.js)... -------------------
         // ------------------- 报表统计 -------------------
         function initOrUpdateCharts() {
             const last7Days = [];
@@ -1736,23 +1865,32 @@
         }
 
         function renderAnalyticsCharts() {
-            const projFilter = document.getElementById('analytics-filter-project').value;
-            const custFilter = document.getElementById('analytics-filter-customer').value;
+            const projSelect = document.getElementById('analytics-filter-project');
+            const custSelect = document.getElementById('analytics-filter-customer');
+            if (!projSelect || !custSelect) return;
+
+            const projFilter = projSelect.value;
+            const custFilter = custSelect.value;
 
             const projects = [...new Set(timesheetEntries.map(e => e.project))];
             const customers = [...new Set(timesheetEntries.map(e => e.customer))];
-            
-            const projSelect = document.getElementById('analytics-filter-project');
-            const custSelect = document.getElementById('analytics-filter-customer');
 
-            if (projSelect.options.length <= 1) {
-                projects.forEach(p => projSelect.add(new Option(p, p)));
-                customers.forEach(c => custSelect.add(new Option(c, c)));
-            }
+            // 保持筛选项最新的逻辑
+            const prevProjVal = projSelect.value;
+            const prevCustVal = custSelect.value;
+
+            projSelect.innerHTML = '<option value="All">All Projects</option>';
+            custSelect.innerHTML = '<option value="All">All Customers</option>';
+
+            projects.forEach(p => projSelect.add(new Option(p, p)));
+            customers.forEach(c => custSelect.add(new Option(c, c)));
+
+            projSelect.value = projects.includes(prevProjVal) ? prevProjVal : 'All';
+            custSelect.value = customers.includes(prevCustVal) ? prevCustVal : 'All';
 
             let filtered = timesheetEntries.filter(e => {
-                return (projFilter === 'All' || e.project === projFilter) &&
-                       (custFilter === 'All' || e.customer === custFilter);
+                return (projSelect.value === 'All' || e.project === projSelect.value) &&
+                       (custSelect.value === 'All' || e.customer === custSelect.value);
             });
 
             const dailyData = {};
@@ -1852,7 +1990,7 @@
             let summary = `【工作日报摘要】 日期: ${todayStr}\n`;
             let total = 0;
             todayEntries.forEach((e, idx) => {
-                summary += `${idx + 1}. [项目: ${e.project}] (对接人员: ${e.sapModule || '无'}) - 时长: ${e.duration}h\n   - 工作明细: ${e.notes}\n`;
+                summary += `${idx + 1}. [项目: ${e.project}] (类型: ${e.type}) - 时长: ${e.duration}h\n   - 工作明细: ${e.notes}\n`;
                 total += parseFloat(e.duration);
             });
             summary += `\n今日累计总工时：${total.toFixed(1)}h。`;
@@ -1860,6 +1998,7 @@
             document.getElementById('ai-summary-output').value = summary;
         }
 
+        // ------------------- STREAMING_CHUNK: Integrating Data Import/Export & Config Functions... -------------------
         // ------------------- 导入导出与配置 -------------------
         function saveSettings(e) {
             e.preventDefault();
@@ -1941,10 +2080,11 @@
             });
         }
 
+        // 生成初始测试假数据 (自动初始化包含 '京东A' 类型记录)
         function generateMockData() {
             return [
-                { id: "1", date: "2026-07-13", type: "开发", start: "09:00", end: "18:00", project: "某某项目", customer: "京东张三", sapModule: "CO", priority: "high", notes: "完成成本要素主数据的迁移配置与数据校验。", duration: 8 },
-                { id: "2", date: "2026-07-14", type: "会议", start: "10:00", end: "12:00", project: "架构对齐研讨会", customer: "陆泽 香肠哥", sapModule: "PS", priority: "medium", notes: "与 晓文 和 香肠哥 确认 Project Systems 设计框架。", duration: 2 }
+                { id: "1", date: getLocalDateString(), type: "京东A", start: "09:00", end: "18:00", project: "京东A模块升级", customer: "京东集团", sapModule: "CO", priority: "high", notes: "进行京东A模块的主数据和流程迁移配置校验。", duration: 8 },
+                { id: "2", date: getLocalDateString(), type: "会议", start: "14:00", end: "16:00", project: "架构对齐研讨会", customer: "陆泽 香肠哥", sapModule: "PS", priority: "medium", notes: "与 晓文 和 香肠哥 确认 Project Systems 设计框架。", duration: 2 }
             ];
         }
 
@@ -1956,842 +2096,811 @@
         }
     </script>
 
-<script>
-// ------------------- 独立高精多线程异步计时引擎 (基于绝对物理时间戳对齐，彻底修复休眠、关屏、锁屏与卡片塌陷Bug) -------------------
-(function() {
-    let activeTimers = [];
-    try {
-        const saved = localStorage.getItem('timesheet_active_timers');
-        if (saved) activeTimers = JSON.parse(saved);
-    } catch (e) { console.error(e); }
+    <script>
+    // ------------------- 独立高精多线程异步计时引擎 (基于绝对物理时间戳对准，修复休眠与卡片塌陷Bug) -------------------
+    (function() {
+        let activeTimers = [];
+        try {
+            const saved = localStorage.getItem('timesheet_active_timers');
+            if (saved) activeTimers = JSON.parse(saved);
+        } catch (e) { console.error(e); }
 
-    // 历史数据格式兼容及平滑迁移 logic
-    activeTimers.forEach(t => {
-        if (t.accumulatedSeconds === undefined) t.accumulatedSeconds = t.seconds || 0;
-        if (t.accumulatedPausedSeconds === undefined) t.accumulatedPausedSeconds = t.pausedSeconds || 0;
-        if (t.lastStateChangeTime === undefined) {
-            t.lastStateChangeTime = t.isRunning ? Date.now() : 0;
-        }
-        if (t.memo === undefined) t.memo = '';
-    });
-
-    // 初始化默认任务，预置默认 memo
-    if (activeTimers.length === 0) {
-        activeTimers.push({
-            id: 'timer-default',
-            name: '默认追踪任务',
-            memo: '',
-            seconds: 0,
-            isRunning: false,
-            startTime: '',
-            endTime: '',
-            pausedSeconds: 0,       
-            accumulatedSeconds: 0,
-            accumulatedPausedSeconds: 0,
-            lastStateChangeTime: 0
-        });
-        localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
-    }
-
-    // 【高精核心】计算指定任务当前的动态绝对时间统计
-    function getTimerCurrentStats(t) {
-        let seconds = t.accumulatedSeconds || 0;
-        let pausedSeconds = t.accumulatedPausedSeconds || 0;
-        const now = Date.now();
-
-        // 仅在任务处于进行中/挂起中且尚未执行“结算”时，通过物理时间戳偏移补全，完美抵抗切后台/关网页
-        if (t.startTime && !t.endTime) {
-            const elapsed = Math.floor((now - (t.lastStateChangeTime || now)) / 1000);
-            if (t.isRunning) {
-                seconds += elapsed;
-            } else {
-                pausedSeconds += elapsed;
-            }
-        }
-        return {
-            seconds: Math.max(0, seconds),
-            pausedSeconds: Math.max(0, pausedSeconds)
-        };
-    }
-
-    // 定时器主驱动轮询器 (仅高效率、低负载刷新前端 DOM)
-    setInterval(() => {
-        updateTimersDisplayOnly();
-    }, 1000);
-
-    function formatTimeStr(totalSeconds) {
-        const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-        const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-        const secs = String(totalSeconds % 60).padStart(2, '0');
-        return `${hrs}:${mins}:${secs}`;
-    }
-
-    function getNowFullTimeStr() {
-        const now = new Date();
-        return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-    }
-
-    // 【绝对防闪烁与防变白修复】：检测当前按钮状态以及内部是否为空，若是空按钮则强制渲染样式！
-    function updateTimersDisplayOnly() {
         activeTimers.forEach(t => {
-            const stats = getTimerCurrentStats(t);
-            
-            const el = document.getElementById(`display-${t.id}`);
-            if (el) el.innerText = formatTimeStr(stats.seconds);
-            
-            const pauseEl = document.getElementById(`pause-display-${t.id}`);
-            if (pauseEl) pauseEl.innerText = formatTimeStr(stats.pausedSeconds);
-
-            const endtimeEl = document.getElementById(`endtime-display-${t.id}`);
-            if (endtimeEl && !t.endTime) {
-                endtimeEl.innerText = t.isRunning ? '进行中...' : (t.startTime ? '暂停挂起中' : '未开始');
+            if (t.accumulatedSeconds === undefined) t.accumulatedSeconds = t.seconds || 0;
+            if (t.accumulatedPausedSeconds === undefined) t.accumulatedPausedSeconds = t.pausedSeconds || 0;
+            if (t.lastStateChangeTime === undefined) {
+                t.lastStateChangeTime = t.isRunning ? Date.now() : 0;
             }
-            
-            const btnEl = document.getElementById(`btn-toggle-${t.id}`);
-            if (btnEl) {
-                const isCurrentlyRenderedRunning = btnEl.getAttribute('data-running') === 'true';
-                const isButtonEmpty = btnEl.innerHTML.trim() === "";
-                
-                // 【核心修复】：如果按钮内容为空，强制进行首次外观渲染写入，使其立即着色！
-                if (isCurrentlyRenderedRunning !== t.isRunning || isButtonEmpty) {
-                    btnEl.setAttribute('data-running', t.isRunning ? 'true' : 'false');
-                    if (t.isRunning) {
-                        btnEl.innerHTML = `<i class="fa-solid fa-pause text-[10px]"></i> <span>暂停</span>`;
-                        btnEl.className = "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
-                    } else {
-                        btnEl.innerHTML = `<i class="fa-solid fa-play text-[10px]"></i> <span>开始</span>`;
-                        btnEl.className = "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-sm shadow-indigo-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
-                    }
+            if (t.memo === undefined) t.memo = '';
+        });
+
+        if (activeTimers.length === 0) {
+            activeTimers.push({
+                id: 'timer-default',
+                name: '默认追踪任务',
+                memo: '',
+                seconds: 0,
+                isRunning: false,
+                startTime: '',
+                endTime: '',
+                pausedSeconds: 0,       
+                accumulatedSeconds: 0,
+                accumulatedPausedSeconds: 0,
+                lastStateChangeTime: 0
+            });
+            localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
+        }
+
+        function getTimerCurrentStats(t) {
+            let seconds = t.accumulatedSeconds || 0;
+            let pausedSeconds = t.accumulatedPausedSeconds || 0;
+            const now = Date.now();
+
+            if (t.startTime && !t.endTime) {
+                const elapsed = Math.floor((now - (t.lastStateChangeTime || now)) / 1000);
+                if (t.isRunning) {
+                    seconds += elapsed;
+                } else {
+                    pausedSeconds += elapsed;
                 }
-            }
-        });
-        const anyRunning = activeTimers.some(t => t.isRunning);
-        const globalDot = document.getElementById('timer-dot');
-        const statusText = document.getElementById('timer-status-text');
-        
-        if (globalDot) globalDot.style.display = anyRunning ? 'block' : 'none';
-        if (statusText) {
-            statusText.innerText = anyRunning ? '进行中' : (activeTimers.some(t => t.startTime && !t.endTime) ? '任务暂停挂起中' : '无正在运行的任务');
-            if (anyRunning) {
-                statusText.className = "text-xs font-bold text-success animate-pulse";
-            } else {
-                statusText.className = "text-xs font-semibold text-slate-400 dark:text-slate-500";
-            }
-        }
-    }
-
-    // ------------------- 暂停期高合规记录拦截窗口 -------------------
-    let pendingPauseTimerId = null;
-    let pendingPauseDuration = 0;
-
-    function triggerPauseActivityCapture(timerId, durationSeconds) {
-        pendingPauseTimerId = timerId;
-        pendingPauseDuration = durationSeconds;
-
-        const t = activeTimers.find(x => x.id === timerId);
-        if (!t) return;
-
-        const modal = document.getElementById('pause-modal');
-        if (!modal) return;
-
-        const minStr = Math.floor(durationSeconds / 60);
-        const secStr = durationSeconds % 60;
-        const durationText = minStr > 0 ? `${minStr}分${secStr}秒` : `${secStr}秒`;
-
-        document.getElementById('pause-modal-sub-info').innerHTML = `当前任务: <b>${t.name}</b> | 累计挂起暂停了 <span class="text-amber-500 font-bold font-mono">${durationText}</span>`;
-        document.getElementById('pause-custom-reason').value = '';
-
-        const tags = document.querySelectorAll('#pause-quick-tags .pause-tag');
-        tags.forEach(tag => tag.classList.remove('bg-primary/10', 'text-primary', 'border-primary/20'));
-        if (tags.length > 0) {
-            tags[0].classList.add('bg-primary/10', 'text-primary', 'border-primary/20');
-        }
-
-        modal.classList.remove('hidden');
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const tags = document.querySelectorAll('#pause-quick-tags .pause-tag');
-        tags.forEach(tag => {
-            tag.addEventListener('click', () => {
-                tags.forEach(t => t.classList.remove('bg-primary/10', 'text-primary', 'border-primary/20'));
-                tag.classList.add('bg-primary/10', 'text-primary', 'border-primary/20');
-            });
-        });
-
-        const btnSave = document.getElementById('btn-pause-modal-save');
-        const btnSkip = document.getElementById('btn-pause-modal-skip');
-
-        if (btnSave) {
-            btnSave.addEventListener('click', () => {
-                const activeTag = document.querySelector('#pause-quick-tags .pause-tag.text-primary');
-                let reason = activeTag ? activeTag.getAttribute('data-reason') : '休息与调整 🍵';
-                let type = activeTag ? activeTag.getAttribute('data-type') : '休假';
-                const customReason = document.getElementById('pause-custom-reason').value.trim();
-                if (customReason) {
-                    reason = customReason;
-                }
-
-                writePauseRecordToDatabase(reason, type);
-                
-                document.getElementById('pause-modal').classList.add('hidden');
-                refreshListDOM();
-                renderTeamsSchedule();
-            });
-        }
-
-        if (btnSkip) {
-            btnSkip.addEventListener('click', () => {
-                document.getElementById('pause-modal').classList.add('hidden');
-                refreshListDOM();
-                renderTeamsSchedule();
-            });
-        }
-    });
-
-    function writePauseRecordToDatabase(reason, type) {
-        const t = activeTimers.find(x => x.id === pendingPauseTimerId);
-        if (!t) return;
-
-        const now = Date.now();
-        const startSec = now - (pendingPauseDuration * 1000);
-        const startDate = new Date(startSec);
-        const endDate = new Date(now);
-
-        const formatTime = (d) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-        const preciseHours = parseFloat((pendingPauseDuration / 3600).toFixed(2));
-
-        const pauseEntry = {
-            id: 'pause-' + Date.now() + Math.random(),
-            date: getLocalDateString(endDate),
-            type: type,
-            start: formatTime(startDate),
-            end: formatTime(endDate),
-            project: `⏸ [暂停记录] ${t.name}`,
-            customer: "系统自动记录",
-            sapModule: "PAUSE",
-            priority: "low",
-            notes: `暂停说明: ${reason}\n在追踪任务「${t.name}」期间发生的挂起暂停时段。`,
-            duration: preciseHours > 0 ? preciseHours : 0.01
-        };
-
-        timesheetEntries.unshift(pauseEntry);
-        saveToLocalStorage();
-
-        renderTable();
-        updateKPIs();
-        initOrUpdateCharts();
-        showToast("已将暂停期间做的事情写入工时表！");
-    }
-
-    // 生成平铺控制台任务列表 HTML
-    function generateTimerListHTML(timers) {
-        let html = '';
-        timers.forEach((t) => {
-            const stats = getTimerCurrentStats(t);
-            const displaySecs = formatTimeStr(stats.seconds);
-            const displayPause = formatTimeStr(stats.pausedSeconds);
-            
-            // 💡 核心修复：直接在模板生成阶段就赋予完美的渐变背景和图标，保证首次载入绝对不发白、不闪烁！
-            const btnClass = t.isRunning 
-                ? "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1"
-                : "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-sm shadow-indigo-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
-            const btnContent = t.isRunning
-                ? `<i class="fa-solid fa-pause text-[10px]"></i> <span>暂停</span>`
-                : `<i class="fa-solid fa-play text-[10px]"></i> <span>开始</span>`;
-            
-            html += `
-                <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex flex-col justify-between gap-3 hover:shadow-md transition-all duration-300 animate-fade-in">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-1.5 max-w-[180px] overflow-hidden">
-                            <span class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate" title="${t.name}">
-                                ${t.name}
-                            </span>
-                            <button onclick="window.customTimerActions.editTitle('${t.id}')" title="修改标题" class="p-1 text-slate-400 hover:text-primary transition-all scale-90">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
-                        </div>
-                        ${timers.length > 1 ? `
-                            <button onclick="window.customTimerActions.remove('${t.id}')" class="text-slate-400 hover:text-danger text-[11px] p-1.5 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                        ` : ''}
-                    </div>
-                    
-                    <!-- 2x2 精细化时间流 analysis 网格 -->
-                    <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50/50 dark:bg-slate-800/10 p-3 rounded-xl font-mono border border-slate-100 dark:border-slate-800/30">
-                        <div class="flex flex-col">
-                            <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">▶ 开始时间</span>
-                            <span class="font-semibold text-slate-600 dark:text-slate-300 truncate mt-0.5">${t.startTime ? t.startTime : '未开始'}</span>
-                        </div>
-                        <div class="flex flex-col">
-                            <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">■ 结束时间</span>
-                            <span class="font-semibold text-slate-600 dark:text-slate-300 truncate mt-0.5" id="endtime-display-${t.id}">
-                                ${t.endTime ? t.endTime : (t.isRunning ? '进行中...' : (t.startTime ? '暂停挂起中' : '未开始'))}
-                            </span>
-                        </div>
-                        <div class="flex flex-col border-t border-slate-100 dark:border-slate-800/60 pt-1.5 mt-1.5">
-                            <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">⏸ 暂停时长</span>
-                            <span class="font-bold text-amber-500 mt-0.5" id="pause-display-${t.id}">${displayPause}</span>
-                        </div>
-                        <div class="flex flex-col border-t border-slate-100 dark:border-slate-800/60 pt-1.5 mt-1.5">
-                            <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">⏱ 有效工时</span>
-                            <span class="font-bold text-primary dark:text-indigo-400 mt-0.5" id="display-${t.id}">${displaySecs}</span>
-                        </div>
-                    </div>
-
-                    <!-- 📝 任务备注 / Memo 功能区域 -->
-                    <div class="text-xs">
-                        <span class="text-slate-400 text-[9px] uppercase font-bold block mb-1">📝 任务说明 / Memo</span>
-                        <textarea oninput="window.customTimerActions.updateMemo('${t.id}', this.value)" placeholder="写点什么..." class="w-full text-xs p-2 rounded-lg bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/30 dark:border-slate-700/30 font-sans focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none h-14 transition-all" rows="2">${t.memo || ''}</textarea>
-                    </div>
-
-                    <!-- 美化后的动作控制栏 (全尺寸更易点击) -->
-                    <div class="flex items-center gap-2 mt-1">
-                        <!-- 开始/暂停 动态渐变按钮 -->
-                        <button id="btn-toggle-${t.id}" data-running="${t.isRunning ? 'true' : 'false'}" onclick="window.customTimerActions.toggle('${t.id}')" class="${btnClass}">
-                            ${btnContent}
-                        </button>
-                        
-                        <!-- 极简高雅重置按钮 -->
-                        <button onclick="window.customTimerActions.reset('${t.id}')" title="重置记录" class="w-8 h-8 flex-shrink-0 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl transition-all duration-300 active:scale-90 flex items-center justify-center border border-slate-200/30 dark:border-slate-700/30 shadow-sm">
-                            <i class="fa-solid fa-rotate-left text-xs"></i>
-                        </button>
-                        
-                        <!-- 结算入账 成功导向高亮渐变按钮 -->
-                        <button onclick="window.customTimerActions.logToFormAndSave('${t.id}')" class="flex-1 py-1.5 text-[10px] font-bold rounded-xl text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 hover:shadow-md hover:shadow-emerald-500/15 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1 shadow-sm">
-                            <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
-                            <span>结束</span>
-                        </button>
-                    </div>
-                </div>
-            `;
-        });
-        return html;
-    }
-
-    // ------------------- 【可调日期的高精度日程排班控制核心】 -------------------
-    let selectedScheduleDate = getLocalDateString(); // 💡 引入控制排班表的全局选择状态，默认为今天
-
-    window.changeScheduleDate = function(val) {
-        if (!val) return;
-        selectedScheduleDate = val;
-        renderTeamsSchedule();
-        showToast(`已切换排班视图至 ${val}`, "info");
-    };
-
-    window.setScheduleDateToToday = function() {
-        const todayStr = getLocalDateString();
-        selectedScheduleDate = todayStr;
-        const inputEl = document.getElementById('schedule-date-input');
-        if (inputEl) inputEl.value = todayStr;
-        renderTeamsSchedule();
-        showToast("已一键回到今天！", "success");
-    };
-
-    // ------------------- 【高精并排算法】Teams 排班日程表核心绘制引擎 (完美解决多任务物理交叉，左右等宽并列排开) -------------------
-    function renderTeamsSchedule() {
-        const gridContainer = document.getElementById('schedule-grid-container');
-        if (!gridContainer) return;
-
-        gridContainer.innerHTML = '';
-
-        // 💡 彻底支持动态日期对齐，过滤出用户在日期选择框里挑中的特定一天的工时数据
-        const todayEntries = timesheetEntries.filter(e => e.date === selectedScheduleDate);
-
-        const startHour = 6;
-        const endHour = 24;
-        const totalMinutes = (endHour - startHour) * 60;
-        const gridHeight = 1200; // 锁定基准高度刻度为1200px
-
-        // 1. 绘制 24小时 刻度左轴及背景平行参考虚线
-        const scaleTrack = document.createElement('div');
-        scaleTrack.className = "absolute inset-0 pointer-events-none z-0";
-        gridContainer.appendChild(scaleTrack);
-
-        for (let h = startHour; h < endHour; h++) {
-            const percent = ((h - startHour) / (endHour - startHour)) * 100;
-            
-            const label = document.createElement('div');
-            label.className = "absolute text-[10px] font-mono text-slate-400 dark:text-slate-500 left-3 select-none";
-            label.style.top = `calc(${percent}% + 4px)`;
-            label.innerText = `${String(h).padStart(2, '0')}:00`;
-            scaleTrack.appendChild(label);
-
-            const line = document.createElement('div');
-            line.className = "absolute left-16 right-0 border-t border-slate-200/40 dark:border-slate-800/40";
-            line.style.top = `${percent}%`;
-            scaleTrack.appendChild(line);
-
-            const halfLine = document.createElement('div');
-            halfLine.className = "absolute left-16 right-0 border-t border-dashed border-slate-100/20 dark:border-slate-800/20";
-            halfLine.style.top = `${percent + (50 / (endHour - startHour))}%`;
-            scaleTrack.appendChild(halfLine);
-        }
-
-        // 2. 映射今日时间块实体
-        const events = todayEntries.map(e => {
-            const [sh, sm] = e.start.split(':').map(Number);
-            const [eh, em] = e.end.split(':').map(Number);
-            
-            let startMin = sh * 60 + sm;
-            let endMin = eh * 60 + em;
-            if (endMin <= startMin) {
-                endMin = startMin + 10; // 优化：将极短/0分钟任务在时间轴上的默认投影宽度缩减为 10 分钟
             }
             return {
-                id: e.id,
-                title: e.project,
-                notes: e.notes,
-                type: e.type,
-                start: e.start,
-                end: e.end,
-                sapModule: e.sapModule,
-                startMin: startMin,
-                endMin: endMin
+                seconds: Math.max(0, seconds),
+                pausedSeconds: Math.max(0, pausedSeconds)
             };
-        });
+        }
 
-        const drawableEvents = events.filter(ev => ev.startMin >= startHour * 60 && ev.endMin <= endHour * 60);
+        setInterval(() => {
+            updateTimersDisplayOnly();
+        }, 1000);
 
-        // 按照开始时间升序，同起点下按持续时间长短降序（保证长柱子排在左侧）
-        drawableEvents.sort((a, b) => a.startMin - b.startMin || b.endMin - a.endMin);
+        function formatTimeStr(totalSeconds) {
+            const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+            const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+            const secs = String(totalSeconds % 60).padStart(2, '0');
+            return `${hrs}:${mins}:${secs}`;
+        }
 
-        // 3. 【无Bug核心：冲突图连通分支算法】
-        // 彻底解决由于数组插入次序问题导致的时间冲突未合并 Bug
-        let clusters = [];
-        let visited = new Set();
+        function getNowFullTimeStr() {
+            const now = new Date();
+            return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+        }
 
-        function dfs(event, currentCluster) {
-            visited.add(event.id);
-            currentCluster.push(event);
-            drawableEvents.forEach(other => {
-                if (!visited.has(other.id)) {
-                    // 只要有任何交叉，判定为冲突并归在同一等高重叠区内
-                    let overlaps = event.startMin < other.endMin && event.endMin > other.startMin;
-                    if (overlaps) {
-                        dfs(other, currentCluster);
+        function updateTimersDisplayOnly() {
+            activeTimers.forEach(t => {
+                const stats = getTimerCurrentStats(t);
+                
+                const el = document.getElementById(`display-${t.id}`);
+                if (el) el.innerText = formatTimeStr(stats.seconds);
+                
+                const pauseEl = document.getElementById(`pause-display-${t.id}`);
+                if (pauseEl) pauseEl.innerText = formatTimeStr(stats.pausedSeconds);
+
+                const endtimeEl = document.getElementById(`endtime-display-${t.id}`);
+                if (endtimeEl && !t.endTime) {
+                    endtimeEl.innerText = t.isRunning ? '进行中...' : (t.startTime ? '暂停挂起中' : '未开始');
+                }
+                
+                const btnEl = document.getElementById(`btn-toggle-${t.id}`);
+                if (btnEl) {
+                    const isCurrentlyRenderedRunning = btnEl.getAttribute('data-running') === 'true';
+                    const isButtonEmpty = btnEl.innerHTML.trim() === "";
+                    
+                    if (isCurrentlyRenderedRunning !== t.isRunning || isButtonEmpty) {
+                        btnEl.setAttribute('data-running', t.isRunning ? 'true' : 'false');
+                        if (t.isRunning) {
+                            btnEl.innerHTML = `<i class="fa-solid fa-pause text-[10px]"></i> <span>暂停</span>`;
+                            btnEl.className = "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
+                        } else {
+                            btnEl.innerHTML = `<i class="fa-solid fa-play text-[10px]"></i> <span>开始</span>`;
+                            btnEl.className = "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-sm shadow-indigo-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
+                        }
                     }
                 }
             });
+            const anyRunning = activeTimers.some(t => t.isRunning);
+            const globalDot = document.getElementById('timer-dot');
+            const statusText = document.getElementById('timer-status-text');
+            
+            if (globalDot) globalDot.style.display = anyRunning ? 'block' : 'none';
+            if (statusText) {
+                statusText.innerText = anyRunning ? '进行中' : (activeTimers.some(t => t.startTime && !t.endTime) ? '任务暂停挂起中' : '无正在运行的任务');
+                if (anyRunning) {
+                    statusText.className = "text-xs font-bold text-success animate-pulse";
+                } else {
+                    statusText.className = "text-xs font-semibold text-slate-400 dark:text-slate-500";
+                }
+            }
         }
 
-        drawableEvents.forEach(event => {
-            if (!visited.has(event.id)) {
-                let currentCluster = [];
-                dfs(event, currentCluster);
-                clusters.push(currentCluster);
+        // ------------------- 暂停期高合规记录拦截窗口 -------------------
+        let pendingPauseTimerId = null;
+        let pendingPauseDuration = 0;
+
+        function triggerPauseActivityCapture(timerId, durationSeconds) {
+            pendingPauseTimerId = timerId;
+            pendingPauseDuration = durationSeconds;
+
+            const t = activeTimers.find(x => x.id === timerId);
+            if (!t) return;
+
+            const modal = document.getElementById('pause-modal');
+            if (!modal) return;
+
+            const minStr = Math.floor(durationSeconds / 60);
+            const secStr = durationSeconds % 60;
+            const durationText = minStr > 0 ? `${minStr}分${secStr}秒` : `${secStr}秒`;
+
+            document.getElementById('pause-modal-sub-info').innerHTML = `当前任务: <b>${t.name}</b> | 累计挂起暂停了 <span class="text-amber-500 font-bold font-mono">${durationText}</span>`;
+            document.getElementById('pause-custom-reason').value = '';
+
+            const tags = document.querySelectorAll('#pause-quick-tags .pause-tag');
+            tags.forEach(tag => tag.classList.remove('bg-primary/10', 'text-primary', 'border-primary/20'));
+            if (tags.length > 0) {
+                tags[0].classList.add('bg-primary/10', 'text-primary', 'border-primary/20');
             }
-        });
 
-        // 4. 【Outlook / Teams 等宽分栏着色泳道算法】
-        // 对每个成簇的冲突时段进行分栏对齐
-        clusters.forEach(cluster => {
-            cluster.sort((a, b) => a.startMin - b.startMin || b.endMin - a.endMin);
+            modal.classList.remove('hidden');
+        }
 
-            let lanes = []; // 每一项存储该泳道当前占用的最晚结束时间
-            cluster.forEach(event => {
-                let placed = false;
-                for (let i = 0; i < lanes.length; i++) {
-                    // 如果当前事件的开始时间大于或等于该泳道已有的最晚结束时间，可放入该栏
-                    if (event.startMin >= lanes[i]) {
-                        event.colIdx = i;
-                        lanes[i] = event.endMin; // 更新该泳道最晚时间
-                        placed = true;
-                        break;
+        document.addEventListener('DOMContentLoaded', () => {
+            const tags = document.querySelectorAll('#pause-quick-tags .pause-tag');
+            tags.forEach(tag => {
+                tag.addEventListener('click', () => {
+                    tags.forEach(t => t.classList.remove('bg-primary/10', 'text-primary', 'border-primary/20'));
+                    tag.classList.add('bg-primary/10', 'text-primary', 'border-primary/20');
+                });
+            });
+
+            const btnSave = document.getElementById('btn-pause-modal-save');
+            const btnSkip = document.getElementById('btn-pause-modal-skip');
+
+            if (btnSave) {
+                btnSave.addEventListener('click', () => {
+                    const activeTag = document.querySelector('#pause-quick-tags .pause-tag.text-primary');
+                    let reason = activeTag ? activeTag.getAttribute('data-reason') : '休息与调整 🍵';
+                    let type = activeTag ? activeTag.getAttribute('data-type') : '休假';
+                    const customReason = document.getElementById('pause-custom-reason').value.trim();
+                    if (customReason) {
+                        reason = customReason;
                     }
-                }
-                if (!placed) {
-                    event.colIdx = lanes.length;
-                    lanes.push(event.endMin);
-                }
-            });
 
-            const totalColumns = lanes.length;
+                    writePauseRecordToDatabase(reason, type);
+                    
+                    document.getElementById('pause-modal').classList.add('hidden');
+                    refreshListDOM();
+                    renderTeamsSchedule();
+                });
+            }
 
-            // 水平方向等分定位，确保无论有多少个冲突活动，全部都是左右完美等宽并排！
-            cluster.forEach(event => {
-                event.left = (event.colIdx / totalColumns) * 100;
-                event.width = (1 / totalColumns) * 100;
-            });
+            if (btnSkip) {
+                btnSkip.addEventListener('click', () => {
+                    document.getElementById('pause-modal').classList.add('hidden');
+                    refreshListDOM();
+                    renderTeamsSchedule();
+                });
+            }
         });
 
-        const cardsTrack = document.createElement('div');
-        cardsTrack.className = "absolute inset-0 left-16 z-10";
-        gridContainer.appendChild(cardsTrack);
+        function writePauseRecordToDatabase(reason, type) {
+            const t = activeTimers.find(x => x.id === pendingPauseTimerId);
+            if (!t) return;
 
-        drawableEvents.forEach(ev => {
-            const topPx = ((ev.startMin - startHour * 60) / totalMinutes) * gridHeight;
-            let heightPx = ((ev.endMin - ev.startMin) / totalMinutes) * gridHeight;
-            
-            // 设定最小物理高度：仅为24px！
-            if (heightPx < 24) {
-                heightPx = 24;
-            }
+            const now = Date.now();
+            const startSec = now - (pendingPauseDuration * 1000);
+            const startDate = new Date(startSec);
+            const endDate = new Date(now);
 
-            const card = document.createElement('div');
-            card.className = "absolute rounded-lg p-1.5 shadow-sm border text-white transition-all duration-300 select-none hover:shadow-md hover:scale-[1.01] hover:z-20 cursor-pointer flex flex-col justify-center overflow-hidden";
-            card.style.top = `${topPx}px`;
-            card.style.height = `${heightPx}px`;
-            
-            // 确保坐标系万无一失
-            const lOffset = ev.left !== undefined ? ev.left : 0;
-            const wOffset = ev.width !== undefined ? ev.width : 100;
-            card.style.left = `calc(${lOffset}% + 3px)`;
-            card.style.width = `calc(${wOffset}% - 6px)`;
+            const formatTime = (d) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+            const preciseHours = parseFloat((pendingPauseDuration / 3600).toFixed(2));
 
-            let skinClass = "from-slate-500 to-slate-600 border-slate-400/30";
-            let typeBadge = ev.type;
+            const pauseEntry = {
+                id: 'pause-' + Date.now() + Math.random(),
+                date: getLocalDateString(endDate),
+                type: type,
+                start: formatTime(startDate),
+                end: formatTime(endDate),
+                project: `⏸ [暂停记录] ${t.name}`,
+                customer: "系统自动记录",
+                sapModule: "PAUSE",
+                priority: "low",
+                notes: `暂停说明: ${reason}\n在追踪任务「${t.name}」期间发生的挂起暂停时段。`,
+                duration: preciseHours > 0 ? preciseHours : 0.01
+            };
 
-            if (ev.sapModule === 'PAUSE') {
-                skinClass = "from-amber-500/80 to-orange-600/80 border-amber-400/40 text-amber-50";
-                typeBadge = "暂停活动";
-            } else {
-                if (ev.type === '开发') skinClass = "from-indigo-500/90 to-purple-600/90 border-indigo-400/40";
-                if (ev.type === '会议') skinClass = "from-emerald-500/90 to-teal-600/90 border-emerald-400/40";
-                if (ev.type === '学习') skinClass = "from-pink-500/90 to-rose-600/90 border-pink-400/40";
-                if (ev.type === 'Support') skinClass = "from-cyan-500/90 to-blue-600/90 border-cyan-400/40";
-            }
-
-            card.className += ` bg-gradient-to-r ${skinClass}`;
-            card.onclick = () => openEditActivityModal(ev.id);
-
-            // 【自适应高精卡片排版逻辑】
-            if (heightPx < 50) {
-                // 单行横向紧凑模式：将标题与分类徽章完美横向并列，适合短时间或0分钟高频测试任务
-                card.innerHTML = `
-                    <div class="flex items-center justify-between w-full h-full text-[10px] leading-none">
-                        <div class="flex items-center gap-1.5 truncate pr-2">
-                            <span class="px-1 py-0.5 rounded bg-white/20 text-[8px] font-extrabold uppercase tracking-wider">${typeBadge}</span>
-                            <span class="font-bold truncate text-white" title="${ev.title}">${ev.title}</span>
-                        </div>
-                        <span class="font-mono text-[9px] opacity-90 flex-shrink-0">${ev.start}-${ev.end}</span>
-                    </div>
-                `;
-            } else {
-                // 标准高度卡片：多行经典垂直排版
-                card.innerHTML = `
-                    <div class="flex flex-col h-full justify-between leading-tight text-[11px] py-0.5">
-                        <div class="truncate">
-                            <div class="flex items-center justify-between text-[9px] font-bold opacity-90 mb-1">
-                                <span class="px-1 py-0.5 rounded bg-white/20 uppercase tracking-wider">${typeBadge}</span>
-                                <span class="font-mono">${ev.start} - ${ev.end}</span>
-                            </div>
-                            <h5 class="font-bold tracking-tight text-white line-clamp-2 leading-snug text-xs">${ev.title}</h5>
-                        </div>
-                        ${heightPx > 65 ? `<p class="text-[9px] opacity-75 truncate border-t border-white/10 pt-1 mt-1">${ev.notes || '-'}</p>` : ''}
-                    </div>
-                `;
-            }
-            cardsTrack.appendChild(card);
-        });
-    }
-
-    // ------------------- 卡片自定义编辑弹窗模块 -------------------
-    window.openEditActivityModal = function(id) {
-        const entry = timesheetEntries.find(e => e.id == id);
-        if (!entry) return;
-
-        // 载入编辑模态框之前刷新一次选项
-        renderTypeOptions();
-
-        document.getElementById('edit-act-id').value = entry.id;
-        document.getElementById('edit-act-project').value = entry.project;
-        document.getElementById('edit-act-date').value = entry.date;
-        document.getElementById('edit-act-type').value = entry.type;
-        document.getElementById('edit-act-start').value = entry.start;
-        document.getElementById('edit-act-end').value = entry.end;
-        document.getElementById('edit-act-notes').value = entry.notes;
-
-        document.getElementById('edit-activity-modal').classList.remove('hidden');
-    };
-
-    window.closeEditActivityModal = function() {
-        document.getElementById('edit-activity-modal').classList.add('hidden');
-    };
-
-    window.handleActivityBlockUpdate = function(e) {
-        e.preventDefault();
-        const id = document.getElementById('edit-act-id').value;
-        const entry = timesheetEntries.find(item => item.id == id);
-        if (!entry) return;
-
-        entry.project = document.getElementById('edit-act-project').value;
-        entry.date = document.getElementById('edit-act-date').value;
-        entry.type = document.getElementById('edit-act-type').value;
-        entry.start = document.getElementById('edit-act-start').value;
-        entry.end = document.getElementById('edit-act-end').value;
-        entry.notes = document.getElementById('edit-act-notes').value;
-
-        const [startH, startM] = entry.start.split(':').map(Number);
-        const [endH, endM] = entry.end.split(':').map(Number);
-        let totalHours = (endH + endM/60) - (startH + startM/60);
-        if (startH <= 12 && endH >= 13 && entry.sapModule !== 'PAUSE') {
-            totalHours -= 1;
-        }
-        entry.duration = Math.max(0.1, parseFloat(totalHours.toFixed(2)));
-
-        saveToLocalStorage();
-        closeEditActivityModal();
-        
-        renderTable();
-        updateKPIs();
-        initOrUpdateCharts();
-        renderTeamsSchedule();
-        
-        showToast("活动数据已成功更新！", "success");
-    };
-
-    window.deleteActivityBlockFromModal = function() {
-        const id = document.getElementById('edit-act-id').value;
-        showConfirm("您确定要永久删除此段时间流记录吗？", () => {
-            timesheetEntries = timesheetEntries.filter(item => item.id != id);
+            timesheetEntries.unshift(pauseEntry);
             saveToLocalStorage();
-            closeEditActivityModal();
 
             renderTable();
             updateKPIs();
             initOrUpdateCharts();
-            renderTeamsSchedule();
-
-            showToast("记录已永久删除", "warning");
-        });
-    };
-
-    function refreshListDOM() {
-        const listBox = document.getElementById('main-dashboard-timers-grid');
-        if (listBox) {
-            listBox.innerHTML = generateTimerListHTML(activeTimers);
+            showToast("已将暂停期间做的事情写入工时表！");
         }
-        updateTimersDisplayOnly();
-    }
 
-    window.refreshTimerConsole = refreshListDOM;
-    window.renderTeamsSchedule = renderTeamsSchedule;
-
-    function initAddButtons() {
-        const btnAdd = document.getElementById('btn-add-timer-main');
-        if (btnAdd) {
-            btnAdd.addEventListener('click', (e) => {
-                e.preventDefault();
-                const taskName = prompt("请输入您想独立跟踪的任务/项目名称:", `任务 ${activeTimers.length + 1}`);
-                if (!taskName || taskName.trim() === '') return;
+        // 生成平铺控制台任务列表 HTML
+        function generateTimerListHTML(timers) {
+            let html = '';
+            timers.forEach((t) => {
+                const stats = getTimerCurrentStats(t);
+                const displaySecs = formatTimeStr(stats.seconds);
+                const displayPause = formatTimeStr(stats.pausedSeconds);
                 
-                activeTimers.push({
-                    id: 'timer-' + Date.now(),
-                    name: taskName.trim(),
-                    memo: '',
-                    seconds: 0,
-                    isRunning: false,
-                    startTime: '',
-                    endTime: '',
-                    pausedSeconds: 0,
-                    accumulatedSeconds: 0,
-                    accumulatedPausedSeconds: 0,
-                    lastStateChangeTime: 0
+                const btnClass = t.isRunning 
+                    ? "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-sm shadow-amber-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1"
+                    : "flex-1 py-1.5 text-[10px] font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 shadow-sm shadow-indigo-500/10 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1";
+                const btnContent = t.isRunning
+                    ? `<i class="fa-solid fa-pause text-[10px]"></i> <span>暂停</span>`
+                    : `<i class="fa-solid fa-play text-[10px]"></i> <span>开始</span>`;
+                
+                html += `
+                    <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/50 shadow-sm flex flex-col justify-between gap-3 hover:shadow-md transition-all duration-300 animate-fade-in">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-1.5 max-w-[180px] overflow-hidden">
+                                <span class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate" title="${t.name}">
+                                    ${t.name}
+                                </span>
+                                <button onclick="window.customTimerActions.editTitle('${t.id}')" title="修改标题" class="p-1 text-slate-400 hover:text-primary transition-all scale-90">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                            </div>
+                            ${timers.length > 1 ? `
+                                <button onclick="window.customTimerActions.remove('${t.id}')" class="text-slate-400 hover:text-danger text-[11px] p-1.5 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                        
+                        <!-- 2x2 精细化时间流分析网格 -->
+                        <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50/50 dark:bg-slate-800/10 p-3 rounded-xl font-mono border border-slate-100 dark:border-slate-800/30">
+                            <div class="flex flex-col">
+                                <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">▶ 开始时间</span>
+                                <span class="font-semibold text-slate-600 dark:text-slate-300 truncate mt-0.5">${t.startTime ? t.startTime : '未开始'}</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">■ 结束时间</span>
+                                <span class="font-semibold text-slate-600 dark:text-slate-300 truncate mt-0.5" id="endtime-display-${t.id}">
+                                    ${t.endTime ? t.endTime : (t.isRunning ? '进行中...' : (t.startTime ? '暂停挂起中' : '未开始'))}
+                                </span>
+                            </div>
+                            <div class="flex flex-col border-t border-slate-100 dark:border-slate-800/60 pt-1.5 mt-1.5">
+                                <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">⏸ 暂停时长</span>
+                                <span class="font-bold text-amber-500 mt-0.5" id="pause-display-${t.id}">${displayPause}</span>
+                            </div>
+                            <div class="flex flex-col border-t border-slate-100 dark:border-slate-800/60 pt-1.5 mt-1.5">
+                                <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">⏱ 有效工时</span>
+                                <span class="font-bold text-primary dark:text-indigo-400 mt-0.5" id="display-${t.id}">${displaySecs}</span>
+                            </div>
+                        </div>
+
+                        <!-- 任务备注 / Memo 功能区域 -->
+                        <div class="text-xs">
+                            <span class="text-slate-400 text-[9px] uppercase font-bold block mb-1">📝 任务说明 / Memo</span>
+                            <textarea oninput="window.customTimerActions.updateMemo('${t.id}', this.value)" placeholder="写点什么..." class="w-full text-xs p-2 rounded-lg bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/30 dark:border-slate-700/30 font-sans focus:outline-none focus:ring-1 focus:ring-primary/30 resize-none h-14 transition-all" rows="2">${t.memo || ''}</textarea>
+                        </div>
+
+                        <!-- 动作控制栏 -->
+                        <div class="flex items-center gap-2 mt-1">
+                            <button id="btn-toggle-${t.id}" data-running="${t.isRunning ? 'true' : 'false'}" onclick="window.customTimerActions.toggle('${t.id}')" class="${btnClass}">
+                                ${btnContent}
+                            </button>
+                            
+                            <button onclick="window.customTimerActions.reset('${t.id}')" title="重置记录" class="w-8 h-8 flex-shrink-0 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl transition-all duration-300 active:scale-90 flex items-center justify-center border border-slate-200/30 dark:border-slate-700/30 shadow-sm">
+                                <i class="fa-solid fa-rotate-left text-xs"></i>
+                            </button>
+                            
+                            <button onclick="window.customTimerActions.logToFormAndSave('${t.id}')" class="flex-1 py-1.5 text-[10px] font-bold rounded-xl text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 hover:shadow-md hover:shadow-emerald-500/15 active:scale-95 transition-all duration-300 flex items-center justify-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
+                                <span>结束</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            return html;
+        }
+
+        // ------------------- 可调日期的高精度日程排班控制核心 -------------------
+        let selectedScheduleDate = getLocalDateString(); 
+
+        window.changeScheduleDate = function(val) {
+            if (!val) return;
+            selectedScheduleDate = val;
+            renderTeamsSchedule();
+            showToast(`已切换排班视图至 ${val}`, "info");
+        };
+
+        window.setScheduleDateToToday = function() {
+            const todayStr = getLocalDateString();
+            selectedScheduleDate = todayStr;
+            const inputEl = document.getElementById('schedule-date-input');
+            if (inputEl) inputEl.value = todayStr;
+            renderTeamsSchedule();
+            showToast("已回到今天！", "success");
+        };
+
+        // ------------------- Teams 排班日程表核心绘制引擎 -------------------
+        function renderTeamsSchedule() {
+            const gridContainer = document.getElementById('schedule-grid-container');
+            if (!gridContainer) return;
+
+            gridContainer.innerHTML = '';
+
+            const todayEntries = timesheetEntries.filter(e => e.date === selectedScheduleDate);
+
+            const startHour = 6;
+            const endHour = 24;
+            const totalMinutes = (endHour - startHour) * 60;
+            const gridHeight = 1200; 
+
+            const scaleTrack = document.createElement('div');
+            scaleTrack.className = "absolute inset-0 pointer-events-none z-0";
+            gridContainer.appendChild(scaleTrack);
+
+            for (let h = startHour; h < endHour; h++) {
+                const percent = ((h - startHour) / (endHour - startHour)) * 100;
+                
+                const label = document.createElement('div');
+                label.className = "absolute text-[10px] font-mono text-slate-400 dark:text-slate-500 left-3 select-none";
+                label.style.top = `calc(${percent}% + 4px)`;
+                label.innerText = `${String(h).padStart(2, '0')}:00`;
+                scaleTrack.appendChild(label);
+
+                const line = document.createElement('div');
+                line.className = "absolute left-16 right-0 border-t border-slate-200/40 dark:border-slate-800/40";
+                line.style.top = `${percent}%`;
+                scaleTrack.appendChild(line);
+
+                const halfLine = document.createElement('div');
+                halfLine.className = "absolute left-16 right-0 border-t border-dashed border-slate-100/20 dark:border-slate-800/20";
+                halfLine.style.top = `${percent + (50 / (endHour - startHour))}%`;
+                scaleTrack.appendChild(halfLine);
+            }
+
+            const events = todayEntries.map(e => {
+                const [sh, sm] = e.start.split(':').map(Number);
+                const [eh, em] = e.end.split(':').map(Number);
+                
+                let startMin = sh * 60 + sm;
+                let endMin = eh * 60 + em;
+                if (endMin <= startMin) {
+                    endMin = startMin + 10; 
+                }
+                return {
+                    id: e.id,
+                    title: e.project,
+                    notes: e.notes,
+                    type: e.type,
+                    start: e.start,
+                    end: e.end,
+                    sapModule: e.sapModule,
+                    startMin: startMin,
+                    endMin: endMin
+                };
+            });
+
+            const drawableEvents = events.filter(ev => ev.startMin >= startHour * 60 && ev.endMin <= endHour * 60);
+
+            drawableEvents.sort((a, b) => a.startMin - b.startMin || b.endMin - a.endMin);
+
+            let clusters = [];
+            let visited = new Set();
+
+            function dfs(event, currentCluster) {
+                visited.add(event.id);
+                currentCluster.push(event);
+                drawableEvents.forEach(other => {
+                    if (!visited.has(other.id)) {
+                        let overlaps = event.startMin < other.endMin && event.endMin > other.startMin;
+                        if (overlaps) {
+                            dfs(other, currentCluster);
+                        }
+                    }
                 });
+            }
+
+            drawableEvents.forEach(event => {
+                if (!visited.has(event.id)) {
+                    let currentCluster = [];
+                    dfs(event, currentCluster);
+                    clusters.push(currentCluster);
+                }
+            });
+
+            clusters.forEach(cluster => {
+                cluster.sort((a, b) => a.startMin - b.startMin || b.endMin - a.endMin);
+
+                let lanes = []; 
+                cluster.forEach(event => {
+                    let placed = false;
+                    for (let i = 0; i < lanes.length; i++) {
+                        if (event.startMin >= lanes[i]) {
+                            event.colIdx = i;
+                            lanes[i] = event.endMin; 
+                            placed = true;
+                            break;
+                        }
+                    }
+                    if (!placed) {
+                        event.colIdx = lanes.length;
+                        lanes.push(event.endMin);
+                    }
+                });
+
+                const totalColumns = lanes.length;
+
+                cluster.forEach(event => {
+                    event.left = (event.colIdx / totalColumns) * 100;
+                    event.width = (1 / totalColumns) * 100;
+                });
+            });
+
+            const cardsTrack = document.createElement('div');
+            cardsTrack.className = "absolute inset-0 left-16 z-10";
+            gridContainer.appendChild(cardsTrack);
+
+            drawableEvents.forEach(ev => {
+                const topPx = ((ev.startMin - startHour * 60) / totalMinutes) * gridHeight;
+                let heightPx = ((ev.endMin - ev.startMin) / totalMinutes) * gridHeight;
+                
+                if (heightPx < 24) {
+                    heightPx = 24;
+                }
+
+                const card = document.createElement('div');
+                card.className = "absolute rounded-lg p-1.5 shadow-sm border text-white transition-all duration-300 select-none hover:shadow-md hover:scale-[1.01] hover:z-20 cursor-pointer flex flex-col justify-center overflow-hidden";
+                card.style.top = `${topPx}px`;
+                card.style.height = `${heightPx}px`;
+                
+                const lOffset = ev.left !== undefined ? ev.left : 0;
+                const wOffset = ev.width !== undefined ? ev.width : 100;
+                card.style.left = `calc(${lOffset}% + 3px)`;
+                card.style.width = `calc(${wOffset}% - 6px)`;
+
+                let skinClass = "from-slate-500 to-slate-600 border-slate-400/30";
+                let typeBadge = ev.type;
+
+                if (ev.sapModule === 'PAUSE') {
+                    skinClass = "from-amber-500/80 to-orange-600/80 border-amber-400/40 text-amber-50";
+                    typeBadge = "暂停活动";
+                } else {
+                    if (ev.type === '开发') skinClass = "from-indigo-500/90 to-purple-600/90 border-indigo-400/40";
+                    if (ev.type === '会议') skinClass = "from-emerald-500/90 to-teal-600/90 border-emerald-400/40";
+                    if (ev.type === '学习') skinClass = "from-pink-500/90 to-rose-600/90 border-pink-400/40";
+                    if (ev.type === 'Support') skinClass = "from-cyan-500/90 to-blue-600/90 border-cyan-400/40";
+                    if (ev.type.includes('京东')) skinClass = "from-rose-500/90 to-orange-600/90 border-rose-400/40";
+                }
+
+                card.className += ` bg-gradient-to-r ${skinClass}`;
+                card.onclick = () => openEditActivityModal(ev.id);
+
+                if (heightPx < 50) {
+                    card.innerHTML = `
+                        <div class="flex items-center justify-between w-full h-full text-[10px] leading-none">
+                            <div class="flex items-center gap-1.5 truncate pr-2">
+                                <span class="px-1 py-0.5 rounded bg-white/20 text-[8px] font-extrabold uppercase tracking-wider">${typeBadge}</span>
+                                <span class="font-bold truncate text-white" title="${ev.title}">${ev.title}</span>
+                            </div>
+                            <span class="font-mono text-[9px] opacity-90 flex-shrink-0">${ev.start}-${ev.end}</span>
+                        </div>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <div class="flex flex-col h-full justify-between leading-tight text-[11px] py-0.5">
+                            <div class="truncate">
+                                <div class="flex items-center justify-between text-[9px] font-bold opacity-90 mb-1">
+                                    <span class="px-1 py-0.5 rounded bg-white/20 uppercase tracking-wider">${typeBadge}</span>
+                                    <span class="font-mono">${ev.start} - ${ev.end}</span>
+                                </div>
+                                <h5 class="font-bold tracking-tight text-white line-clamp-2 leading-snug text-xs">${ev.title}</h5>
+                            </div>
+                            ${heightPx > 65 ? `<p class="text-[9px] opacity-75 truncate border-t border-white/10 pt-1 mt-1">${ev.notes || '-'}</p>` : ''}
+                        </div>
+                    `;
+                }
+                cardsTrack.appendChild(card);
+            });
+        }
+
+        // ------------------- 卡片自定义编辑弹窗模块 -------------------
+        window.openEditActivityModal = function(id) {
+            const entry = timesheetEntries.find(e => e.id == id);
+            if (!entry) return;
+
+            renderTypeOptions();
+
+            document.getElementById('edit-act-id').value = entry.id;
+            document.getElementById('edit-act-project').value = entry.project;
+            document.getElementById('edit-act-date').value = entry.date;
+            document.getElementById('edit-act-type').value = entry.type;
+            document.getElementById('edit-act-start').value = entry.start;
+            document.getElementById('edit-act-end').value = entry.end;
+            document.getElementById('edit-act-notes').value = entry.notes;
+
+            document.getElementById('edit-activity-modal').classList.remove('hidden');
+        };
+
+        window.closeEditActivityModal = function() {
+            document.getElementById('edit-activity-modal').classList.add('hidden');
+        };
+
+        window.handleActivityBlockUpdate = function(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-act-id').value;
+            const entry = timesheetEntries.find(item => item.id == id);
+            if (!entry) return;
+
+            entry.project = document.getElementById('edit-act-project').value;
+            entry.date = document.getElementById('edit-act-date').value;
+            entry.type = document.getElementById('edit-act-type').value;
+            entry.start = document.getElementById('edit-act-start').value;
+            entry.end = document.getElementById('edit-act-end').value;
+            entry.notes = document.getElementById('edit-act-notes').value;
+
+            const [startH, startM] = entry.start.split(':').map(Number);
+            const [endH, endM] = entry.end.split(':').map(Number);
+            let totalHours = (endH + endM/60) - (startH + startM/60);
+            if (startH <= 12 && endH >= 13 && entry.sapModule !== 'PAUSE') {
+                totalHours -= 1;
+            }
+            entry.duration = Math.max(0.1, parseFloat(totalHours.toFixed(2)));
+
+            saveToLocalStorage();
+            closeEditActivityModal();
+            
+            renderTable();
+            updateKPIs();
+            initOrUpdateCharts();
+            renderTeamsSchedule();
+            
+            showToast("活动数据已成功更新！", "success");
+        };
+
+        window.deleteActivityBlockFromModal = function() {
+            const id = document.getElementById('edit-act-id').value;
+            showConfirm("您确定要永久删除此段时间流记录吗？", () => {
+                timesheetEntries = timesheetEntries.filter(item => item.id != id);
+                saveToLocalStorage();
+                closeEditActivityModal();
+
+                renderTable();
+                updateKPIs();
+                initOrUpdateCharts();
+                renderTeamsSchedule();
+
+                showToast("记录已永久删除", "warning");
+            });
+        };
+
+        function refreshListDOM() {
+            const listBox = document.getElementById('main-dashboard-timers-grid');
+            if (listBox) {
+                listBox.innerHTML = generateTimerListHTML(activeTimers);
+            }
+            updateTimersDisplayOnly();
+        }
+
+        window.refreshTimerConsole = refreshListDOM;
+        window.renderTeamsSchedule = renderTeamsSchedule;
+
+        function initAddButtons() {
+            const btnAdd = document.getElementById('btn-add-timer-main');
+            if (btnAdd) {
+                btnAdd.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const taskName = prompt("请输入您想独立跟踪的任务/项目名称:", `任务 ${activeTimers.length + 1}`);
+                    if (!taskName || taskName.trim() === '') return;
+                    
+                    activeTimers.push({
+                        id: 'timer-' + Date.now(),
+                        name: taskName.trim(),
+                        memo: '',
+                        seconds: 0,
+                        isRunning: false,
+                        startTime: '',
+                        endTime: '',
+                        pausedSeconds: 0,
+                        accumulatedSeconds: 0,
+                        accumulatedPausedSeconds: 0,
+                        lastStateChangeTime: 0
+                    });
+                    localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
+                    refreshListDOM();
+                    renderTeamsSchedule();
+                });
+            }
+            refreshListDOM();
+            renderTeamsSchedule();
+        }
+
+        window.customTimerActions = {
+            toggle: function(id) {
+                const t = activeTimers.find(x => x.id === id);
+                if (!t) return;
+                
+                const now = Date.now();
+                const nowTimeFull = getNowFullTimeStr();
+                const stats = getTimerCurrentStats(t);
+                
+                if (!t.isRunning) {
+                    const isFirstStart = !t.startTime || t.accumulatedSeconds === 0;
+                    
+                    if (isFirstStart) {
+                        t.startTime = nowTimeFull; 
+                        t.accumulatedSeconds = 0;
+                        t.accumulatedPausedSeconds = 0;
+                    } else {
+                        const pauseDuration = Math.floor((now - t.lastStateChangeTime) / 1000);
+                        if (pauseDuration > 1) {
+                            t.accumulatedPausedSeconds = stats.pausedSeconds;
+                            triggerPauseActivityCapture(t.id, pauseDuration);
+                        }
+                    }
+                    t.isRunning = true;
+                    t.endTime = ''; 
+                    t.lastStateChangeTime = now;
+                } else {
+                    t.accumulatedSeconds = stats.seconds;
+                    t.isRunning = false;
+                    t.lastStateChangeTime = now;
+                    showToast("任务已暂停，计时归档 ⏸", "info");
+                }
+                
+                t.seconds = stats.seconds;
+                t.pausedSeconds = stats.pausedSeconds;
+
                 localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
                 refreshListDOM();
                 renderTeamsSchedule();
-            });
-        }
-        refreshListDOM();
-        renderTeamsSchedule();
-    }
+            },
 
-    window.customTimerActions = {
-        toggle: function(id) {
-            const t = activeTimers.find(x => x.id === id);
-            if (!t) return;
-            
-            const now = Date.now();
-            const nowTimeFull = getNowFullTimeStr();
-            const stats = getTimerCurrentStats(t);
-            
-            if (!t.isRunning) {
-                const isFirstStart = !t.startTime || t.accumulatedSeconds === 0;
-                
-                if (isFirstStart) {
-                    t.startTime = nowTimeFull; 
+            reset: function(id) {
+                const t = activeTimers.find(x => x.id === id);
+                if (t) {
+                    t.seconds = 0;
+                    t.pausedSeconds = 0;
+                    t.isRunning = false;
+                    t.startTime = '';
+                    t.endTime = '';
                     t.accumulatedSeconds = 0;
                     t.accumulatedPausedSeconds = 0;
-                } else {
-                    const pauseDuration = Math.floor((now - t.lastStateChangeTime) / 1000);
-                    if (pauseDuration > 1) {
-                        t.accumulatedPausedSeconds = stats.pausedSeconds;
-                        triggerPauseActivityCapture(t.id, pauseDuration);
-                    }
+                    t.lastStateChangeTime = 0;
+                    localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
+                    refreshListDOM();
+                    renderTeamsSchedule();
                 }
-                t.isRunning = true;
-                t.endTime = ''; 
-                t.lastStateChangeTime = now;
-            } else {
-                t.accumulatedSeconds = stats.seconds;
-                t.isRunning = false;
-                t.lastStateChangeTime = now;
-                showToast("任务已暂停，计时归档 ⏸", "info");
-            }
-            
-            t.seconds = stats.seconds;
-            t.pausedSeconds = stats.pausedSeconds;
+            },
 
-            localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
-            refreshListDOM();
-            renderTeamsSchedule();
-        },
+            remove: function(id) {
+                activeTimers = activeTimers.filter(x => x.id !== id);
+                localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
+                refreshListDOM();
+                renderTeamsSchedule();
+            },
 
-        reset: function(id) {
-            const t = activeTimers.find(x => x.id === id);
-            if (t) {
+            editTitle: function(id) {
+                const t = activeTimers.find(x => x.id === id);
+                if (!t) return;
+                const newName = prompt("请修改任务标题：", t.name);
+                if (newName && newName.trim() !== '') {
+                    t.name = newName.trim();
+                    localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
+                    refreshListDOM();
+                    renderTeamsSchedule();
+                }
+            },
+
+            updateMemo: function(id, val) {
+                const t = activeTimers.find(x => x.id === id);
+                if (t) {
+                    t.memo = val;
+                    localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
+                }
+            },
+
+            logToFormAndSave: function(id) {
+                const t = activeTimers.find(x => x.id === id);
+                if (!t) return;
+                
+                const stats = getTimerCurrentStats(t);
+                if (stats.seconds <= 0) {
+                    showToast("计时器时长为 0，请开始计时后再结算！", "warning");
+                    return;
+                }
+
+                const nowTimeFull = getNowFullTimeStr();
+                const now = Date.now();
+                
+                if (t.isRunning) {
+                    t.accumulatedSeconds = stats.seconds;
+                    t.isRunning = false;
+                    t.endTime = nowTimeFull;
+                    t.lastStateChangeTime = now;
+                } else if (!t.endTime) {
+                    t.accumulatedPausedSeconds = stats.pausedSeconds;
+                    t.endTime = nowTimeFull;
+                    t.lastStateChangeTime = now;
+                }
+
+                if (!t.startTime) t.startTime = getNowFullTimeStr();
+                
+                const preciseHours = parseFloat((stats.seconds / 3600).toFixed(2));
+                const durationString = formatTimeStr(stats.seconds);
+                const pauseString = formatTimeStr(stats.pausedSeconds);
+
+                const userMemoText = t.memo ? t.memo.trim() : "";
+                const auditNotes = (userMemoText ? `${userMemoText}\n\n` : '') + 
+                                   `▶ 开始时间: ${t.startTime}\n` +
+                                   `⏸ 挂起暂停: ${pauseString}\n` +
+                                   `⏱ 有效持续: ${durationString}\n` +
+                                   `■ 结束时间: ${t.endTime}\n` +
+                                   `---------------------\n` +
+                                   ` ${t.name}`;
+
+                const newRecord = {
+                    id: String(Date.now()),
+                    date: getLocalDateString(),
+                    type: "开发", 
+                    start: t.startTime.substring(0, 5), 
+                    end: t.endTime.substring(0, 5),     
+                    project: t.name,
+                    customer: "异步追踪",
+                    sapModule: "TIMER",
+                    priority: "medium",
+                    notes: auditNotes,  
+                    duration: preciseHours > 0 ? preciseHours : 0.1 
+                };
+
+                if (typeof timesheetEntries !== 'undefined' && Array.isArray(timesheetEntries)) {
+                    timesheetEntries.unshift(newRecord);
+                    saveToLocalStorage();
+                }
+
+                const refreshRoutines = [
+                    { name: 'renderTable', action: () => renderTable() },
+                    { name: 'updateKPIs', action: () => updateKPIs() },
+                    { name: 'initOrUpdateCharts', action: () => initOrUpdateCharts() }
+                ];
+
+                refreshRoutines.forEach(routine => {
+                    if (typeof window[routine.name] === 'function') {
+                        try { routine.action(); } catch(err) { console.error(err); }
+                    }
+                });
+
+                if (typeof switchTab === 'function') {
+                    switchTab('timesheet');
+                }
+
+                showToast("🎉 结算入账成功！\n有效工作时间: " + durationString, "success");
+                
                 t.seconds = 0;
-                t.pausedSeconds = 0;
-                t.isRunning = false;
                 t.startTime = '';
                 t.endTime = '';
+                t.pausedSeconds = 0;
                 t.accumulatedSeconds = 0;
                 t.accumulatedPausedSeconds = 0;
                 t.lastStateChangeTime = 0;
+                t.memo = '';
                 localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
                 refreshListDOM();
                 renderTeamsSchedule();
             }
-        },
+        };
 
-        remove: function(id) {
-            activeTimers = activeTimers.filter(x => x.id !== id);
-            localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
-            refreshListDOM();
-            renderTeamsSchedule();
-        },
-
-        editTitle: function(id) {
-            const t = activeTimers.find(x => x.id === id);
-            if (!t) return;
-            const newName = prompt("请修改任务标题：", t.name);
-            if (newName && newName.trim() !== '') {
-                t.name = newName.trim();
-                localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
-                refreshListDOM();
-                renderTeamsSchedule();
-            }
-        },
-
-        updateMemo: function(id, val) {
-            const t = activeTimers.find(x => x.id === id);
-            if (t) {
-                t.memo = val;
-                localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
-            }
-        },
-
-        logToFormAndSave: function(id) {
-            const t = activeTimers.find(x => x.id === id);
-            if (!t) return;
-            
-            const stats = getTimerCurrentStats(t);
-            if (stats.seconds <= 0) {
-                showToast("计时器时长为 0，请开始并进行有效计时后再结算！", "warning");
-                return;
-            }
-
-            const nowTimeFull = getNowFullTimeStr();
-            const now = Date.now();
-            
-            if (t.isRunning) {
-                t.accumulatedSeconds = stats.seconds;
-                t.isRunning = false;
-                t.endTime = nowTimeFull;
-                t.lastStateChangeTime = now;
-            } else if (!t.endTime) {
-                t.accumulatedPausedSeconds = stats.pausedSeconds;
-                t.endTime = nowTimeFull;
-                t.lastStateChangeTime = now;
-            }
-
-            if (!t.startTime) t.startTime = getNowFullTimeStr();
-            
-            const preciseHours = parseFloat((stats.seconds / 3600).toFixed(2));
-            const durationString = formatTimeStr(stats.seconds);
-            const pauseString = formatTimeStr(stats.pausedSeconds);
-
-            const userMemoText = t.memo ? t.memo.trim() : "";
-            const auditNotes = (userMemoText ? `${userMemoText}\n\n` : '') + 
-                               `▶ 开始时间: ${t.startTime}\n` +
-                               `⏸ 挂起暂停: ${pauseString}\n` +
-                               `⏱ 有效持续: ${durationString}\n` +
-                               `■ 结束时间: ${t.endTime}\n` +
-                               `---------------------\n` +
-                               ` ${t.name}`;
-
-            const newRecord = {
-                id: String(Date.now()),
-                date: getLocalDateString(),
-                type: "开发", 
-                start: t.startTime.substring(0, 5), 
-                end: t.endTime.substring(0, 5),     
-                project: t.name,
-                customer: "异步追踪",
-                sapModule: "TIMER",
-                priority: "medium",
-                notes: auditNotes,  
-                duration: preciseHours > 0 ? preciseHours : 0.1 
-            };
-
-            if (typeof timesheetEntries !== 'undefined' && Array.isArray(timesheetEntries)) {
-                timesheetEntries.unshift(newRecord);
-                if (typeof saveToLocalStorage === 'function') {
-                    saveToLocalStorage();
-                }
-            }
-
-            const refreshRoutines = [
-                { name: 'renderTable', action: () => renderTable() },
-                { name: 'updateKPIs', action: () => updateKPIs() },
-                { name: 'initOrUpdateCharts', action: () => initOrUpdateCharts() }
-            ];
-
-            refreshRoutines.forEach(routine => {
-                if (typeof window[routine.name] === 'function') {
-                    try { routine.action(); } catch(err) { console.error(err); }
-                }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                initAddButtons();
+                const inp = document.getElementById('schedule-date-input');
+                if (inp) inp.value = selectedScheduleDate;
             });
-
-            if (typeof switchTab === 'function') {
-                switchTab('timesheet');
-            }
-
-            showToast("🎉 结算入账成功！\n有效工作时间: " + durationString, "success");
-            
-            t.seconds = 0;
-            t.startTime = '';
-            t.endTime = '';
-            t.pausedSeconds = 0;
-            t.accumulatedSeconds = 0;
-            t.accumulatedPausedSeconds = 0;
-            t.lastStateChangeTime = 0;
-            t.memo = '';
-            localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
-            refreshListDOM();
-            renderTeamsSchedule();
+        } else {
+            setTimeout(() => {
+                initAddButtons();
+                const inp = document.getElementById('schedule-date-input');
+                if (inp) inp.value = selectedScheduleDate;
+            }, 200);
         }
-    };
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            initAddButtons();
-            // 在页面完全加载后，精准设定一次日期选择器的初始默认值为本地当前日期
-            const inp = document.getElementById('schedule-date-input');
-            if (inp) inp.value = selectedScheduleDate;
-        });
-    } else {
-        setTimeout(() => {
-            initAddButtons();
-            const inp = document.getElementById('schedule-date-input');
-            if (inp) inp.value = selectedScheduleDate;
-        }, 200);
-    }
-})();
-</script>
-
+    })();
+    </script>
 </body>
 </html>
