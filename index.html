@@ -718,6 +718,40 @@
         </div>
     </div>
 
+    <!-- 新建任务高精弹窗 -->
+    <div id="add-task-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+        <div class="glass max-w-md w-full p-6 rounded-apple shadow-2xl border border-slate-200/50 dark:border-slate-800/50 transform scale-95 transition-all duration-300">
+            <div class="flex items-center justify-between mb-4">
+                <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-stopwatch text-primary"></i> 新建追踪任务
+                </h4>
+                <button onclick="window.closeAddTaskModal()" class="text-slate-400 hover:text-danger"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form id="add-task-form" onsubmit="window.handleAddTaskSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 mb-1">任务/项目名称</label>
+                    <input type="text" id="add-task-name" required placeholder="例如：架构方案设计、产品周会" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 mb-1">手动设定开始时间 <span class="text-slate-400 font-normal">(选填)</span></label>
+                    <div class="flex gap-2">
+                        <input type="time" id="add-task-start-time" class="flex-1 text-xs p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none">
+                        <button type="button" onclick="window.setAddTaskTimeNow()" class="px-3 bg-slate-100 dark:bg-slate-850 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-xs transition-all font-semibold">现在</button>
+                        <button type="button" onclick="window.clearAddTaskTime()" class="px-3 bg-danger/10 hover:bg-danger/20 text-danger rounded-xl text-xs transition-all font-semibold">清除</button>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1.5 leading-relaxed">💡 提示：若填入了时间，系统会计算当前已耗时时长，创建后立即显示（如输入10:00，当前11:30，创建完后计时器将直接展示已用时 01:30:00）。留空则从 00:00:00 重新算起。</p>
+                </div>
+
+                <div class="flex gap-3 justify-end pt-2">
+                    <button type="button" onclick="window.closeAddTaskModal()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-500 dark:text-slate-300 text-xs font-semibold rounded-xl transition-all">取消</button>
+                    <button type="submit" class="px-5 py-2.5 bg-primary hover:bg-primary/95 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-primary/20">创建任务</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- 重命名工时分类精美弹窗 -->
     <div id="rename-type-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
         <div class="glass max-w-md w-full p-6 rounded-apple shadow-2xl border border-slate-200/50 dark:border-slate-800/50 transform scale-95 transition-all duration-300">
@@ -2255,8 +2289,9 @@
             let pausedSeconds = t.accumulatedPausedSeconds || 0;
             const now = Date.now();
 
-            if (t.startTime && !t.endTime) {
-                const elapsed = Math.floor((now - (t.lastStateChangeTime || now)) / 1000);
+            // 仅在 lastStateChangeTime > 0 (即开始过计时) 时才进行相对物理时间计算
+            if (t.startTime && !t.endTime && t.lastStateChangeTime > 0) {
+                const elapsed = Math.floor((now - t.lastStateChangeTime) / 1000);
                 if (t.isRunning) {
                     seconds += elapsed;
                 } else {
@@ -2523,6 +2558,72 @@
             initOrUpdateCharts();
             showToast("已将暂停时段无缝录入工时表！", "success");
         }
+
+        // ------------------- 新增追踪任务 modal 业务流程交互逻辑 -------------------
+        window.openAddTaskModal = function() {
+            document.getElementById('add-task-name').value = `任务 ${activeTimers.length + 1}`;
+            document.getElementById('add-task-start-time').value = '';
+            document.getElementById('add-task-modal').classList.remove('hidden');
+        };
+
+        window.closeAddTaskModal = function() {
+            document.getElementById('add-task-modal').classList.add('hidden');
+        };
+
+        window.setAddTaskTimeNow = function() {
+            const now = new Date();
+            const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            document.getElementById('add-task-start-time').value = hhmm;
+        };
+
+        window.clearAddTaskTime = function() {
+            document.getElementById('add-task-start-time').value = '';
+        };
+
+        window.handleAddTaskSubmit = function(e) {
+            e.preventDefault();
+            const taskName = document.getElementById('add-task-name').value.trim();
+            const customStart = document.getElementById('add-task-start-time').value;
+            
+            if (!taskName) return;
+
+            let finalStartTime = '';
+            let initialSeconds = 0;
+
+            if (customStart) {
+                finalStartTime = customStart + ':00';
+                
+                // 自动计算过去时间差，将有效时长直接导入累加秒数中
+                const now = new Date();
+                const [sh, sm] = customStart.split(':').map(Number);
+                const startDate = new Date();
+                startDate.setHours(sh, sm, 0, 0);
+                
+                if (startDate < now) {
+                    initialSeconds = Math.floor((now - startDate) / 1000);
+                }
+            }
+
+            activeTimers.push({
+                id: 'timer-' + Date.now(),
+                name: taskName,
+                memo: '',
+                seconds: initialSeconds,
+                isRunning: false,
+                startTime: finalStartTime,
+                endTime: '',
+                pausedSeconds: 0,
+                accumulatedSeconds: initialSeconds,
+                accumulatedPausedSeconds: 0,
+                lastStateChangeTime: 0
+            });
+
+            localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
+            window.closeAddTaskModal();
+            refreshListDOM();
+            renderTeamsSchedule();
+            showToast("追踪任务创建成功！", "success");
+        };
 
         // 生成平铺控制台任务列表 HTML
         function generateTimerListHTML(timers) {
@@ -2888,25 +2989,7 @@
             if (btnAdd) {
                 btnAdd.addEventListener('click', (e) => {
                     e.preventDefault();
-                    const taskName = prompt("请输入您想独立跟踪的任务/项目名称:", `任务 ${activeTimers.length + 1}`);
-                    if (!taskName || taskName.trim() === '') return;
-                    
-                    activeTimers.push({
-                        id: 'timer-' + Date.now(),
-                        name: taskName.trim(),
-                        memo: '',
-                        seconds: 0,
-                        isRunning: false,
-                        startTime: '',
-                        endTime: '',
-                        pausedSeconds: 0,
-                        accumulatedSeconds: 0,
-                        accumulatedPausedSeconds: 0,
-                        lastStateChangeTime: 0
-                    });
-                    localStorage.setItem('timesheet_active_timers', JSON.stringify(activeTimers));
-                    refreshListDOM();
-                    renderTeamsSchedule();
+                    window.openAddTaskModal();
                 });
             }
             refreshListDOM();
@@ -2923,14 +3006,15 @@
                 const stats = getTimerCurrentStats(t);
                 
                 if (!t.isRunning) {
-                    const isFirstStart = !t.startTime || t.accumulatedSeconds === 0;
+                    // 判断是否属于真正意义上的首次直接运行启动
+                    const isFirstStart = (!t.startTime && t.accumulatedSeconds === 0);
                     
                     if (isFirstStart) {
                         t.startTime = nowTimeFull; 
                         t.accumulatedSeconds = 0;
                         t.accumulatedPausedSeconds = 0;
                     } else {
-                        const pauseDuration = Math.floor((now - t.lastStateChangeTime) / 1000);
+                        const pauseDuration = t.lastStateChangeTime > 0 ? Math.floor((now - t.lastStateChangeTime) / 1000) : 0;
                         if (pauseDuration > 1) {
                             t.accumulatedPausedSeconds = stats.pausedSeconds;
                             triggerPauseActivityCapture(t.id, pauseDuration);
