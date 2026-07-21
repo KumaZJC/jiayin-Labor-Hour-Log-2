@@ -821,7 +821,7 @@
             const y = date.getFullYear();
             const m = String(date.getMonth() + 1).padStart(2, '0');
             const d = String(date.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
+            return `${y}${m}${d}`;
         }
 
         // ------------------- HTML 转义安全过滤 -------------------
@@ -1176,26 +1176,46 @@
 
         function addNewReminderPrompt() {
             const defaultDate = getLocalDateString();
-            const dateStr = prompt("请输入提醒日期 (格式 YYYY-MM-DD)：", defaultDate);
+            const dateStr = prompt("请输入提醒日期 (格式 YYYYMMDD)：", defaultDate);
             if (!dateStr || !dateStr.trim()) return;
 
-            const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+            const datePattern =/^\d{8}$/;
             if (!datePattern.test(dateStr.trim())) {
-                showToast("日期格式不正确，请使用 YYYY-MM-DD 格式！", "warning");
+                showToast("日期格式不正确，请使用 YYYYMMDD 格式！", "warning");
                 return;
             }
 
             const title = prompt("请输入会议/任务名称：");
             if (!title || !title.trim()) return;
 
-            const timeStr = prompt("请输入提醒时间 (格式 24小时制，例如 15:00)：");
+            const timeStr = prompt("请输入提醒时间 (宝贝你可以输入1500或15:00或15：00)：");
             if (!timeStr) return;
 
-            const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
-            if (!timePattern.test(timeStr)) {
-                showToast("时间格式不正确，请使用 HH:MM 格式！", "warning");
+            // 格式兼容化处理
+            let rawTime = timeStr.trim().replace('：', ':');
+            let h = '', m = '';
+
+            if (/^\d{3,4}$/.test(rawTime)) {
+                // 处理纯数字如 1500 或 930
+                const padded = rawTime.padStart(4, '0');
+                h = padded.slice(0, 2);
+                m = padded.slice(2, 4);
+            } else if (/^\d{1,2}:\d{2}$/.test(rawTime)) {
+                // 处理带冒号如 15:00 或 9:30
+                const parts = rawTime.split(':');
+                h = parts[0].padStart(2, '0');
+                m = parts[1];
+            }
+
+            const hNum = parseInt(h, 10);
+            const mNum = parseInt(m, 10);
+
+            if (h === '' || isNaN(hNum) || isNaN(mNum) || hNum < 0 || hNum > 23 || mNum < 0 || mNum > 59) {
+                showToast("时间格式不正确！请输入如 1500、15:00 或 15：00", "warning");
                 return;
             }
+
+            const timeFormatted = `${h}:${m}`;
 
             reminderList.push({
                 id: Date.now(),
