@@ -1264,28 +1264,36 @@
             });
         }
 
-        function triggerNotification(title, minsLeft) {
+function triggerNotification(title, minsLeft) {
             const msg = `会议「${title}」将在 ${minsLeft} 分钟后开始！请注意时间。`;
             
             if ("Notification" in window && Notification.permission === "granted") {
-                new Notification("Chronos 会议提醒", { body: msg });
+                new Notification("Chronos 会议提醒", { 
+                    body: msg,
+                    requireInteraction: true // 桌面原生通知也保持显示，直到用户交互
+                });
             }
 
             const alertBanner = document.createElement('div');
-            alertBanner.className = "fixed top-5 right-5 z-50 glass border border-amber-400 bg-amber-500/10 p-4 rounded-apple shadow-xl max-w-sm flex items-start gap-3 animate-bounce";
+            alertBanner.className = "fixed top-5 right-5 z-50 glass border border-rose-500 bg-rose-500/15 p-4 rounded-apple shadow-xl shadow-rose-500/10 max-w-sm flex items-start gap-3 animate-bounce cursor-pointer group";
             alertBanner.innerHTML = `
-                <div class="text-amber-500 mt-0.5"><i class="fa-solid fa-triangle-exclamation text-xl animate-pulse"></i></div>
-                <div>
-                    <h5 class="font-bold text-xs text-amber-800 dark:text-amber-400">重要日程提醒</h5>
-                    <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-1">${msg}</p>
+                <div class="text-rose-500 mt-0.5"><i class="fa-solid fa-triangle-exclamation text-xl animate-pulse"></i></div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                        <h5 class="font-bold text-xs text-rose-700 dark:text-rose-400">重要日程提醒</h5>
+                        <span class="text-[10px] text-rose-600/80 hover:text-rose-800 dark:hover:text-rose-300 font-semibold ml-2">点击关闭 ✖</span>
+                    </div>
+                    <p class="text-[11px] text-slate-700 dark:text-slate-200 mt-1">${msg}</p>
                 </div>
             `;
-            document.body.appendChild(alertBanner);
             
-            setTimeout(() => {
-                alertBanner.classList.add('opacity-0', 'transition-all', 'duration-500');
-                setTimeout(() => alertBanner.remove(), 500);
-            }, 6000);
+            // 点击弹窗任意位置直接手动关闭
+            alertBanner.onclick = () => {
+                alertBanner.classList.add('opacity-0', 'transition-all', 'duration-300');
+                setTimeout(() => alertBanner.remove(), 300);
+            };
+
+            document.body.appendChild(alertBanner);
         }
 
         // ------------------- 传统计时器一键录入工时 -------------------
