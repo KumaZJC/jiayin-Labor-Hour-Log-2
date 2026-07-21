@@ -910,7 +910,7 @@
         ];
 
         let reminderList = [
-            { id: 1, title: "部门同步会议", time: "15:00", notified: { 10: false, 5: false, 1: false } }
+            { id: 1, title: "部门同步会议", date: getLocalDateString(), time: "15:00", notified: { 10: false, 5: false, 1: false } }
         ];
 
         let trendChartRef = null;
@@ -1140,6 +1140,8 @@
                 document.getElementById('reminder-sidebar-list-mobile')
             ];
 
+            const todayStr = getLocalDateString();
+
             containers.forEach(container => {
                 if (!container) return;
                 container.innerHTML = '';
@@ -1152,10 +1154,18 @@
                 reminderList.forEach(rem => {
                     const card = document.createElement('div');
                     card.className = "flex items-center justify-between p-2 rounded-lg bg-white/60 dark:bg-slate-800/60 border border-amber-200/20 text-xs";
+                    
+                    let dateLabel = rem.date;
+                    if (!dateLabel || dateLabel === todayStr) {
+                        dateLabel = '今天';
+                    } else {
+                        dateLabel = rem.date.substring(5); // 提取 MM-DD
+                    }
+
                     card.innerHTML = `
                         <div class="flex flex-col">
-                            <span class="font-semibold text-slate-700 dark:text-slate-200">${rem.title}</span>
-                            <span class="text-[10px] text-amber-600 font-mono"><i class="fa-regular fa-clock mr-1"></i>${rem.time}</span>
+                            <span class="font-semibold text-slate-700 dark:text-slate-200">${escapeHTML(rem.title)}</span>
+                            <span class="text-[10px] text-amber-600 font-mono"><i class="fa-regular fa-clock mr-1"></i>${dateLabel} ${rem.time}</span>
                         </div>
                         <button onclick="deleteReminder(${rem.id})" class="text-slate-400 hover:text-danger text-[11px]"><i class="fa-solid fa-trash-can"></i></button>
                     `;
@@ -1165,8 +1175,19 @@
         }
 
         function addNewReminderPrompt() {
+            const defaultDate = getLocalDateString();
+            const dateStr = prompt("请输入提醒日期 (格式 YYYY-MM-DD)：", defaultDate);
+            if (!dateStr || !dateStr.trim()) return;
+
+            const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+            if (!datePattern.test(dateStr.trim())) {
+                showToast("日期格式不正确，请使用 YYYY-MM-DD 格式！", "warning");
+                return;
+            }
+
             const title = prompt("请输入会议/任务名称：");
             if (!title || !title.trim()) return;
+
             const timeStr = prompt("请输入提醒时间 (格式 24小时制，例如 15:00)：");
             if (!timeStr) return;
 
@@ -1179,12 +1200,14 @@
             reminderList.push({
                 id: Date.now(),
                 title: title.trim(),
+                date: dateStr.trim(),
                 time: timeStr.trim(),
                 notified: { 10: false, 5: false, 1: false }
             });
 
             saveToLocalStorage();
             renderReminders();
+            showToast("日程提醒添加成功！", "success");
         }
 
         function deleteReminder(id) {
@@ -1195,10 +1218,14 @@
 
         function checkReminders() {
             const now = new Date();
+            const todayStr = getLocalDateString(now);
             const currentHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
             const [nowH, nowM] = currentHHMM.split(':').map(Number);
 
             reminderList.forEach(rem => {
+                // 如果提醒设置了具体的日期且不是今天，则忽略不出发
+                if (rem.date && rem.date !== todayStr) return;
+
                 const [remH, remM] = rem.time.split(':').map(Number);
                 
                 const nowTotalMin = nowH * 60 + nowM;
