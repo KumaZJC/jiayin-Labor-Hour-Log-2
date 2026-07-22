@@ -159,8 +159,8 @@
                 </div>
                 <div class="flex items-center gap-3">
                     <div id="quick-alert" class="flex items-center gap-2 px-4 py-2 rounded-full glass text-xs font-medium text-warning border-warning/20">
-                        <i class="fa-solid fa-circle-exclamation text-amber-500 animate-bounce"></i>
-                        <span id="alert-text">今天尚未填报满 8h 工时！</span>
+                        <i class="fa-solid fa-mug-hot text-amber-500 animate-bounce"></i>
+                        <span id="alert-text">今天已经工作 0.0h 啦，宝贝辛苦啦 ☕</span>
                     </div>
                 </div>
             </header>
@@ -824,6 +824,26 @@
             return `${y}-${m}-${d}`;
         }
 
+        // 全局日期规范化转换器：自动将 20260722 或 2026/07/22 转换为 2026-07-22
+        function formatToStandardDate(dateStr) {
+            if (!dateStr) return getLocalDateString();
+            let str = String(dateStr).trim();
+            // 匹配 20260722 纯数字格式
+            if (/^\d{8}$/.test(str)) {
+                return `${str.substring(0, 4)}-${str.substring(4, 6)}-${str.substring(6, 8)}`;
+            }
+            // 替换斜杠或点号为短横线 2026/07/22 -> 2026-07-22
+            str = str.replace(/[\/.]/g, '-');
+            const parts = str.split('-');
+            if (parts.length === 3) {
+                const y = parts[0];
+                const m = parts[1].padStart(2, '0');
+                const d = parts[2].padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            }
+            return str;
+        }
+
         // ------------------- HTML 转义安全过滤 -------------------
         function escapeHTML(str) {
             if (!str) return '';
@@ -949,6 +969,11 @@
 
             if (storedEntries) {
                 timesheetEntries = JSON.parse(storedEntries);
+                // 自动修正所有历史保存的日期为标准的 YYYY-MM-DD
+                timesheetEntries = timesheetEntries.map(e => ({
+                    ...e,
+                    date: formatToStandardDate(e.date)
+                }));
             } else {
                 timesheetEntries = generateMockData();
                 saveToLocalStorage();
@@ -964,6 +989,10 @@
 
             if (storedReminders) {
                 reminderList = JSON.parse(storedReminders);
+                reminderList = reminderList.map(r => ({
+                    ...r,
+                    date: formatToStandardDate(r.date)
+                }));
             }
 
             document.getElementById('cfg-standard-hours').value = systemSettings.standardHours;
@@ -1037,6 +1066,10 @@
                             showToast("导入失败：JSON 数据部分字段缺失！", "danger");
                             return;
                         }
+                        importedData = importedData.map(item => ({
+                            ...item,
+                            date: formatToStandardDate(item.date)
+                        }));
                     } else if (extension === 'csv') {
                         if (content.startsWith('\uFEFF')) {
                             content = content.slice(1);
@@ -1059,7 +1092,7 @@
                             .map((line, idx) => {
                                 return {
                                     id: String(Date.now() + idx + Math.random()),
-                                    date: line[0] ? line[0].trim() : getLocalDateString(),
+                                    date: formatToStandardDate(line[0] ? line[0].trim() : getLocalDateString()),
                                     type: line[1] ? line[1].trim() : "开发",
                                     start: line[2] ? line[2].trim() : "09:00",
                                     end: line[3] ? line[3].trim() : "18:00",
@@ -1155,11 +1188,11 @@
                     const card = document.createElement('div');
                     card.className = "flex items-center justify-between p-2 rounded-lg bg-white/60 dark:bg-slate-800/60 border border-amber-200/20 text-xs";
                     
-                    let dateLabel = rem.date;
+                    let dateLabel = formatToStandardDate(rem.date);
                     if (!dateLabel || dateLabel === todayStr) {
                         dateLabel = '今天';
                     } else {
-                        dateLabel = rem.date.length >= 10 ? rem.date.substring(5) : rem.date;
+                        dateLabel = dateLabel.length >= 10 ? dateLabel.substring(5) : dateLabel;
                     }
 
                     card.innerHTML = `
@@ -1211,7 +1244,7 @@
             reminderList.push({
                 id: Date.now(),
                 title: title.trim(),
-                date: dateStr.trim(),
+                date: formatToStandardDate(dateStr.trim()),
                 time: timeFormatted,
                 notified: { 10: false, 5: false, 1: false }
             });
@@ -1315,7 +1348,8 @@
         function handleTimesheetSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('entry-id').value;
-            const date = document.getElementById('ts-date').value || getLocalDateString();
+            const rawDate = document.getElementById('ts-date').value || getLocalDateString();
+            const date = formatToStandardDate(rawDate);
             const type = document.getElementById('ts-type').value;
             const start = document.getElementById('ts-start').value;
             const end = document.getElementById('ts-end').value;
@@ -1634,8 +1668,8 @@
                     }
                 });
             } else if (policy === 'range') {
-                const startDateStr = document.getElementById('rename-start-date').value;
-                const endDateStr = document.getElementById('rename-end-date').value;
+                const startDateStr = formatToStandardDate(document.getElementById('rename-start-date').value);
+                const endDateStr = formatToStandardDate(document.getElementById('rename-end-date').value);
 
                 if (!startDateStr || !endDateStr) {
                     showToast("请指定合法的起止覆盖范围时间！", "warning");
@@ -1644,7 +1678,8 @@
 
                 timesheetEntries.forEach(entry => {
                     if (entry.type === oldType) {
-                        if (entry.date >= startDateStr && entry.date <= endDateStr) {
+                        const formattedEntryDate = formatToStandardDate(entry.date);
+                        if (formattedEntryDate >= startDateStr && formattedEntryDate <= endDateStr) {
                             entry.type = newType;
                             matchedCount++;
                         }
@@ -1722,11 +1757,11 @@
             const todayStr = getLocalDateString();
             
             const todayHours = timesheetEntries
-                .filter(e => e.date === todayStr)
+                .filter(e => formatToStandardDate(e.date) === todayStr)
                 .reduce((acc, curr) => acc + parseFloat(curr.duration || 0), 0);
             
             const currentWeekEntries = timesheetEntries.filter(e => {
-                const entryDate = new Date(e.date);
+                const entryDate = new Date(formatToStandardDate(e.date));
                 const diff = (new Date() - entryDate) / (1000 * 60 * 60 * 24);
                 return diff >= 0 && diff < 7;
             });
@@ -1734,7 +1769,7 @@
 
             const currentMonthStr = todayStr.substring(0, 7);
             const monthHours = timesheetEntries
-                .filter(e => e.date && e.date.startsWith(currentMonthStr))
+                .filter(e => e.date && formatToStandardDate(e.date).startsWith(currentMonthStr))
                 .reduce((acc, curr) => acc + parseFloat(curr.duration || 0), 0);
 
             const targetRate = Math.round((monthHours / systemSettings.targetHours) * 100);
@@ -1753,16 +1788,12 @@
                 monthKpiBox.innerHTML = `<span id="kpi-target-rate" class="text-success font-semibold">${targetRate}%</span> <span class="text-slate-400 font-normal">of 180h target</span>`;
             }
 
+            // 保持常驻显示，并统一显示格式
             const alertEl = document.getElementById('quick-alert');
-            if (todayHours > 0) {
+            const alertText = document.getElementById('alert-text');
+            if (alertEl && alertText) {
                 alertEl.style.display = 'flex';
-                if (todayHours < systemSettings.standardHours) {
-                    document.getElementById('alert-text').innerText = `今天已经工作 ${todayHours.toFixed(1)}h 啦，宝贝辛苦啦 ☕`;
-                } else {
-                    document.getElementById('alert-text').innerText = `今天已累计 ${todayHours.toFixed(1)}h！超额达成目标，快去休息吧 🎉`;
-                }
-            } else {
-                alertEl.style.display = 'none';
+                alertText.innerText = `今天已经工作 ${todayHours.toFixed(1)}h 啦，宝贝辛苦啦 ☕`;
             }
         }
 
@@ -1774,7 +1805,7 @@
             renderTypeOptions();
 
             document.getElementById('entry-id').value = entry.id;
-            document.getElementById('ts-date').value = entry.date;
+            document.getElementById('ts-date').value = formatToStandardDate(entry.date);
             document.getElementById('ts-type').value = entry.type;
             document.getElementById('ts-start').value = entry.start;
             document.getElementById('ts-end').value = entry.end;
@@ -1822,7 +1853,7 @@
                 return matchSearch && matchType;
             });
 
-            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+            filtered.sort((a, b) => new Date(formatToStandardDate(b.date)) - new Date(formatToStandardDate(a.date)));
 
             const total = filtered.length;
             const startIdx = (currentPage - 1) * entriesPerPage;
@@ -1844,9 +1875,11 @@
                 else if (entry.type === 'Support') typeBadgeColor = 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-500/10';
                 else if (entry.type && entry.type.includes('京东')) typeBadgeColor = 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400 border border-rose-500/10';
 
+                const formattedDisplayDate = formatToStandardDate(entry.date);
+
                 tr.innerHTML = `
                     <td class="py-4 px-2"><input type="checkbox" class="entry-select" data-id="${entry.id}"></td>
-                    <td class="py-4 px-2 font-medium">${entry.date}</td>
+                    <td class="py-4 px-2 font-medium font-mono">${formattedDisplayDate}</td>
                     <td class="py-4 px-2">
                         <span class="px-2 py-1 rounded-full font-semibold text-[10px] ${typeBadgeColor}">${escapeHTML(entry.type)}</span>
                     </td>
@@ -1907,7 +1940,7 @@
 
             for (let day = 1; day <= lastDay; day++) {
                 const dayStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const daysEntries = timesheetEntries.filter(e => e.date === dayStr);
+                const daysEntries = timesheetEntries.filter(e => formatToStandardDate(e.date) === dayStr);
                 const totalHours = daysEntries.reduce((sum, e) => sum + parseFloat(e.duration || 0), 0);
 
                 const card = document.createElement('div');
@@ -1979,7 +2012,7 @@
 
             const dailyWorkload = last7Days.map(date => {
                 return timesheetEntries
-                    .filter(e => e.date === date)
+                    .filter(e => formatToStandardDate(e.date) === date)
                     .reduce((sum, e) => sum + parseFloat(e.duration || 0), 0);
             });
 
@@ -2067,7 +2100,8 @@
 
             const dailyData = {};
             filtered.forEach(e => {
-                dailyData[e.date] = (dailyData[e.date] || 0) + parseFloat(e.duration || 0);
+                const stdDate = formatToStandardDate(e.date);
+                dailyData[stdDate] = (dailyData[stdDate] || 0) + parseFloat(e.duration || 0);
             });
 
             const sortedDates = Object.keys(dailyData).sort().slice(-10);
@@ -2133,7 +2167,7 @@
 
         function duplicateYesterday() {
             const yesterdayStr = getLocalDateString(new Date(Date.now() - 86400000));
-            const yesterdayEntries = timesheetEntries.filter(e => e.date === yesterdayStr);
+            const yesterdayEntries = timesheetEntries.filter(e => formatToStandardDate(e.date) === yesterdayStr);
 
             if (yesterdayEntries.length === 0) {
                 showToast("昨天没有任何填报记录。", "warning");
@@ -2152,7 +2186,7 @@
 
         function generateDailySummary() {
             const todayStr = getLocalDateString();
-            const todayEntries = timesheetEntries.filter(e => e.date === todayStr);
+            const todayEntries = timesheetEntries.filter(e => formatToStandardDate(e.date) === todayStr);
 
             if (todayEntries.length === 0) {
                 document.getElementById('ai-summary-output').value = "今天尚未录入任何工时，无法生成日报。";
@@ -2190,7 +2224,7 @@
 
             const headers = ["日期(Date)", "工时类型(Type)", "开始时间(Start)", "结束时间(End)", "项目(Project)", "客户(Customer)", "SAP模块(Module)", "工时(Duration)", "描述/备注(Notes)"];
             const rows = timesheetEntries.map(e => [
-                e.date,
+                formatToStandardDate(e.date),
                 e.type,
                 e.start,
                 e.end,
@@ -2730,9 +2764,9 @@
 
         window.changeScheduleDate = function(val) {
             if (!val) return;
-            selectedScheduleDate = val;
+            selectedScheduleDate = formatToStandardDate(val);
             renderTeamsSchedule();
-            showToast(`已切换排班视图至 ${val}`, "info");
+            showToast(`已切换排班视图至 ${selectedScheduleDate}`, "info");
         };
 
         window.setScheduleDateToToday = function() {
@@ -2751,7 +2785,7 @@
 
             gridContainer.innerHTML = '';
 
-            const todayEntries = timesheetEntries.filter(e => e.date === selectedScheduleDate);
+            const todayEntries = timesheetEntries.filter(e => formatToStandardDate(e.date) === selectedScheduleDate);
 
             const startHour = 6;
             const endHour = 24;
@@ -2934,7 +2968,7 @@
 
             document.getElementById('edit-act-id').value = entry.id;
             document.getElementById('edit-act-project').value = entry.project;
-            document.getElementById('edit-act-date').value = entry.date;
+            document.getElementById('edit-act-date').value = formatToStandardDate(entry.date);
             document.getElementById('edit-act-type').value = entry.type;
             document.getElementById('edit-act-start').value = entry.start;
             document.getElementById('edit-act-end').value = entry.end;
@@ -2954,7 +2988,7 @@
             if (!entry) return;
 
             entry.project = document.getElementById('edit-act-project').value;
-            entry.date = document.getElementById('edit-act-date').value;
+            entry.date = formatToStandardDate(document.getElementById('edit-act-date').value);
             entry.type = document.getElementById('edit-act-type').value;
             entry.start = document.getElementById('edit-act-start').value;
             entry.end = document.getElementById('edit-act-end').value;
