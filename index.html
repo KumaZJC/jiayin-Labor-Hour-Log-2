@@ -816,7 +816,7 @@
     </div>
 
     <script>
-        // ------------------- 本地时间格式标准化对准器 (支持 YYYY-MM-DD) -------------------
+        // ------------------- 本地时间格式标准化对准器 (支持标准 YYYY-MM-DD 格式) -------------------
         function getLocalDateString(date = new Date()) {
             const y = date.getFullYear();
             const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -1311,7 +1311,7 @@
             document.getElementById('ts-project').focus();
         }
 
-        // ------------------- 工时保存与即时渲染 (Bug修复区) -------------------
+        // ------------------- 工时保存与即时渲染 (包含起止时间全额工时计算) -------------------
         function handleTimesheetSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('entry-id').value;
@@ -1326,7 +1326,7 @@
             const priority = document.getElementById('ts-priority').value;
             const notes = document.getElementById('ts-notes').value || "-";
             
-            // 修复工时计算
+            // 计算全程实际工时，不扣除暂停/午休时间
             const duration = calculateDuration();
 
             if (id) {
@@ -1358,9 +1358,6 @@
             let totalHours = (endH + endM/60) - (startH + startM/60);
             if (totalHours < 0) totalHours += 24; // 跨天兼容
             
-            if (startH <= 12 && endH >= 13 && totalHours >= 1) {
-                totalHours -= 1; // 自动扣除1h午休
-            }
             return Math.max(0.1, parseFloat(totalHours.toFixed(1)));
         }
 
@@ -1845,7 +1842,7 @@
                 else if (entry.type === '会议') typeBadgeColor = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-500/10';
                 else if (entry.type === '学习') typeBadgeColor = 'bg-purple-50 text-purple-600 dark:bg-purple-950/30 dark:text-purple-400 border border-purple-500/10';
                 else if (entry.type === 'Support') typeBadgeColor = 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400 border border-amber-500/10';
-                else if (entry.type.includes('京东')) typeBadgeColor = 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400 border border-rose-500/10';
+                else if (entry.type && entry.type.includes('京东')) typeBadgeColor = 'bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400 border border-rose-500/10';
 
                 tr.innerHTML = `
                     <td class="py-4 px-2"><input type="checkbox" class="entry-select" data-id="${entry.id}"></td>
@@ -2255,7 +2252,7 @@
 
         function generateMockData() {
             return [
-                { id: "1", date: getLocalDateString(), type: "京东A", start: "09:00", end: "18:00", project: "京东A模块升级", customer: "京东集团", sapModule: "CO", priority: "high", notes: "进行京东A模块的主数据和流程迁移配置校验。", duration: 8 },
+                { id: "1", date: getLocalDateString(), type: "京东A", start: "09:00", end: "18:00", project: "京东A模块升级", customer: "京东集团", sapModule: "CO", priority: "high", notes: "进行京东A模块的主数据和流程迁移配置校验。", duration: 9 },
                 { id: "2", date: getLocalDateString(), type: "会议", start: "14:00", end: "16:00", project: "架构对齐研统会", customer: "陆泽 香肠哥", sapModule: "PS", priority: "medium", notes: "与 晓文 和 香肠哥 确认 Project Systems 设计框架。", duration: 2 }
             ];
         }
@@ -2268,7 +2265,7 @@
     </script>
 
     <script>
-    // ------------------- 独立高精多线程异步计时引擎 -------------------
+    // ------------------- 独立高精多线程异步计时引擎 (已全面合并暂停工时) -------------------
     (function() {
         let activeTimers = [];
         try {
@@ -2552,6 +2549,7 @@
             }
         });
 
+        // 写入日程记录（仅在日程排班试图中独立标记呈现，工时数设为0，防止与主任务重复计费）
         function writePauseRecordToDatabase(reason, type) {
             const t = activeTimers.find(x => x.id === pendingPauseTimerId);
             if (!t) return;
@@ -2562,7 +2560,6 @@
             const endDate = new Date(now);
 
             const formatTime = (d) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-            const preciseHours = parseFloat((pendingPauseDuration / 3600).toFixed(2));
 
             const pauseEntry = {
                 id: 'pause-' + Date.now() + Math.random(),
@@ -2574,8 +2571,8 @@
                 customer: "系统自动记录",
                 sapModule: "PAUSE",
                 priority: "low",
-                notes: `暂停说明: ${reason}\n在追踪任务「${t.name}」期间发生的挂起暂停时段。`,
-                duration: preciseHours > 0 ? preciseHours : 0.01
+                notes: `暂停说明: ${reason}\n在追踪任务「${t.name}」期间发生的挂起暂停时段（已计入主任务总工时）。`,
+                duration: 0
             };
 
             timesheetEntries.unshift(pauseEntry);
@@ -2584,7 +2581,7 @@
             renderTable();
             updateKPIs();
             initOrUpdateCharts();
-            showToast("已将暂停时段无缝录入工时表！", "success");
+            showToast("已将暂停时段无缝录入日程视图！", "success");
         }
 
         window.openAddTaskModal = function() {
@@ -2966,9 +2963,8 @@
             const [startH, startM] = entry.start.split(':').map(Number);
             const [endH, endM] = entry.end.split(':').map(Number);
             let totalHours = (endH + endM/60) - (startH + startM/60);
-            if (startH <= 12 && endH >= 13 && entry.sapModule !== 'PAUSE') {
-                totalHours -= 1;
-            }
+            if (totalHours < 0) totalHours += 24;
+            
             entry.duration = Math.max(0.1, parseFloat(totalHours.toFixed(2)));
 
             saveToLocalStorage();
@@ -3106,12 +3102,14 @@
                 }
             },
 
+            // 结算并保存：将有效专注时间 + 暂停挂起时间 统一合并为该任务的总工时
             logToFormAndSave: function(id) {
                 const t = activeTimers.find(x => x.id === id);
                 if (!t) return;
                 
                 const stats = getTimerCurrentStats(t);
-                if (stats.seconds <= 0) {
+                const totalSeconds = stats.seconds + stats.pausedSeconds; // 包含暂停时间的总秒数
+                if (totalSeconds <= 0) {
                     showToast("计时器时长为 0，请开始计时后再结算！", "warning");
                     return;
                 }
@@ -3132,22 +3130,24 @@
 
                 if (!t.startTime) t.startTime = getNowFullTimeStr();
                 
-                const preciseHours = parseFloat((stats.seconds / 3600).toFixed(2));
-                const durationString = formatTimeStr(stats.seconds);
+                const preciseHours = parseFloat((totalSeconds / 3600).toFixed(2));
+                const activeString = formatTimeStr(stats.seconds);
                 const pauseString = formatTimeStr(stats.pausedSeconds);
+                const totalString = formatTimeStr(totalSeconds);
 
                 const userMemoText = t.memo ? t.memo.trim() : "";
                 const auditNotes = (userMemoText ? `${userMemoText}\n\n` : '') + 
                                    `▶ 开始时间: ${t.startTime}\n` +
                                    `⏸ 挂起暂停: ${pauseString}\n` +
-                                   `⏱ 有效持续: ${durationString}\n` +
+                                   `⏱ 实际专注: ${activeString}\n` +
+                                   `⏱ 包含暂停总时长: ${totalString}\n` +
                                    `■ 结束时间: ${t.endTime}\n` +
                                    `---------------------\n` +
                                    ` ${t.name}`;
 
                 const newRecord = {
                     id: String(Date.now()),
-                    date: getLocalDateString(), // 格式对齐 YYYY-MM-DD
+                    date: getLocalDateString(), // 标准 YYYY-MM-DD
                     type: "开发", 
                     start: t.startTime.substring(0, 5), 
                     end: t.endTime.substring(0, 5),     
@@ -3180,7 +3180,7 @@
                     switchTab('timesheet');
                 }
 
-                showToast("🎉 结算入账成功！\n有效工作时间: " + durationString, "success");
+                showToast("🎉 结算入账成功！\n含暂停总工时: " + totalString, "success");
                 
                 t.seconds = 0;
                 t.startTime = '';
